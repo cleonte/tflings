@@ -2,14 +2,28 @@
 
 tflings is a Rustlings-style course for Terraform, built the way [k8slings](https://github.com/cleonte/k8slings) and [golings](https://github.com/cleonte/golings) are built: same CLI shape, `info.toml` manifest, `exercises/` + `solutions/` trees, `# I AM NOT DONE` marker, Bubble Tea `watch`, `doctor`, CI that proves every exercise ("broken fails, solution passes"). This file is the plan; `CLAUDE.md` (written in Phase 0) will be the architecture.
 
-The syllabus follows the **HashiCorp Terraform Associate (004)** study guide and exam content list. What is new compared with k8slings is the **simulator**: a fake cloud that lives inside the tflings binary, so learners can create, break, drift, import and destroy "infrastructure" offline, for free, with no AWS/Azure account.
+The syllabus follows the **HashiCorp Terraform Associate (004)** study guide and exam content list. The exercises use the **real `hashicorp/aws` provider against [Floci](https://floci.io/aws/)**, a free, local AWS emulator, so learners write the same AWS Terraform they would write at work, with no AWS account, no cost and no risk to a real account.
 
 ## Facts checked while writing this plan (2026-11-13)
 
-- Terraform Associate **004** tests **Terraform 1.12** and includes HCP Terraform content. Prerequisites: basic terminal skills, basic cloud/on-prem architecture. ([study guide](https://developer.hashicorp.com/terraform/tutorials/certification-004/associate-study-004), [exam content list](https://developer.hashicorp.com/terraform/tutorials/certification-004/associate-review-004))
-- Current Terraform is 1.16.x (1.17.0 just out). **Decision proposed: floor 1.12 (the exam version), CI on 1.12 and latest.** Features newer than 1.12 stay out of the core path, or are tagged "beyond the exam".
-- LocalStack's free Community edition was sunset in March 2026 (account required now). That is one more reason not to build the course on an AWS emulator: **the simulator is our own**.
-- To verify in Phase 0: the official exam format (question count, duration, question types) before building the mock exam; the current HCP Terraform free tier limits before building the HCP track.
+- Terraform Associate **004** tests **Terraform 1.12** and includes HCP Terraform content. ([study guide](https://developer.hashicorp.com/terraform/tutorials/certification-004/associate-study-004), [exam content list](https://developer.hashicorp.com/terraform/tutorials/certification-004/associate-review-004))
+- Current Terraform is 1.16.x (1.17.0 just out). **Floor 1.12 (the exam version), CI on 1.12 and latest.**
+- LocalStack's free Community edition was sunset in March 2026 (account required now), so it is not an option.
+- **Floci** (`github.com/floci-io/floci`, formerly `hectorvent/floci`):
+  - **MIT**, no paid tier. Latest release **2.4.0** (2026-10-31); very active (commits daily), so **pin a version** and watch releases.
+  - Ships as a Docker image **and a native binary** `floci-aws` (~40 MB, macOS/Linux/Windows), listens on `127.0.0.1:4566`, ~24 ms start, ~13 MiB idle, persistent storage optional, snapshots.
+  - Without Docker, in-process services work fully (S3, IAM, STS, VPC/subnets/security groups/route tables, SSM, Secrets Manager, KMS, DynamoDB, SQS, SNS, Route 53, CloudWatch Logs, ACM...). Container-backed ones (EC2 instances, RDS, EKS...) keep their control plane but start nothing; Lambda/ECS fail. EC2 `RunInstances` with Docker launches a real container.
+  - Its own CI runs a **Terraform compatibility suite** (Terraform 1.14.7, AWS provider `~> 6.0`, ~60 resource types incl. VPC, IAM, S3, DynamoDB, SSM, Secrets Manager, Route 53, KMS) and an **OpenTofu** one, and tests the **S3 backend with DynamoDB locking**.
+  - **Multi-account isolation**: a 12-digit access key ID is used as the account ID, and each account's resources are invisible to the others. That gives each exercise its own clean "AWS account".
+  - A web console at `/_floci/ui` (needs Docker).
+- **Spike 01 (2026-11-13, macOS arm64, Floci 2.4.0 in Docker, Terraform 1.12.2 and 1.17.2, `hashicorp/aws` 6.73.0) — PASS** (`spikes/01-env-only/RESULTS.md`):
+  - `init`/`plan`/`apply`/`destroy` work with a provider block of only `region`, everything else from env; no `skip_*`, no `endpoints {}`. Second plan empty, no perpetual diffs.
+  - **Endpoint must be `http://localhost:4577`, not `127.0.0.1`**: S3 Control prefixes the account ID to the host (`000000000001.localhost` resolves on macOS; `*.localhost` on Linux/Windows still to verify).
+  - Warm plan ~2.9 s (13 resources), warm init ~1.25 s, cold init ~11 s. AWS provider = **737 MB** per version/platform in the plugin cache.
+  - Endpoint removed + fake keys → fails at STS `InvalidClientTokenId`, no state written (one STS call with a fake key reaches real AWS).
+  - Secrets Manager soft-deletes: every exercise secret needs `recovery_window_in_days = 0`.
+  - **Floci 2.4.0 published no native binary** (release has no assets), so Docker was needed. Under Lima `$HOME` is read-only to containers, so Floci data lives in a named Docker volume.
+- To verify in Phase 0: exam format (question count, duration, types), HCP Terraform free tier, AWS provider env-only configuration against Floci (see spikes).
 
 ## The eight objectives → topics
 
@@ -18,12 +32,12 @@ The syllabus follows the **HashiCorp Terraform Associate (004)** study guide and
 | 1 | IaC concepts (1a–1c) | `iac` (quiz) |
 | 2 | Fundamentals: providers, versions, multiple providers, state (2a–2d) | `providers`, `versions`, `state-basics` |
 | 3 | Core workflow: init, validate, plan, apply, destroy, fmt (3a–3g) | `workflow`, `fmt` |
-| 4 | Configuration (4a–4h) | `resources`, `data-sources`, `references`, `variables`, `outputs`, `types`, `expressions`, `functions`, `iteration` (count/for_each/dynamic), `dependencies`, `lifecycle`, `conditions` (validation, pre/postconditions, `check`), `sensitive` (sensitive, ephemeral, write-only, Vault) |
+| 4 | Configuration (4a–4h) | `resources`, `data-sources`, `references`, `variables`, `outputs`, `types`, `expressions`, `functions`, `iteration`, `dependencies`, `lifecycle`, `conditions`, `sensitive` (sensitive, ephemeral, write-only, Secrets Manager / SSM) |
 | 5 | Modules (5a–5d) | `modules`, `module-versions` |
-| 6 | State management (6a–6d) | `backends`, `locking`, `drift`, `refactoring` (moved, removed, state mv/rm) |
-| 7 | Maintain infrastructure (7a–7c) | `import`, `inspect` (state list/show, console, output), `debugging` (TF_LOG) |
-| 8 | HCP Terraform (8a–8d) | `hcp` (quiz always; hands-on optional, needs an HCP account) |
-| — | Capstone | `capstone`: a broken multi-module stack with drift and a stuck lock, fixed like an incident |
+| 6 | State management (6a–6d) | `backends` (S3 backend on Floci), `locking` (`use_lockfile`, DynamoDB), `drift`, `refactoring` |
+| 7 | Maintain infrastructure (7a–7c) | `import`, `inspect`, `debugging` |
+| 8 | HCP Terraform (8a–8d) | `hcp` (quiz; hands-on optional, needs an HCP account) |
+| — | Capstone | `capstone`: a broken VPC + S3 + IAM stack across modules, with drift and a stuck lock |
 
 Planning size: **~120 exercises in ~25 topics**, plus a question bank for the mock exam.
 
@@ -31,57 +45,52 @@ Planning size: **~120 exercises in ~25 topics**, plus a question bank for the mo
 
 ### Exercise modes
 
-Like k8slings, each exercise uses the cheapest mode that can prove the skill.
+| Mode | What the learner does | How it is checked |
+|---|---|---|
+| **plan** | Fix `main.tf` (and friends) | `init` + `validate` + `plan -out` → `terraform show -json` → CEL assertions over plan and configuration |
+| **apply** | Fix the config so it really builds | Apply against Floci, then CEL over state, outputs and **`aws` checks** (what really exists in Floci, read with the AWS SDK) |
+| **fix** | Repair a seeded broken situation with the CLI (drift, stuck lock, resource renamed in code, bucket created by hand that must be imported) | End state in Floci + Terraform state; a second plan must be empty |
+| **cli** | Write one command in `answer.sh` (`terraform state show ...`, a `console` expression, `output -raw ...`) | Allowlist parser (like k8slings query mode), compare with the reference answer, variant against hard-coding |
+| **quiz** | Edit `quiz.toml`, set `answer = "b"` (or several) | Answer key; explanation shown after a pass; options shuffled |
 
-| Mode | What the learner does | How it is checked | Needs |
-|---|---|---|---|
-| **plan** | Fix `main.tf` (and friends) | `terraform init` (offline) + `validate` + `plan -out` → `terraform show -json` → CEL assertions over the plan and configuration | `terraform` |
-| **apply** | Fix the config so it really builds | Apply against the simulator, then CEL over `show -json` state, outputs and the simulator's inventory | `terraform` |
-| **fix** | Repair a seeded broken situation with the CLI (drift, stuck lock, resource renamed in code, resource created by hand that must be imported) | End state of simulator + Terraform state; plan must be empty | `terraform` |
-| **cli** | Write one Terraform command in `answer.sh` (`terraform state show ...`, a `console` expression, `output -raw ...`) | Allowlist parser (like k8slings query mode), then compare with the reference answer, with a variant to catch hard-coding | `terraform` |
-| **quiz** | Edit `quiz.toml` and set `answer = "b"` (or several) | Compare with the answer key; the explanation is shown after a pass | nothing |
+Every mode except `quiz` needs `terraform` (fetched and pinned by tflings if missing) and Docker (for Floci). Without Docker, `quiz` exercises still run and the rest are skipped with the fix `doctor` prints, like k8slings's cluster exercises without kind.
 
-`quiz` covers what cannot be practised hands-on (IaC theory, HCP governance features) and gives exam-style practice. Everything else is hands-on.
+### Floci integration (replaces the "fake cloud")
 
-Unlike k8slings, almost every mode needs the `terraform` binary. That is a light requirement (one static binary), and `tflings doctor` can install a pinned version into tflings's own cache with `hashicorp/hc-install` if the learner has none. The user's own `terraform` on PATH is used when its version is new enough.
-
-### The simulator ("Tflings Cloud")
-
-A small fake cloud with a real Terraform provider in front of it, both inside the tflings binary.
-
-- **Provider `tflings/tfl`**, written with `terraform-plugin-framework`. The tflings binary serves it when Terraform launches it (argv[0] / subcommand detection), so there is one binary to ship. `init` writes a workspace-local CLI config (`TF_CLI_CONFIG_FILE`) with a `filesystem_mirror` for `tflings/*` and nothing else, so `terraform init` works offline.
-- **Resources** (enough to teach every objective, not a clone of any real cloud): `tfl_network`, `tfl_subnet`, `tfl_security_group`, `tfl_instance`, `tfl_bucket`, `tfl_object`, `tfl_dns_record`, `tfl_database`, `tfl_load_balancer`, `tfl_secret`. **Data sources**: `tfl_regions`, `tfl_images`, `tfl_instance` (lookup), `tfl_secret`. **Ephemeral resource**: `tfl_secret` (teaches ephemeral values and write-only attributes).
-- **Realistic behaviour**: computed attributes (ids, IPs, ARNs-like `tfl:` ids), attributes that force replacement (so `create_before_destroy` and `-replace` matter), name collisions, region-scoped resources (so provider `alias` matters), quotas, dependency errors ("subnet still in use"), optional latency to make dependency order visible.
-- **Several provider versions in the mirror** (e.g. `1.0.0`, `1.4.0`, `2.0.0` with a breaking rename) so version constraints, `.terraform.lock.hcl` and `init -upgrade` are practised offline.
-- **A second provider `tflings/dns`** for "multiple providers in one configuration" (2c).
-- **Storage**: a JSON file per exercise under `.tflings/cloud/`. Nothing leaves the machine; no real cloud credentials are read (the runner strips `AWS_*`, `ARM_*`, `GOOGLE_*`, `TF_*` from the environment and sets its own `TF_DATA_DIR`).
-- **Simulator commands** — the "play" part:
-  - `tflings sim ls|show <id>` — look at the cloud like a console would.
-  - `tflings sim drift <exercise>` / `sim edit <id> key=value` / `sim delete <id>` / `sim create ...` — change the cloud behind Terraform's back ("someone clicked in the console"), to see drift, refresh-only and import.
-  - `tflings sim ui` — a live full-screen view of the cloud (resources appear, change and vanish as `apply` runs). Phase 6 adds `--web`: a local page with the resource graph and plan diff.
-- **State backend with locking**: `tflings sim backend` serves Terraform's `http` backend (with `lock_address`/`unlock_address`) on localhost, so remote state, locking, a stuck lock and `force-unlock` are real, not described.
-- **Playground**: `tflings sandbox` opens a scratch folder wired to the simulator, with `sim ui` beside it, for free play outside the exercises.
+- **tflings runs its own Floci in Docker**, never the learner's: `tflings aws up|down|status` runs the Floci image **pinned by digest** as container `tflings-floci`, published on `127.0.0.1:4577` (a tflings-only port), data in the named volume `tflings-floci-data` (works under Lima/Colima, where `$HOME` is read-only to containers). The endpoint is always given as `http://localhost:4577`. `run`/`watch` start it on demand. Docker is required, as it is for k8slings (Docker Desktop, OrbStack, Colima, Lima or Docker on Linux); the native `floci-aws` binary stays a possible later option, not a plan.
+- **One AWS account per exercise**: each exercise gets a fixed 12-digit access key ID (`AWS_ACCESS_KEY_ID=<account>`), so exercises never see each other's resources, and `reset` wipes just that account.
+- **Never real AWS**, enforced in three layers:
+  1. The runner builds Terraform's environment from scratch: `AWS_ENDPOINT_URL=http://127.0.0.1:4577`, the exercise's fake keys, `AWS_CONFIG_FILE` and `AWS_SHARED_CREDENTIALS_FILE` pointing at tflings's own empty files, every other `AWS_*`, `TF_*`, `ARM_*`, `GOOGLE_*` dropped. A real profile or SSO session is never read.
+  2. Before every `plan`/`apply`, a static check of the learner's `provider "aws"` blocks refuses `profile`, `assume_role`, `shared_*_files`, real-looking keys, and `endpoints` that do not point at the tflings Floci.
+  3. Even if both failed, the fake keys would be rejected by real AWS.
+- **Provider download**: the AWS provider is large (hundreds of MB unpacked). tflings sets one shared `TF_PLUGIN_CACHE_DIR`, ships `.terraform.lock.hcl` files pinned to one AWS provider version, and `doctor --prefetch` downloads it once; after that the course works offline. Version-constraint and lock-file lessons use small providers (`hashicorp/random`, `hashicorp/local`) with several versions, so they stay fast.
+- **Commands for playing with it**:
+  - `tflings aws <args>` — the AWS CLI against the exercise's account in Floci (like `k8slings kubectl`); if the AWS CLI is not installed, a small built-in `tflings aws ls|show|tag|delete` covers what the exercises need.
+  - `tflings drift <exercise>` — change things behind Terraform's back ("someone clicked in the console").
+  - `tflings console` — opens Floci's web console (Docker).
+  - `tflings sandbox` — a scratch folder wired to Floci (own account) for free play outside the exercises.
+- **Seeding and checks use the AWS SDK for Go v2** pointed at Floci (no `os/exec` for AWS calls), as k8slings uses client calls rather than shelling out where it can.
 
 ### Checks (`check.yaml`)
 
-Same CEL approach as k8slings, over Terraform's JSON outputs instead of Kubernetes objects:
+Same CEL approach as k8slings, over Terraform's JSON and over what Floci reports:
 
 ```yaml
 plan:
-  - expr: plan.resource_changes.exists(r, r.address == "tfl_instance.web" && "create" in r.change.actions)
-    message: "The plan should create tfl_instance.web."
+  - expr: plan.resource_changes.exists(r, r.address == "aws_s3_bucket.logs" && "create" in r.change.actions)
+    message: "The plan should create aws_s3_bucket.logs."
 config:
-  - expr: config.root_module.variables["region"].default == "eu-west"
-    message: "Give the region variable a default."
+  - expr: config.root_module.variables["region"].default == "eu-west-1"
 state:
-  - expr: state.values.outputs["web_ip"].value != ""
-cloud:
-  - expr: cloud.instances.size() == 3
-    message: "Three instances should exist in Tflings Cloud."
+  - expr: state.values.outputs["vpc_id"].value.startsWith("vpc-")
+aws:
+  - call: s3.GetBucketVersioning { Bucket: "tflings-logs" }
+    expr: result.Status == "Enabled"
+    message: "Versioning should be enabled on the logs bucket."
 empty_plan_after: true          # apply/fix: a second plan must have no changes
 ```
 
-`check.yaml`, `setup/` (seeded state for fix mode) and `solutions/` are embedded and never written to the workspace, as in k8slings.
+`aws` calls come from an allowlist of read-only SDK calls. `check.yaml`, `setup/` and `solutions/` are embedded and never written to the workspace.
 
 ### Exercise layout
 
@@ -89,108 +98,102 @@ empty_plan_after: true          # apply/fix: a second plan must have no changes
 exercises/<topic>/<name>/
   README.md        lesson (few lines), links to the matching HashiCorp tutorial
   main.tf ...      the broken configuration; # TODO: at the fix site; # I AM NOT DONE on line 1
+  .terraform.lock.hcl   pinned providers (so init is reproducible and offline after prefetch)
   quiz.toml        quiz mode only
   answer.sh        cli mode only
   check.yaml       embedded only
-  setup/           fix mode only: seeded simulator state, tfstate, lock (embedded only)
-solutions/<topic>/<name>/   the fixed files, or solution.sh for fix mode, plus shortcut-*.sh the check must refuse
+  setup/           fix mode only: what to seed in Floci, a tfstate, a lock (embedded only)
+solutions/<topic>/<name>/   fixed files, or solution.sh for fix mode, plus shortcut-*.sh the check must refuse
 ```
 
-Every exercise in `info.toml` carries `objective = "4e"` so `tflings list --objective` and the progress report map straight to the exam content list.
+`info.toml` entries carry `objective = "4e"`, `requires = [...]` (e.g. `hcp`) and `engines = ["terraform"]`.
 
 ### Commands
 
-Same as k8slings (`init`, `watch`, `run`, `hint`, `list`, `verify`, `reset`, `solution`, `update`, `doctor`), with `cluster` replaced by `sim`, plus:
-
-- `tflings terraform ...` — pass-through to Terraform with the exercise's isolated env and CLI config (the only terraform a learner needs).
-- `tflings exam [--minutes N]` — timed mock exam drawn from the question bank, scored per objective, with explanations at the end.
-- `tflings progress` — readiness per exam objective.
-
-## Phases
-
-### Phase 0 — Decisions and spikes
-- [ ] Spike: serve the provider from the tflings binary through a filesystem mirror; `init` fully offline on macOS, Linux, Windows.
-- [ ] Spike: multiple provider versions in the mirror and lock-file checksums (`h1:` hashes generated at build time).
-- [ ] Spike: CEL over `terraform show -json` (plan and state) on Terraform 1.12 and latest; note the format differences.
-- [ ] Spike: `http` backend with locking served by tflings.
-- [x] Decided: Terraform first behind an `Engine` interface; OpenTofu in Phase 8.
-- [ ] Add a LICENSE to `learn/tf-associate` (or note in `NOTICE`); map each day's lab to exercises.
-- [ ] Verify the official exam format and the HCP free tier; write `CLAUDE.md`.
-
-### Phase 1 — Skeleton and plan mode
-- [ ] Copy the CLI shell from k8slings (cobra, Bubble Tea v2, workspace, `update`, markers, progress file), rename, strip Kubernetes.
-- [ ] Terraform runner: isolated env, per-exercise `TF_DATA_DIR`, timeouts, output caps, `hc-install` fallback.
-- [ ] Plan mode + `check.yaml` (plan/config).
-- [ ] Topics: `workflow`, `fmt`, `variables`, `outputs`, `types`, `expressions`, `functions` (using only `terraform_data` and the simulator's data sources).
-- [ ] CI: every exercise proven on Terraform 1.12 and latest.
-
-### Phase 2 — Simulator v1 and apply mode
-- [ ] `tflings/tfl` provider, cloud store, `sim ls/show/edit/delete`.
-- [ ] Apply mode with `cloud` and `state` checks, `empty_plan_after`.
-- [ ] Topics: `providers`, `versions`, `resources`, `data-sources`, `references`, `iteration`, `dependencies`, `lifecycle`, `conditions`, `sensitive`.
-
-### Phase 3 — State and fix mode
-- [ ] Seeding (simulator state + tfstate + lock), `reset` re-seeds, done is kept.
-- [ ] `sim backend` (http, locking), `sim drift`.
-- [ ] Topics: `state-basics`, `backends`, `locking`, `drift` (refresh-only), `refactoring` (moved/removed/state mv), `import` (import blocks, `-generate-config-out`), `debugging`.
-- [ ] cli mode and the `inspect` topic.
-
-### Phase 4 — Modules
-- [ ] Local modules, module scope, outputs between modules; sources and versions with a local git repo and a tiny module registry stub if the spike allows (otherwise quiz for registry specifics).
-- [ ] Topics: `modules`, `module-versions`; capstone.
-
-### Phase 5 — Exam practice and HCP
-- [ ] Quiz mode, question bank (target ~150 questions, all eight objectives, each with an explanation and a docs link).
-- [ ] `tflings exam` and `tflings progress`.
-- [ ] Optional `hcp` track (`requires = ["hcp"]`, skipped without `TF_TOKEN_app_terraform_io`): `cloud` block, workspaces and projects, variable sets, run triggers. Optional `vault` add-on (Vault dev server) for objective 4h.
-
-### Phase 6 — Simulator UI and playground
-- [ ] `sim ui` live TUI; `tflings sandbox`.
-- [ ] `sim ui --web`: local page with the dependency graph, plan diff and the cloud inventory.
-
-### Phase 7 — Release
-- [ ] GoReleaser, Homebrew tap (`cleonte/tap/tflings`), README with demo GIFs, CONTRIBUTING, version watch for Terraform releases.
-
-### Phase 8 — OpenTofu
-- [ ] `tofu` engine, `--engine` flag and `doctor` support, `engines` filtering, CI matrix, small `tofu-only` topic.
+Same as k8slings (`init`, `watch`, `run`, `hint`, `list`, `verify`, `reset`, `solution`, `update`, `doctor`), with `cluster` replaced by `aws up|down|status`, plus `aws`, `drift`, `console`, `sandbox`, `terraform ...` (pass-through with the isolated env), `exam` (timed mock exam, scored per objective) and `progress` (readiness per objective).
 
 ## Decisions (2026-11-13)
 
-1. **Simulator only.** No real AWS/Azure track, ever: nothing in tflings reads cloud credentials or talks to a real cloud. (The optional HCP track in Phase 5 is the one exception that needs an account; it is skippable and stays last.)
-2. **Terraform first, OpenTofu-ready.** The runner talks to an `Engine` interface from day one; `tofu` support is Phase 8 (see below).
-3. **Repo `github.com/cleonte/tflings`, Apache-2.0, Go floor 1.26**, like golings and k8slings.
+1. **Floci, against AWS.** Exercises use the real `hashicorp/aws` provider and AWS resources on Floci. No own fake cloud, no real AWS/Azure track. (The optional HCP track is the only part that needs an account; it is skippable and comes last.)
+2. **Terraform first, OpenTofu-ready.** The runner talks to an `Engine` interface from day one; `tofu` support is Phase 8.
+3. **Repo `github.com/cleonte/tflings`, Apache-2.0, Go floor 1.26**, like golings and k8slings. Floci is MIT and is downloaded, not vendored; credit it in `NOTICE` and the README.
 4. **Source material: `~/Work/git/terraform/learn/tf-associate`** (see below).
 
 ## Source material: `learn/tf-associate`
 
-A 12-day plan (day 0 to day 12) already mapped to the 004 objectives, written for no cloud account (`local`, `random`, `terraform_data`). It is Cristian's own; it has no LICENSE file, so add one there (or state in `NOTICE` that it is the author's own) before adapting.
+A 12-day plan (day 0 to day 12) already mapped to the 004 objectives. It is Cristian's own; it has no LICENSE file, so add one there (or state in `NOTICE` that it is the author's own) before adapting. Its labs use `local`/`random`/`terraform_data`; they are rewritten for AWS on Floci (S3, VPC, IAM, SSM, Secrets Manager) so they can be checked and broken.
 
 | Source | Becomes |
 |---|---|
-| `day-00-hcl-basics` | `hcl` intro topic (blocks, types, expressions), plan mode |
+| `day-00-hcl-basics` | `hcl` intro topic, plan mode |
 | `day-01-workflow` | `iac` quiz + `workflow`, `fmt` |
-| `day-02-providers` | `providers`, `versions` (the simulator's multi-version mirror replaces `random`) |
+| `day-02-providers` | `providers` (aws + aliases for two regions), `versions` |
 | `day-03-state` | `state-basics`, first `drift` exercises |
 | `day-04-resources-dependencies` | `resources`, `data-sources`, `references`, `dependencies`, `lifecycle` |
 | `day-05-variables` | `variables`, `outputs`, `types` |
 | `day-06-expressions` | `expressions`, `functions`, `iteration` |
-| `day-07-conditions-secrets` | `conditions`, `sensitive` (ephemeral and write-only via `tfl_secret`) |
+| `day-07-conditions-secrets` | `conditions`, `sensitive` (ephemeral `aws_secretsmanager_secret_version`, write-only args) |
 | `day-08-modules` | `modules`, `module-versions` |
-| `day-09-backends-state-locking` | `backends`, `locking` (via `sim backend`) |
+| `day-09-backends-state-locking` | `backends`, `locking` (S3 backend + `use_lockfile` / DynamoDB, all on Floci) |
 | `day-10-maintain` | `import`, `refactoring`, `inspect`, `debugging` |
 | `day-11-hcp-terraform` | `hcp` quiz (+ optional hands-on track) |
-| `day-12-mock-exam`, `practice-questions.md` | seed of the question bank (30 questions). Note: their key is almost all "b"; the quiz loader must shuffle options. |
-| `extras/cheatsheet`, `glossary` | hint texts and `tflings hint` docs links |
-
-The days' labs use `local`/`random`; each lab is rewritten against the simulator so it can be checked (apply mode) and broken (fix mode).
+| `day-12-mock-exam`, `practice-questions.md` | seed of the question bank (30 questions; their key is almost all "b", so options are shuffled) |
+| `extras/cheatsheet`, `glossary`, `azure-aws-real-world` | hint texts, docs links, "at work" notes in READMEs |
 
 ## OpenTofu (Phase 8)
 
-How hard: **moderate, about 10–15% extra**, if the runner is engine-agnostic from the start. What carries over unchanged: the provider (same plugin protocol), the filesystem mirror, `show -json` output, CEL checks, most HCL. What costs work:
+Easier with Floci than with a custom provider: Floci already tests OpenTofu in its CI, and the AWS provider and S3 backend work in both. Remaining cost (~10%): the `Engine` abstraction (binary, version, install), tagging exercises whose feature differs (HCP / `cloud` block is Terraform-only; state encryption, provider `for_each`, `-exclude` are OpenTofu-only), and a CI matrix of Terraform 1.12, Terraform latest, OpenTofu latest.
 
-- **Engine abstraction**: binary name, version detection, install (`hc-install` for Terraform, OpenTofu's own release downloads), env vars (`TF_*` mostly shared).
-- **Divergent features**: OpenTofu has state encryption, early variable evaluation in backend/module sources, provider `for_each`, `-exclude`; Terraform has HCP Terraform / `cloud` block and its own ephemeral/write-only timeline. Exercises get `engines = ["terraform", "tofu"]` (default both); HCP and exam-specific ones are `terraform` only, and a small `tofu-only` topic can show the extras.
-- **CI matrix doubles** (Terraform 1.12, Terraform latest, OpenTofu latest).
-- **Wording**: lessons say "Terraform" because the exam does; with `--engine tofu` the hints and commands print `tofu`.
+## Phases
 
-So: build Terraform-only through Phase 7, but never call `terraform` outside the `Engine` interface, and keep `engines` in `info.toml` from Phase 1 (always `["terraform"]` until Phase 8).
+### Phase 0 — Decisions and spikes
+- [x] Floci against AWS; Terraform first behind an `Engine` interface; repo, license, Go floor.
+- [x] Spike 01: AWS provider configured only through env — PASS (endpoint must be `localhost`).
+- [x] Decided: Floci runs in Docker (pinned by digest, named volume); Docker is required, as for k8slings.
+- [ ] Verify `*.localhost` resolution from Terraform's AWS provider on Linux and Windows (CI).
+- [ ] Spike: per-exercise account via 12-digit key ID; wiping one account (reset) without restarting Floci.
+- [ ] Spike: S3 backend with `use_lockfile` and with DynamoDB on Floci; a stuck lock and `force-unlock`.
+- [ ] Spike: tflings-managed Floci container (pull by digest, port 4577, named volume, health wait, start time) on macOS, Linux, Windows.
+- [ ] Spike: time of `plan` per save with the AWS provider (target < 5 s); plugin cache and offline `init`.
+- [ ] Add a LICENSE to `learn/tf-associate`; verify exam format and HCP free tier; write `CLAUDE.md`.
+
+### Phase 1 — Skeleton and plan mode
+- [ ] Copy the CLI shell from k8slings (cobra, Bubble Tea v2, workspace, `update`, markers, progress file), rename, strip Kubernetes.
+- [ ] Terraform runner: isolated env, per-exercise `TF_DATA_DIR`, plugin cache, timeouts, output caps, `hc-install`; the provider-block safety check.
+- [ ] Floci manager (`aws up|down|status`), `doctor` (terraform, Floci, plugin cache, Docker optional).
+- [ ] Plan mode + `check.yaml` (plan/config). Topics: `hcl`, `workflow`, `fmt`, `variables`, `outputs`, `types`, `expressions`, `functions`.
+- [ ] CI: every exercise proven on Terraform 1.12 and latest, with Floci.
+
+### Phase 2 — Apply mode
+- [ ] Apply mode, `aws` checks (SDK allowlist), `empty_plan_after`.
+- [ ] Topics: `providers`, `versions`, `resources`, `data-sources`, `references`, `iteration`, `dependencies`, `lifecycle`, `conditions`, `sensitive`.
+
+### Phase 3 — State and fix mode
+- [ ] Seeding (Floci resources, tfstate, locks), `reset` re-seeds, done is kept; `drift`.
+- [ ] Topics: `state-basics`, `backends`, `locking`, `drift` (refresh-only), `refactoring` (moved/removed/state mv), `import` (import blocks, `-generate-config-out`), `debugging`.
+- [ ] cli mode and the `inspect` topic.
+
+### Phase 4 — Modules
+- [ ] Local modules, scope, outputs between modules; sources and versions with a local git repo; registry specifics via quiz unless a local registry stub proves cheap.
+- [ ] Topics: `modules`, `module-versions`; capstone.
+
+### Phase 5 — Exam practice and HCP
+- [ ] Quiz mode, question bank (target ~150, all objectives, explanation + docs link each).
+- [ ] `tflings exam`, `tflings progress`.
+- [ ] Optional `hcp` track (`requires = ["hcp"]`, skipped without `TF_TOKEN_app_terraform_io`).
+
+### Phase 6 — Playground
+- [ ] `tflings sandbox`, `tflings console`, exercises with EC2 instances that really run (user data, security group ports).
+
+### Phase 7 — Release
+- [ ] GoReleaser, Homebrew tap (`cleonte/tap/tflings`), README with demo GIFs, CONTRIBUTING, version watch for Terraform, the AWS provider and Floci.
+
+### Phase 8 — OpenTofu
+- [ ] `tofu` engine, `--engine`, `doctor`, `engines` filtering, CI matrix, small `tofu-only` topic.
+
+## Risks
+
+- **Floci moves fast**: a new release can change behaviour. Pin the version, run the full exercise suite before bumping, keep the bump a deliberate PR (version watch opens it).
+- **Emulator gaps**: an AWS feature Floci gets wrong would teach the wrong thing. Use only resource types in Floci's Terraform compatibility suite or proven by our own CI; prefer S3, VPC, IAM, SSM, Secrets Manager, DynamoDB, Route 53, KMS.
+- **Docker is required** for all hands-on exercises. Acceptable (k8slings learners have it already); `doctor` checks it and the Lima/Colima specifics, and companies that cannot use Docker Desktop can use Colima or OrbStack.
+- **First-run download size** (AWS provider + Terraform + Floci): `doctor --prefetch` and a clear progress message.
