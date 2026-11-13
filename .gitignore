@@ -5,3 +5,4 @@ spikes/.home/
 *.tfstate.*
 crash.log
 spikes/01-env-only/work-*/
+spikes/02-accounts/work-*/
