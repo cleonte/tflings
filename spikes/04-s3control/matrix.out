@@ -1,0 +1,12 @@
+##### T3 OFFLINE, generic=127.0.0.1, s3control=localhost, retry capped
+config: generic=http://127.0.0.1:4577 s3control=http://localhost:4577 hosts-entry=0 offline=1 retry=AWS_MAX_ATTEMPTS=1 AWS_RETRY_MODE=standard
+apply rc=124 elapsed=90s: Error: execution halted Error: execution halted 
+destroy rc=0 elapsed=2s: Destroy complete! Resources: 8 destroyed. 
+##### T4 OFFLINE + /etc/hosts line for <account>.localhost, generic=127.0.0.1, s3control=localhost
+config: generic=http://127.0.0.1:4577 s3control=http://localhost:4577 hosts-entry=1 offline=1 retry=AWS_MAX_ATTEMPTS=1 AWS_RETRY_MODE=standard
+apply rc=0 elapsed=8s: Apply complete! Resources: 13 added, 0 changed, 0 destroyed. 
+destroy rc=0 elapsed=3s: Destroy complete! Resources: 13 destroyed. 
+##### T5 OFFLINE + /etc/hosts line, generic=localhost (default, no s3control var) -> bucket.localhost also needed
+config: generic=http://localhost:4577 s3control=<unset> hosts-entry=1 offline=1 retry=AWS_MAX_ATTEMPTS=1 AWS_RETRY_MODE=standard
+apply rc=124 elapsed=90s: Error: execution halted Error: execution halted 
+destroy rc=0 elapsed=2s: Destroy complete! Resources: 8 destroyed. 
