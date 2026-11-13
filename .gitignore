@@ -1,0 +1,6 @@
+spikes/.cache/
+spikes/.home/
+.terraform/
+*.tfstate
+*.tfstate.*
+crash.log
