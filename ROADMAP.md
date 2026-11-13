@@ -58,9 +58,9 @@ Every mode except `quiz` needs `terraform` (fetched and pinned by tflings if mis
 ### Floci integration (replaces the "fake cloud")
 
 - **tflings runs its own Floci in Docker**, never the learner's: `tflings aws up|down|status` runs the Floci image **pinned by digest** as container `tflings-floci`, published on `127.0.0.1:4577` (a tflings-only port), data in the named volume `tflings-floci-data` (works under Lima/Colima, where `$HOME` is read-only to containers). The endpoint is always given as `http://localhost:4577`. `run`/`watch` start it on demand. Docker is required, as it is for k8slings (Docker Desktop, OrbStack, Colima, Lima or Docker on Linux); the native `floci-aws` binary stays a possible later option, not a plan.
-- **One AWS account per exercise**: each exercise gets a fixed 12-digit access key ID (`AWS_ACCESS_KEY_ID=<account>`), so exercises never see each other's resources, and `reset` wipes just that account.
+- **One AWS account per exercise**: each exercise gets a fixed 12-digit access key ID (`AWS_ACCESS_KEY_ID=<account>`), so exercises never see each other's resources. The account ID is deterministic from the exercise name plus a reset counter kept in the progress file: `reset` bumps the counter and gets a fresh, empty account (spike 02). The scripted per-account wipe (8.8 s with the AWS CLI) is a fallback only.
 - **Never real AWS**, enforced in three layers:
-  1. The runner builds Terraform's environment from scratch: `AWS_ENDPOINT_URL=http://127.0.0.1:4577`, the exercise's fake keys, `AWS_CONFIG_FILE` and `AWS_SHARED_CREDENTIALS_FILE` pointing at tflings's own empty files, every other `AWS_*`, `TF_*`, `ARM_*`, `GOOGLE_*` dropped. A real profile or SSO session is never read.
+  1. The runner builds Terraform's environment from scratch: `AWS_ENDPOINT_URL=http://localhost:4577` (never `127.0.0.1`, see spike 01), the exercise's fake keys, `AWS_CONFIG_FILE` and `AWS_SHARED_CREDENTIALS_FILE` pointing at tflings's own empty files, every other `AWS_*`, `TF_*`, `ARM_*`, `GOOGLE_*` dropped. A real profile or SSO session is never read.
   2. Before every `plan`/`apply`, a static check of the learner's `provider "aws"` blocks refuses `profile`, `assume_role`, `shared_*_files`, real-looking keys, and `endpoints` that do not point at the tflings Floci.
   3. Even if both failed, the fake keys would be rejected by real AWS.
 - **Provider download**: the AWS provider is large (hundreds of MB unpacked). tflings sets one shared `TF_PLUGIN_CACHE_DIR`, ships `.terraform.lock.hcl` files pinned to one AWS provider version, and `doctor --prefetch` downloads it once; after that the course works offline. Version-constraint and lock-file lessons use small providers (`hashicorp/random`, `hashicorp/local`) with several versions, so they stay fast.
@@ -118,6 +118,11 @@ Same as k8slings (`init`, `watch`, `run`, `hint`, `list`, `verify`, `reset`, `so
 2. **Terraform first, OpenTofu-ready.** The runner talks to an `Engine` interface from day one; `tofu` support is Phase 8.
 3. **Repo `github.com/cleonte/tflings`, Apache-2.0, Go floor 1.26**, like golings and k8slings. Floci is MIT and is downloaded, not vendored; credit it in `NOTICE` and the README.
 4. **Source material: `~/Work/git/terraform/learn/tf-associate`** (see below).
+5. **Account per reset** (spike 02): a fresh account ID per reset, deterministic from exercise name + reset counter in the progress file. The 8.8 s scripted wipe is a fallback only. The global `POST /_floci/state/reset` runs on `tflings aws up`, or when `watch` starts with no active exercise, after a warning.
+6. **No "bucket name already taken" exercises**: Floci's S3 namespace is per account, so the situation cannot happen. Those become quiz questions, and the README says so.
+7. **Default VPC**: every account starts with one, so the check DSL gets a `non_default` helper.
+8. **`force_destroy = true` on every bucket** in every exercise template, enforced by a lint in the exercise checker.
+9. **Retries**: the runner sets `AWS_MAX_ATTEMPTS` low, `AWS_RETRY_MODE=standard`, a short timeout and a clear error message, so a learner never waits minutes on retries (offline resolution failure showed this).
 
 ## Source material: `learn/tf-associate`
 
@@ -150,8 +155,11 @@ Easier with Floci than with a custom provider: Floci already tests OpenTofu in i
 - [x] Floci against AWS; Terraform first behind an `Engine` interface; repo, license, Go floor.
 - [x] Spike 01: AWS provider configured only through env — PASS (endpoint must be `localhost`).
 - [x] Decided: Floci runs in Docker (pinned by digest, named volume); Docker is required, as for k8slings.
-- [ ] Verify `*.localhost` resolution from Terraform's AWS provider on Linux and Windows (CI).
-- [ ] Spike: per-exercise account via 12-digit key ID; wiping one account (reset) without restarting Floci.
+- [~] Spike 00 (partial): `<account>.localhost` resolves on Linux (Debian glibc, Alpine musl) with DNS available; **fails with no DNS** (offline). Windows, macOS offline, amd64, systemd-resolved untested.
+- [x] Spike 02: one account per exercise via 12-digit key ID — PASS; no single-account reset API (global `/_floci/state/reset` only), so `reset` uses a fresh account ID.
+- [ ] Test service-specific endpoint env vars for S3 Control (`AWS_ENDPOINT_URL_S3_CONTROL`) so the account-ID host prefix disappears (spike 04; the macOS try with `127.0.0.1` kept the prefix).
+- [ ] Offline CI job: network disabled during the `apply` step.
+- [ ] CI matrix for Windows, macOS offline, Linux amd64 and systemd-resolved.
 - [ ] Spike: S3 backend with `use_lockfile` and with DynamoDB on Floci; a stuck lock and `force-unlock`.
 - [ ] Spike: tflings-managed Floci container (pull by digest, port 4577, named volume, health wait, start time) on macOS, Linux, Windows.
 - [ ] Spike: time of `plan` per save with the AWS provider (target < 5 s); plugin cache and offline `init`.
@@ -193,6 +201,7 @@ Easier with Floci than with a custom provider: Floci already tests OpenTofu in i
 
 ## Risks
 
+- **Offline resolution of `<account>.localhost`**: the AWS provider sends S3 Control calls to `<account-id>.<endpoint host>`. That resolves only if the resolver answers `*.localhost` (Docker/Lima DNS does; glibc and Go do not synthesize it). With no DNS, `apply` hangs in retries. Open until spike 04 or a `doctor` fix settles it.
 - **Floci moves fast**: a new release can change behaviour. Pin the version, run the full exercise suite before bumping, keep the bump a deliberate PR (version watch opens it).
 - **Emulator gaps**: an AWS feature Floci gets wrong would teach the wrong thing. Use only resource types in Floci's Terraform compatibility suite or proven by our own CI; prefer S3, VPC, IAM, SSM, Secrets Manager, DynamoDB, Route 53, KMS.
 - **Docker is required** for all hands-on exercises. Acceptable (k8slings learners have it already); `doctor` checks it and the Lima/Colima specifics, and companies that cannot use Docker Desktop can use Colima or OrbStack.
