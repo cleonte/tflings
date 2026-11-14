@@ -33,5 +33,23 @@ func WriteCLIConfig(path, cacheDir string) error {
 	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
 		return err
 	}
-	return os.WriteFile(path, []byte(CLIConfig(cacheDir)), 0o644)
+	// Written whole and moved into place: runs of several exercises at once
+	// (the proofs run in parallel) write the same file, and a Terraform reading
+	// it must never see it half written.
+	tmp, err := os.CreateTemp(filepath.Dir(path), ".cli-*.tmp")
+	if err != nil {
+		return err
+	}
+	defer os.Remove(tmp.Name())
+	if _, err := tmp.WriteString(CLIConfig(cacheDir)); err != nil {
+		tmp.Close()
+		return err
+	}
+	if err := tmp.Close(); err != nil {
+		return err
+	}
+	if err := os.Chmod(tmp.Name(), 0o644); err != nil {
+		return err
+	}
+	return os.Rename(tmp.Name(), path)
 }

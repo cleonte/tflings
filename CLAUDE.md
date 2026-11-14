@@ -119,9 +119,17 @@ Each is a thing an exercise must avoid or a check must tolerate; report upstream
 
 Terraform Associate 004 tests Terraform 1.12; 1 hour, multiple choice, online proctored, $70.50, credential valid 2 years. HashiCorp does not publish the question count or pass mark, so `tflings exam` makes the count a setting and labels any default unofficial. HCP Terraform Free: 500 managed resources, unlimited users, one concurrent run (IBM support page, 2026-06-23; not on HashiCorp's pricing page). Remote HCP runs cannot reach a local Floci, so the optional HCP track needs local execution mode or resources that do not need Floci (**untested**); objective 8 is covered by quiz anyway.
 
+## Linux results (2026-11-14, run by hand while GitHub Actions was out of minutes)
+
+Every exercise proof passed, AWS-provider exercises against Floci included, on:
+- Linux arm64, Ubuntu 26.04 in a Lima `vz` VM with native Docker (Floci 2.4.0), Terraform 1.12.2 and 1.17.2: 375 s cold, 131 s warm (2 proofs at a time). `*.localhost` resolved to `::1` with no `/etc/hosts` line.
+- Linux x86_64, Debian 13 on an i9-9980HK with native Docker, Terraform 1.12.2 (1048 s; the provider takes about 5 s to start there, against about 1 s on an M-series Mac, so one AWS exercise takes 36 to 90 s and Go's default 10 minute test timeout is too short: use `-timeout 60m`). Terraform 1.17.2 passed the provider-free and `tflings`-only packages; its AWS proofs were still running when this was written.
+- To test on Linux without a Go toolchain there (the Lima VM ran out of memory compiling the AWS SDK, with kind clusters alongside): cross-compile on the Mac with `GOOS=linux GOARCH=arm64 go build ./cmd/tflings` and `go test -c ./internal/exercises` (the exercises are embedded in the test binary), copy both, run `tflings doctor --prefetch` there, then run the test binary with `TFLINGS_TEST_HOME` and `TFLINGS_TEST_TERRAFORM` set.
+- The proofs run in parallel (`TFLINGS_TEST_PARALLEL`, default half the cores): on macOS 170 s one at a time, 54 s with 4, 42 s with 8.
+
 ## Not yet tested
 
-Windows with Docker and the AWS-provider exercises, macOS with the network off, systemd-resolved, Docker Desktop/Colima/OrbStack for the Floci container, the offline mirror recipe on Windows. (Linux amd64 and native Linux Docker are covered by `ubuntu-latest` in CI.) CI must cover these before release.
+Windows with Docker and the AWS-provider exercises, macOS with the network off, systemd-resolved, Docker Desktop/OrbStack for the Floci container (Lima and Linux Docker are covered above), the offline mirror recipe on Windows. The GitHub Actions jobs (macOS, Windows, offline) last ran on 2026-11-14 for the `sensitive` PR; Actions is disabled until 2026-12-01 (private repo, 2000 free minutes used), and `make ci` stands in for it on macOS.
 
 ## Conventions
 
