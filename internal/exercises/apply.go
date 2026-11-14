@@ -10,7 +10,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cleonte/tflings/internal/awscheck"
 	"github.com/cleonte/tflings/internal/check"
+	"github.com/cleonte/tflings/internal/runner"
 )
 
 // cleanSource empties the scratch folder of an exercise except for the
@@ -87,6 +89,16 @@ func (e Exercise) runApply(ctx context.Context, env *Env, c *check.Compiled, fil
 	failures = append(failures, c.RunState(state)...)
 	if len(failures) > 0 {
 		return Result{}, &FailedError{Lines: failures}
+	}
+
+	if len(c.AWS) > 0 {
+		awsFailures, err := c.RunAWS(ctx, awscheck.New(runner.Endpoint(), run.cfg.Account), state)
+		if err != nil {
+			return Result{}, err
+		}
+		if len(awsFailures) > 0 {
+			return Result{}, &FailedError{Lines: awsFailures}
+		}
 	}
 
 	if c.EmptyPlanAfter && needsApply {

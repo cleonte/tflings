@@ -99,3 +99,12 @@ mode      = "apply"
 objective = "4b"
 hint      = "The object's bucket can be the id of the bucket resource: look at how a resource's attributes are written, TYPE.NAME.ATTRIBUTE."
 docs      = "https://developer.hashicorp.com/terraform/language/expressions/references"
+
+[[exercises]]
+name      = "resources2"
+path      = "exercises/resources/resources2"
+topic     = "resources"
+mode      = "apply"
+objective = "4a"
+hint      = "Look for a resource called aws_s3_bucket_versioning in the provider documentation. It points at the bucket by reference."
+docs      = "https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_versioning"

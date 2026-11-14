@@ -8,17 +8,32 @@
 package check
 
 import (
+	"context"
+	"encoding/json"
 	"fmt"
 	"slices"
 	"strings"
 
 	"cel.dev/cel-go/cel"
+	"github.com/cleonte/tflings/internal/awscheck"
 	"sigs.k8s.io/yaml"
 )
 
 // Assertion is one CEL expression that must be true, and what to tell the
 // learner when it is not.
 type Assertion struct {
+	Expr    string `json:"expr"`
+	Message string `json:"message"`
+}
+
+// AWSAssertion reads something from the fake AWS with one of the typed,
+// read-only calls of the awscheck package and asserts on what it returns.
+type AWSAssertion struct {
+	// Call is the name of the call, e.g. "s3.versioning".
+	Call string `json:"call"`
+	// Args are the arguments of the call, all strings.
+	Args map[string]any `json:"args,omitempty"`
+	// Expr sees `result` (what the call returned) and `state`.
 	Expr    string `json:"expr"`
 	Message string `json:"message"`
 }
@@ -38,6 +53,8 @@ type File struct {
 	// State assertions (apply mode) see `state`, the JSON of `terraform show -json`
 	// for the state after the apply (values.root_module.resources, values.outputs).
 	State []Assertion `json:"state,omitempty"`
+	// AWS assertions (apply mode) look at what really exists in Floci.
+	AWS []AWSAssertion `json:"aws,omitempty"`
 	// EmptyPlanAfter (apply mode) requires a second plan to have no changes: the
 	// configuration must apply and then be stable.
 	EmptyPlanAfter bool `json:"empty_plan_after,omitempty"`
@@ -66,6 +83,7 @@ type Variant struct {
 type Compiled struct {
 	File
 	plan, config, state []cel.Program
+	aws                 []cel.Program
 }
 
 // Load parses a check.yaml, compiles every expression and rejects anything
@@ -83,6 +101,7 @@ func Load(raw []byte) (*Compiled, error) {
 		cel.Variable("plan", cel.DynType),
 		cel.Variable("config", cel.DynType),
 		cel.Variable("state", cel.DynType),
+		cel.Variable("result", cel.DynType),
 	)
 	if err != nil {
 		return nil, err
@@ -96,6 +115,16 @@ func Load(raw []byte) (*Compiled, error) {
 	}
 	if c.state, err = compile(env, f.State, "state"); err != nil {
 		return nil, err
+	}
+	for i, a := range f.AWS {
+		if err := awscheck.Validate(a.Call, a.Args); err != nil {
+			return nil, fmt.Errorf("check.yaml: aws[%d]: %w", i, err)
+		}
+		progs, err := compile(env, []Assertion{{Expr: a.Expr, Message: a.Message}}, fmt.Sprintf("aws[%d]", i))
+		if err != nil {
+			return nil, err
+		}
+		c.aws = append(c.aws, progs[0])
 	}
 	for i := range c.Variants {
 		v := &c.Variants[i]
@@ -139,7 +168,7 @@ func compile(env *cel.Env, as []Assertion, section string) ([]cel.Program, error
 
 // Count is how many assertions the check has, variants included.
 func (c *Compiled) Count() int {
-	n := len(c.plan) + len(c.config) + len(c.state)
+	n := len(c.plan) + len(c.config) + len(c.state) + len(c.aws)
 	if c.EmptyPlanAfter {
 		n++
 	}
@@ -154,6 +183,39 @@ func (c *Compiled) Count() int {
 // evaluated (a field it reads is missing, say) counts as failed.
 func (c *Compiled) RunPlan(plan map[string]any) []string {
 	return evaluate(plan, group{c.Plan, c.plan}, group{c.Config, c.config})
+}
+
+// AWSCaller runs the typed calls of the awscheck package.
+type AWSCaller interface {
+	Call(ctx context.Context, name string, args map[string]any) (map[string]any, error)
+}
+
+// RunAWS makes the calls of the aws assertions and evaluates them, and returns
+// the messages of those that failed. Equal calls are made once. An error from a
+// call itself (Floci not answering) is returned as an error, not as a failed
+// assertion: it is not the learner's mistake.
+func (c *Compiled) RunAWS(ctx context.Context, caller AWSCaller, state map[string]any) ([]string, error) {
+	var failures []string
+	cache := map[string]map[string]any{}
+	for i, a := range c.AWS {
+		key := a.Call
+		if b, err := json.Marshal(a.Args); err == nil {
+			key += string(b)
+		}
+		res, ok := cache[key]
+		if !ok {
+			var err error
+			if res, err = caller.Call(ctx, a.Call, a.Args); err != nil {
+				return nil, fmt.Errorf("reading %s from Floci: %w", a.Call, err)
+			}
+			cache[key] = res
+		}
+		out, _, err := c.aws[i].Eval(map[string]any{"result": res, "state": state, "plan": map[string]any{}, "config": map[string]any{}})
+		if err != nil || out.Value() != true {
+			failures = append(failures, a.Message)
+		}
+	}
+	return failures, nil
 }
 
 // RunPlanOnly is RunPlan without the config assertions: apply mode checks the

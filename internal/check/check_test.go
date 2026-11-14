@@ -1,6 +1,9 @@
 package check
 
-import "testing"
+import (
+	"context"
+	"testing"
+)
 
 func TestQuizOK(t *testing.T) {
 	c, err := Load([]byte("answer: [B]\nexplanation: why\n"))
@@ -119,5 +122,54 @@ empty_plan_after: true
 	}
 	if c.Count() != 4 {
 		t.Errorf("Count = %d, want 4 (plan, config, state, empty plan)", c.Count())
+	}
+}
+
+type fakeAWS struct{ calls int }
+
+func (f *fakeAWS) Call(_ context.Context, name string, args map[string]any) (map[string]any, error) {
+	f.calls++
+	return map[string]any{"status": "Enabled", "exists": true}, nil
+}
+
+func TestRunAWS(t *testing.T) {
+	c, err := Load([]byte(`
+aws:
+  - call: s3.versioning
+    args: { bucket: b }
+    expr: result.status == "Enabled"
+    message: "enabled"
+  - call: s3.versioning
+    args: { bucket: b }
+    expr: result.status == "Suspended"
+    message: "suspended"
+`))
+	if err != nil {
+		t.Fatal(err)
+	}
+	f := &fakeAWS{}
+	got, err := c.RunAWS(context.Background(), f, nil)
+	if err != nil || len(got) != 1 || got[0] != "suspended" {
+		t.Errorf("got %v, %v", got, err)
+	}
+	if f.calls != 1 {
+		t.Errorf("equal calls are made once, got %d", f.calls)
+	}
+	if c.Count() != 2 {
+		t.Errorf("Count = %d", c.Count())
+	}
+}
+
+func TestLoadRejectsBadAWSChecks(t *testing.T) {
+	for name, doc := range map[string]string{
+		"unknown call":   "aws:\n  - call: s3.delete_bucket\n    args: {bucket: b}\n    expr: \"true\"\n    message: m\n",
+		"missing arg":    "aws:\n  - call: s3.versioning\n    expr: \"true\"\n    message: m\n",
+		"no message":     "aws:\n  - call: s3.bucket\n    args: {bucket: b}\n    expr: result.exists\n",
+		"bad expression": "aws:\n  - call: s3.bucket\n    args: {bucket: b}\n    expr: \"result.\"\n    message: m\n",
+		"unknown field":  "aws:\n  - call: s3.bucket\n    args: {bucket: b}\n    expr: result.exists\n    message: m\n    extra: 1\n",
+	} {
+		if _, err := Load([]byte(doc)); err == nil {
+			t.Errorf("%s: expected an error", name)
+		}
 	}
 }
