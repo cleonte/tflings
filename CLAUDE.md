@@ -13,8 +13,8 @@ tflings is "rustlings for Terraform": a Go CLI that teaches Terraform (aimed at 
 
 ## Rules
 
-- **Never touch real AWS.** Every Terraform or AWS CLI command runs with a clean environment: `env -i` plus only `PATH`, `HOME`, the fake keys, `AWS_ENDPOINT_URL` pointing at the local Floci, `AWS_CONFIG_FILE=/dev/null`, `AWS_SHARED_CREDENTIALS_FILE=/dev/null`. Never use the user's AWS profiles, SSO sessions or `~/.aws`. If a command would need real credentials, stop and ask.
-- Floci for tflings runs **in Docker** (image pinned by digest, container `tflings-floci`, named volume `tflings-floci-data`) on **port 4577** (not 4566, which the user may use for something else). Endpoint is always `http://localhost:4577`, never `127.0.0.1` (S3 Control prefixes the account ID to the host).
+- **Never touch real AWS.** Every Terraform or AWS CLI command runs with a clean environment: `env -i` plus only `PATH`, `HOME`, the fake keys, `AWS_ENDPOINT_URL` and `AWS_ENDPOINT_URL_S3_CONTROL` pointing at the local Floci, `AWS_CONFIG_FILE=/dev/null`, `AWS_SHARED_CREDENTIALS_FILE=/dev/null`. Never use the user's AWS profiles, SSO sessions or `~/.aws`. If a command would need real credentials, stop and ask.
+- Floci for tflings runs **in Docker** (image pinned by digest, container `tflings-floci`, named volume `tflings-floci-data`) on **port 4577** (not 4566, which the user may use for something else). Endpoints are split (spike 04): `AWS_ENDPOINT_URL=http://127.0.0.1:4577` and `AWS_ENDPOINT_URL_S3_CONTROL=http://localhost:4577` (the provider's S3 Control call prepends the account ID to the host, so `<account>.localhost` must resolve).
 - Pin versions and write them down (Floci 2.4.0 unless a spike says otherwise; Terraform 1.12.x and latest; AWS provider `~> 6.0`).
 - Downloads go under `spikes/.cache/` (git-ignored); verify checksums when the project publishes them.
 - Facts you checked go into `RESULTS.md` with the date and the exact versions. Do not write anything as fact that you did not run.
