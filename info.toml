@@ -237,6 +237,16 @@ hint      = "The data source aws_caller_identity has an attribute called account
 docs      = "https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/caller_identity"
 
 [[exercises]]
+name      = "data-sources2"
+path      = "exercises/data-sources/data-sources2"
+topic     = "data-sources"
+mode      = "apply"
+objective = "4b"
+requires  = ["floci"]
+hint      = "data \"aws_vpc\" \"default\" { default = true } finds the default VPC; reference its id."
+docs      = "https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/vpc"
+
+[[exercises]]
 name      = "dependencies1"
 path      = "exercises/dependencies/dependencies1"
 topic     = "dependencies"
@@ -432,6 +442,15 @@ hint      = "A moved block has from and to, written as resource addresses. Apply
 docs      = "https://developer.hashicorp.com/terraform/language/modules/develop/refactoring"
 
 [[exercises]]
+name      = "refactoring3"
+path      = "exercises/refactoring/refactoring3"
+topic     = "refactoring"
+mode      = "fix"
+objective = "6d"
+hint      = "A moved block can point into a module: to = module.web.terraform_data.this."
+docs      = "https://developer.hashicorp.com/terraform/language/modules/develop/refactoring"
+
+[[exercises]]
 name      = "drift3"
 path      = "exercises/drift/drift3"
 topic     = "drift"
@@ -499,3 +518,57 @@ objective = "6c"
 requires  = ["floci"]
 hint      = "-migrate-state copies the state to the new place; -reconfigure starts from what the new place holds."
 docs      = "https://developer.hashicorp.com/terraform/cli/commands/init#backend-initialization"
+
+[[exercises]]
+name      = "modules1"
+path      = "exercises/modules/modules1"
+topic     = "modules"
+mode      = "plan"
+objective = "5b"
+hint      = "The module declares variable \"name\" without a default, so the module block has to set name."
+docs      = "https://developer.hashicorp.com/terraform/language/block/module"
+
+[[exercises]]
+name      = "modules2"
+path      = "exercises/modules/modules2"
+topic     = "modules"
+mode      = "plan"
+objective = "5b"
+hint      = "Two files: the module needs an output block, and the root reads it as module.app.<output name>."
+docs      = "https://developer.hashicorp.com/terraform/language/block/module#accessing-module-output-values"
+
+[[exercises]]
+name      = "modules3"
+path      = "exercises/modules/modules3"
+topic     = "modules"
+mode      = "plan"
+objective = "5b"
+hint      = "The module block takes for_each like a resource does; each.key is the current element."
+docs      = "https://developer.hashicorp.com/terraform/language/meta-arguments/for_each"
+
+[[exercises]]
+name      = "modules4"
+path      = "exercises/modules/modules4"
+topic     = "modules"
+mode      = "plan"
+objective = "5c"
+hint      = "Declare variable \"environment\" in the module, then set environment = var.environment in the module block."
+docs      = "https://developer.hashicorp.com/terraform/language/modules/develop/variables"
+
+[[exercises]]
+name      = "module-versions1"
+path      = "exercises/module-versions/module-versions1"
+topic     = "module-versions"
+mode      = "quiz"
+objective = "5a"
+hint      = "Think about where versions are published: which kind of source is a registry?"
+docs      = "https://developer.hashicorp.com/terraform/language/block/module#version"
+
+[[exercises]]
+name      = "module-versions2"
+path      = "exercises/module-versions/module-versions2"
+topic     = "module-versions"
+mode      = "quiz"
+objective = "5a"
+hint      = "Where do modules get installed, and which command does it?"
+docs      = "https://developer.hashicorp.com/terraform/cli/commands/init"

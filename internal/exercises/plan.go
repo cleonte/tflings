@@ -11,7 +11,6 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/cleonte/tflings/internal/check"
@@ -259,9 +258,6 @@ func lines(s string, max int) []string {
 	return ls
 }
 
-// initMu serialises the inits of one process that share a plugin cache.
-var initMu sync.Mutex
-
 // A run is one exercise's scratch folder and the environment Terraform sees.
 type run struct {
 	env *Env
@@ -300,10 +296,14 @@ func (e *Env) runFor(ex Exercise) (*run, error) {
 		cfg.Account = runner.Account(ex.Name+e.AccountSalt, ResetCount(e.workspace(), ex.Name))
 		// The AWS provider is installed from the prefetched cache by a filesystem
 		// mirror. The mirror folder must not also be TF_PLUGIN_CACHE_DIR: Terraform
-		// refuses to install a provider "to itself". Other providers use a second
-		// cache.
+		// refuses to install a provider "to itself". The cache is the exercise's
+		// own: our lock files hold only zip hashes, which cannot vouch for a cached
+		// copy, so Terraform reinstalls it on every init, and for a moment the
+		// entry is gone for anyone else reading it (two exercises running at once
+		// failed that way). An entry is only a symlink into the mirror, so a
+		// cache of one's own costs nothing.
 		mirror := filepath.Join(home, "plugins")
-		cfg.PluginCache = filepath.Join(home, "plugins-extra")
+		cfg.PluginCache = filepath.Join(dir, "plugin-cache")
 		cfg.CLIConfig = filepath.Join(home, "cli.tfrc")
 		if err := os.MkdirAll(cfg.PluginCache, 0o755); err != nil {
 			return nil, err
@@ -342,14 +342,6 @@ func writeSource(src string, files map[string][]byte, keepState bool) error {
 // as that command accepts them, then extra flags, then positional arguments.
 func (r *run) tf(ctx context.Context, command string, flags, positional []string) (runner.Output, error) {
 	report(ctx, "terraform "+command)
-	if command == "init" && r.cfg.PluginCache != "" {
-		// Terraform reinstalls a provider into the shared plugin cache when the
-		// lock file cannot vouch for what is there (ours hold only zip hashes), and
-		// two inits doing that at once fail with "file exists". Inits are about a
-		// second, so they take turns.
-		initMu.Lock()
-		defer initMu.Unlock()
-	}
 	args := append([]string{command}, r.env.Engine.Flags(command)...)
 	args = append(args, flags...)
 	args = append(args, positional...)

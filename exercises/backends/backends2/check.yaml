@@ -3,7 +3,7 @@ state:
     message: "terraform_data.app was built again. The existing state has to move to the new key."
 aws:
   - call: s3.object
-    args: { bucket: tflings-state, key: orders/terraform.tfstate }
+    args: { bucket: tflings-key-state, key: orders/terraform.tfstate }
     expr: result.exists && result.size > 0
     message: "There is no state at orders/terraform.tfstate yet."
 empty_plan_after: true

@@ -1,6 +1,6 @@
 terraform {
   backend "s3" {
-    bucket       = "tflings-state"
+    bucket       = "tflings-key-state"
     key          = "orders/terraform.tfstate"
     region       = "us-east-1"
     use_lockfile = true

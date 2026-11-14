@@ -1,5 +1,5 @@
 steps:
   - mutate:
       call: s3.create_bucket
-      args: { bucket: tflings-state }
+      args: { bucket: tflings-key-state }
   - apply: initial

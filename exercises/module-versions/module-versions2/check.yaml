@@ -1,0 +1,3 @@
+answer: [b]
+explanation: >-
+  terraform init installs the modules a configuration calls, into .terraform/modules. After adding or changing a module source or version, run init again.
