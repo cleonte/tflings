@@ -4,7 +4,7 @@ Learn Terraform by fixing small broken exercises, like [Rustlings](https://githu
 
 You get a folder of Terraform files with a `# I AM NOT DONE` line and a `# TODO:` where something is wrong. You fix them, save, and tflings tells you what Terraform says and what is still not right. Exercises that build things use the real `hashicorp/aws` provider against [Floci](https://github.com/floci-io/floci), a free local AWS emulator that tflings runs in Docker. Nothing ever talks to a real AWS account.
 
-> **Status: pre-release, expect breakage.** The skeleton, plan mode, apply mode, the full-screen view, `doctor` and 51 exercises work, fix mode among them (`tflings tf <exercise> ...` repairs a situation that has gone wrong). Most of the planned ~120 exercises and the releases do not exist yet. See [ROADMAP.md](ROADMAP.md).
+> **Status: pre-release, expect breakage.** The skeleton, plan mode, apply mode, the full-screen view, `doctor` and 55 exercises work, fix mode among them (`tflings tf <exercise> ...` repairs a situation that has gone wrong). Most of the planned ~120 exercises and the releases do not exist yet. See [ROADMAP.md](ROADMAP.md).
 
 ## What you need
 
@@ -16,17 +16,18 @@ You get a folder of Terraform files with a `# I AM NOT DONE` line and a `# TODO:
 
 ## Try it
 
-There are no releases yet, so build it from source:
+There are no release binaries yet. With Go 1.26 or newer:
 
 ```bash
-git clone https://github.com/cleonte/tflings && cd tflings
-make build              # writes bin/tflings; put it on your PATH
-cd ~/somewhere/else
+go install github.com/cleonte/tflings/cmd/tflings@latest   # puts tflings in $(go env GOPATH)/bin
+mkdir ~/tflings-play && cd ~/tflings-play
 tflings init            # creates ./tflings-exercises
 cd tflings-exercises
 tflings doctor          # what works on this machine, and what to fix
 tflings watch           # full-screen view: edit a file, save, see the result
 ```
+
+Make sure `$(go env GOPATH)/bin` is on your `PATH`. To work on tflings itself, clone the repository and run `make build`, which writes `bin/tflings`.
 
 For exercises that use the AWS provider, once:
 

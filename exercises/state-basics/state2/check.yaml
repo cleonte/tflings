@@ -1,0 +1,10 @@
+state:
+  - expr: state.values.root_module.resources.exists(r, r.address == "terraform_data.app")
+    message: "terraform_data.app should be in the state."
+  - expr: state.values.root_module.resources.filter(r, r.address == "terraform_data.app").all(r, r.values.id != seed.values.root_module.resources.filter(s, s.address == "terraform_data.app")[0].values.id)
+    message: "The app server is still the same object. Terraform should build a new one."
+empty_plan_after: true
+explanation: >-
+  `terraform apply -replace=ADDRESS` destroys and builds one resource again
+  although nothing in the configuration changed. It replaced `terraform taint`,
+  which marked the resource in the state and left the decision to the next apply.
