@@ -18,7 +18,7 @@ The syllabus follows the **HashiCorp Terraform Associate (004)** study guide and
   - A web console at `/_floci/ui` (needs Docker).
 - **Spike 01 (2026-11-13, macOS arm64, Floci 2.4.0 in Docker, Terraform 1.12.2 and 1.17.2, `hashicorp/aws` 6.73.0) — PASS** (`spikes/01-env-only/RESULTS.md`):
   - `init`/`plan`/`apply`/`destroy` work with a provider block of only `region`, everything else from env; no `skip_*`, no `endpoints {}`. Second plan empty, no perpetual diffs.
-  - **Endpoint must be `http://localhost:4577`, not `127.0.0.1`**: S3 Control prefixes the account ID to the host (`000000000001.localhost` resolves on macOS; `*.localhost` on Linux/Windows still to verify).
+  - S3 Control prefixes the account ID to the endpoint host, so a bare `127.0.0.1` endpoint breaks bucket tag reads (`000000000001.localhost` resolved on macOS). Superseded by spike 04: split endpoints, IP for the rest and `localhost` for S3 Control.
   - Warm plan ~2.9 s (13 resources), warm init ~1.25 s, cold init ~11 s. AWS provider = **737 MB** per version/platform in the plugin cache.
   - Endpoint removed + fake keys → fails at STS `InvalidClientTokenId`, no state written (one STS call with a fake key reaches real AWS).
   - Secrets Manager soft-deletes: every exercise secret needs `recovery_window_in_days = 0`.
@@ -166,7 +166,7 @@ Easier with Floci than with a custom provider: Floci already tests OpenTofu in i
 - [x] Spike 07: plugin cache alone does NOT give offline `init` (Terraform still asks the registry); `filesystem_mirror`/`-plugin-dir` pointed at the cache does (0.4 s, 28 KB `.terraform`, zh-only lock files are enough). Plan per save: 3.1 s (no resources) to 5.1 s (13 resources) with validate + plan + show; `-refresh=false` saves about 1.3 s on 13 resources.
 - [x] Spike 06: exam is 1 h, multiple choice, online proctored, $70.50, Terraform 1.12, credential valid 2 years; question count and pass mark are not published by HashiCorp. HCP Free: 500 managed resources, unlimited users, 1 concurrent run (IBM support page, 2026-06-23; not shown on HashiCorp's pricing page).
 - [x] LICENSE (Apache-2.0) and NOTICE added to `learn/tf-associate`.
-- [ ] Write the architecture `CLAUDE.md` (replaces the Phase 0 one).
+- [x] Architecture `CLAUDE.md` written (replaces the Phase 0 one).
 
 ### Phase 1 — Skeleton and plan mode
 - [ ] Copy the CLI shell from k8slings (cobra, Bubble Tea v2, workspace, `update`, markers, progress file), rename, strip Kubernetes.
