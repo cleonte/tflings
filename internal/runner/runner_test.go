@@ -45,6 +45,10 @@ func TestEnvIsBuiltFromNothing(t *testing.T) {
 		"AWS_SHARED_CREDENTIALS_FILE", "CHECKPOINT_DISABLE", "HOME", "PATH", "TF_CLI_CONFIG_FILE",
 		"TF_DATA_DIR", "TF_IN_AUTOMATION", "TF_INPUT", "TF_PLUGIN_CACHE_DIR",
 	}
+	if runtime.GOOS == "windows" {
+		// Go and Terraform need these on Windows to find a temp folder and the OS.
+		allowed = append(allowed, "SystemRoot", "TEMP", "TMP")
+	}
 	for _, n := range got {
 		if !slices.Contains(allowed, n) {
 			t.Errorf("unexpected variable %s", n)

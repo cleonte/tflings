@@ -108,7 +108,9 @@ func (s *session) expect(want ...string) {
 	}
 }
 
-var answerLine = regexp.MustCompile(`(?m)^answer = ".*"$`)
+// Not anchored at the end of the line: on Windows git checks files out with
+// CRLF line endings.
+var answerLine = regexp.MustCompile(`(?m)^answer = "[^"]*"`)
 
 func (s *session) quiz(answer string) {
 	s.t.Helper()
