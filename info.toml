@@ -172,3 +172,48 @@ mode      = "apply"
 objective = "4a"
 hint      = "The data source aws_caller_identity has an attribute called account_id. A data block is referred to as data.TYPE.NAME.ATTRIBUTE."
 docs      = "https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/caller_identity"
+
+[[exercises]]
+name      = "dependencies1"
+path      = "exercises/dependencies/dependencies1"
+topic     = "dependencies"
+mode      = "plan"
+objective = "4f"
+hint      = "The meta-argument is called depends_on and takes a list of resource addresses."
+docs      = "https://developer.hashicorp.com/terraform/language/meta-arguments/depends_on"
+
+[[exercises]]
+name      = "lifecycle1"
+path      = "exercises/lifecycle/lifecycle1"
+topic     = "lifecycle"
+mode      = "plan"
+objective = "4a"
+hint      = "The lifecycle block takes create_before_destroy = true."
+docs      = "https://developer.hashicorp.com/terraform/language/meta-arguments/lifecycle"
+
+[[exercises]]
+name      = "lifecycle2"
+path      = "exercises/lifecycle/lifecycle2"
+topic     = "lifecycle"
+mode      = "plan"
+objective = "4a"
+hint      = "The lifecycle block takes prevent_destroy = true."
+docs      = "https://developer.hashicorp.com/terraform/language/meta-arguments/lifecycle"
+
+[[exercises]]
+name      = "lifecycle3"
+path      = "exercises/lifecycle/lifecycle3"
+topic     = "lifecycle"
+mode      = "plan"
+objective = "4a"
+hint      = "ignore_changes takes a list of the attributes to leave alone, written without quotes."
+docs      = "https://developer.hashicorp.com/terraform/language/meta-arguments/lifecycle"
+
+[[exercises]]
+name      = "lifecycle4"
+path      = "exercises/lifecycle/lifecycle4"
+topic     = "lifecycle"
+mode      = "plan"
+objective = "4a"
+hint      = "replace_triggered_by takes a list of references to the resources whose change should cause a replacement."
+docs      = "https://developer.hashicorp.com/terraform/language/meta-arguments/lifecycle"

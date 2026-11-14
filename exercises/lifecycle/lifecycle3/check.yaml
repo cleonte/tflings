@@ -1,0 +1,9 @@
+plan:
+  - expr: plan.resource_changes.exists(r, r.address == "terraform_data.server" && "create" in r.change.actions)
+    message: "terraform_data.server should be created."
+variants:
+  - vars: { size: "large" }
+    apply_first: { size: "small" }
+    plan:
+      - expr: plan.resource_changes.filter(r, r.address == "terraform_data.server").all(r, r.change.actions == ["no-op"])
+        message: "A change of the size should be ignored: the plan should have nothing to do for terraform_data.server."

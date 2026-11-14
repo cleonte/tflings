@@ -129,6 +129,9 @@ func TestExerciseLint(t *testing.T) {
 					t.Error(p)
 				}
 			}
+			if usesAWS && strings.Contains(string(cy), "apply_first") {
+				t.Error("apply_first builds the configuration during a plan exercise: it is for configurations that need no cloud")
+			}
 			if usesAWS {
 				if !ex.NeedsFloci() {
 					t.Error("an exercise that uses the AWS provider must say requires = [\"floci\"]")

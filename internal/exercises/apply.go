@@ -15,12 +15,12 @@ import (
 	"github.com/cleonte/tflings/internal/runner"
 )
 
-// cleanSource empties the scratch folder of an exercise except for the
-// Terraform state, which has to survive between runs: an apply exercise is
+// cleanSource empties the scratch folder of an exercise. With keepState (apply
+// mode) the Terraform state survives, because it has to survive between runs: an apply exercise is
 // worked on in steps, and each save applies on top of what is already there,
 // as real work does. Everything else (the .tf files, a stale lock file) is
 // rewritten by the run.
-func cleanSource(src string) error {
+func cleanSource(src string, keepState bool) error {
 	entries, err := os.ReadDir(src)
 	if os.IsNotExist(err) {
 		return nil
@@ -29,7 +29,7 @@ func cleanSource(src string) error {
 		return err
 	}
 	for _, e := range entries {
-		if n := e.Name(); n == "terraform.tfstate" || n == "terraform.tfstate.backup" {
+		if n := e.Name(); keepState && (n == "terraform.tfstate" || n == "terraform.tfstate.backup") {
 			continue
 		}
 		if err := os.RemoveAll(filepath.Join(src, e.Name())); err != nil {
