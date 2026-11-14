@@ -18,7 +18,7 @@ func TestCleanSourceKeepsTheState(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	if err := cleanSource(src); err != nil {
+	if err := cleanSource(src, true); err != nil {
 		t.Fatal(err)
 	}
 	entries, _ := os.ReadDir(src)
@@ -30,7 +30,13 @@ func TestCleanSourceKeepsTheState(t *testing.T) {
 	if !slices.Equal(left, []string{"terraform.tfstate", "terraform.tfstate.backup"}) {
 		t.Errorf("only the state should survive, got %v", left)
 	}
-	if err := cleanSource(filepath.Join(t.TempDir(), "missing")); err != nil {
+	if err := cleanSource(src, false); err != nil {
+		t.Fatal(err)
+	}
+	if entries, _ := os.ReadDir(src); len(entries) != 0 {
+		t.Errorf("plan mode keeps nothing, got %v", entries)
+	}
+	if err := cleanSource(filepath.Join(t.TempDir(), "missing"), true); err != nil {
 		t.Errorf("a folder that does not exist yet is fine: %v", err)
 	}
 }

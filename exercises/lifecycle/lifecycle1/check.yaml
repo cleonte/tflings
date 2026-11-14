@@ -1,0 +1,12 @@
+plan:
+  - expr: plan.resource_changes.exists(r, r.address == "terraform_data.server" && "create" in r.change.actions)
+    message: "terraform_data.server should be created."
+variants:
+  - vars: { release: "v2" }
+    apply_first: { release: "v1" }
+    plan:
+      - expr: plan.resource_changes.filter(r, r.address == "terraform_data.server")[0].change.actions == ["create", "delete"]
+        message: "When the release changes, the new server should be created before the old one is deleted."
+explanation: >-
+  In a replacement plan the actions read ["delete", "create"] by default and
+  ["create", "delete"] with create_before_destroy.

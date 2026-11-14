@@ -1,0 +1,9 @@
+plan:
+  - expr: plan.resource_changes.filter(r, r.type == "terraform_data").size() == 2
+    message: "Both resources should still be there."
+variants:
+  - vars: { config_version: "2" }
+    apply_first: { config_version: "1" }
+    plan:
+      - expr: plan.resource_changes.filter(r, r.address == "terraform_data.app").all(r, r.action_reason == "replace_by_triggers")
+        message: "terraform_data.app should be replaced when terraform_data.config changes."

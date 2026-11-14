@@ -73,9 +73,19 @@ type File struct {
 type Variant struct {
 	// Vars are passed as -var name=value (strings; Terraform converts them to
 	// the variable's type).
-	Vars   map[string]string `json:"vars"`
-	Plan   []Assertion       `json:"plan,omitempty"`
-	Config []Assertion       `json:"config,omitempty"`
+	Vars map[string]string `json:"vars"`
+	// ApplyFirst applies the configuration with these values before planning
+	// with Vars, so that the plan sees an existing resource: a replacement, a
+	// change that is ignored, a destroy that is forbidden. It is for
+	// configurations that need no cloud (terraform_data); the state is deleted
+	// afterwards.
+	ApplyFirst map[string]string `json:"apply_first,omitempty"`
+	// ExpectError says the plan must fail with a message that contains this
+	// text; Message is what the learner is told when it does not.
+	ExpectError string      `json:"expect_error,omitempty"`
+	Message     string      `json:"message,omitempty"`
+	Plan        []Assertion `json:"plan,omitempty"`
+	Config      []Assertion `json:"config,omitempty"`
 
 	plan, config []cel.Program
 }
@@ -136,7 +146,14 @@ func Load(raw []byte) (*Compiled, error) {
 		if len(v.Vars) == 0 {
 			return nil, fmt.Errorf("check.yaml: variants[%d] needs vars", i)
 		}
-		if len(v.Plan)+len(v.Config) == 0 {
+		if v.ExpectError != "" {
+			if strings.TrimSpace(v.Message) == "" {
+				return nil, fmt.Errorf("check.yaml: variants[%d] with expect_error needs a message", i)
+			}
+			if len(v.Plan)+len(v.Config) > 0 {
+				return nil, fmt.Errorf("check.yaml: variants[%d] with expect_error has no plan to assert on", i)
+			}
+		} else if len(v.Plan)+len(v.Config) == 0 {
 			return nil, fmt.Errorf("check.yaml: variants[%d] has no assertions", i)
 		}
 		if v.plan, err = compile(env, v.Plan, fmt.Sprintf("variants[%d].plan", i)); err != nil {
@@ -179,6 +196,9 @@ func (c *Compiled) Count() int {
 	}
 	for _, v := range c.Variants {
 		n += len(v.plan) + len(v.config)
+		if v.ExpectError != "" {
+			n++
+		}
 	}
 	return n
 }

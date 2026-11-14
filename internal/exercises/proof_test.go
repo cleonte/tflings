@@ -154,3 +154,33 @@ func TestShortcutsAreRefused(t *testing.T) {
 		})
 	}
 }
+
+// A variant that builds the configuration first (apply_first) must leave no
+// state behind: the next run, and the next variant, start from nothing.
+func TestVariantsLeaveNoState(t *testing.T) {
+	eng, err := engine.Find(context.Background(), os.Getenv("TFLINGS_TEST_TERRAFORM"))
+	if err != nil {
+		t.Skip("no Terraform found: set TFLINGS_TEST_TERRAFORM")
+	}
+	home := t.TempDir()
+	env := &exercises.Env{Embedded: tflings.FS, Solutions: tflings.Solutions, Home: home, Workspace: t.TempDir(), Engine: eng}
+	raw, _ := fs.ReadFile(tflings.FS, "info.toml")
+	all, _ := exercises.ParseInfo(raw)
+	for _, ex := range all {
+		if ex.Name != "lifecycle1" {
+			continue
+		}
+		files, err := ex.ProofFiles(env)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if _, err := ex.RunFiles(context.Background(), env, files); err != nil {
+			t.Fatal(err)
+		}
+		for _, n := range []string{"terraform.tfstate", "terraform.tfstate.backup"} {
+			if _, err := os.Stat(home + "/runs/lifecycle1/src/" + n); err == nil {
+				t.Errorf("%s was left behind by a variant", n)
+			}
+		}
+	}
+}

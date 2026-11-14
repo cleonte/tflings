@@ -82,18 +82,88 @@ func (e Exercise) runPlan(ctx context.Context, env *Env, c *check.Compiled, file
 		return Result{}, &FailedError{Lines: failures}
 	}
 	for i, v := range c.Variants {
-		plan, err := run.plan(ctx, v.Vars)
-		if err != nil {
+		if err := run.runVariant(ctx, c, i, v); err != nil {
 			return Result{}, err
-		}
-		if failures := c.RunVariant(i, plan); len(failures) > 0 {
-			return Result{}, &FailedError{
-				Lines:   failures,
-				Details: []string{"(This check plans your configuration again with " + describeVars(v.Vars) + ".)"},
-			}
 		}
 	}
 	return Result{Exercise: e, Checked: c.Count(), Explanation: c.Explanation}, nil
+}
+
+// runVariant plans the configuration again with the values of one variant. A
+// variant that starts with ApplyFirst builds the configuration with other
+// values first, in a state of its own that is deleted afterwards, so that no
+// variant sees what another left behind.
+func (r *run) runVariant(ctx context.Context, c *check.Compiled, i int, v check.Variant) error {
+	if len(v.ApplyFirst) > 0 {
+		r.forgetState()
+		defer r.forgetState()
+		if err := r.applyWith(ctx, v.ApplyFirst); err != nil {
+			return err
+		}
+	}
+	about := []string{"(This check " + describeVariant(v) + ".)"}
+	if v.ExpectError != "" {
+		out, err := r.tf(ctx, "plan", r.varFlags(v.Vars, "-refresh=false"), nil)
+		if err != nil {
+			return err
+		}
+		if out.ExitCode == 0 || !strings.Contains(string(out.Stderr)+string(out.Stdout), v.ExpectError) {
+			return &FailedError{Lines: []string{v.Message}, Details: about}
+		}
+		return nil
+	}
+	plan, _, err := r.planFor(ctx, v.Vars, false, false)
+	if err != nil {
+		return err
+	}
+	if failures := c.RunVariant(i, plan); len(failures) > 0 {
+		return &FailedError{Lines: failures, Details: about}
+	}
+	return nil
+}
+
+// applyWith builds the configuration with the given values and nothing else:
+// the first half of a variant that needs something to exist before it plans.
+func (r *run) applyWith(ctx context.Context, vars map[string]string) error {
+	if _, _, err := r.planFor(ctx, vars, false, false); err != nil {
+		return err
+	}
+	out, err := r.tf(ctx, "apply", nil, []string{filepath.Join(r.dir, "tflings.plan")})
+	if err != nil {
+		return err
+	}
+	if out.ExitCode != 0 {
+		return terraformFailed("Terraform could not build your configuration for this check:", out)
+	}
+	return nil
+}
+
+// forgetState deletes the Terraform state of the scratch folder.
+func (r *run) forgetState() {
+	for _, n := range []string{"terraform.tfstate", "terraform.tfstate.backup"} {
+		_ = os.Remove(filepath.Join(r.src, n))
+	}
+}
+
+// varFlags are -var flags for the values, after the given flags.
+func (r *run) varFlags(vars map[string]string, first ...string) []string {
+	flags := append([]string{}, first...)
+	names := make([]string, 0, len(vars))
+	for n := range vars {
+		names = append(names, n)
+	}
+	sort.Strings(names)
+	for _, n := range names {
+		flags = append(flags, "-var", n+"="+vars[n])
+	}
+	return flags
+}
+
+func describeVariant(v check.Variant) string {
+	if len(v.ApplyFirst) > 0 {
+		return "builds your configuration with " + describeVars(v.ApplyFirst) + ", then plans it with " + describeVars(v.Vars)
+	}
+	return "plans your configuration again with " + describeVars(v.Vars)
 }
 
 func describeVars(vars map[string]string) string {
@@ -129,14 +199,7 @@ func (r *run) planFor(ctx context.Context, vars map[string]string, refresh, deta
 	if detailed {
 		flags = append(flags, "-detailed-exitcode")
 	}
-	names := make([]string, 0, len(vars))
-	for n := range vars {
-		names = append(names, n)
-	}
-	sort.Strings(names)
-	for _, n := range names {
-		flags = append(flags, "-var", n+"="+vars[n])
-	}
+	flags = append(flags, r.varFlags(vars)...)
 	out, err := r.tf(ctx, "plan", flags, nil)
 	if err != nil {
 		return nil, false, err
@@ -212,7 +275,7 @@ func (e *Env) newRun(ex Exercise, files map[string][]byte) (*run, error) {
 	home := e.home()
 	dir := filepath.Join(home, "runs", ex.Name)
 	src := filepath.Join(dir, "src")
-	if err := cleanSource(src); err != nil {
+	if err := cleanSource(src, ex.Mode == ModeApply); err != nil {
 		return nil, err
 	}
 	names := make([]string, 0, len(files))

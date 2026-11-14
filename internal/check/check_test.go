@@ -173,3 +173,35 @@ func TestLoadRejectsBadAWSChecks(t *testing.T) {
 		}
 	}
 }
+
+func TestVariantFeatures(t *testing.T) {
+	c, err := Load([]byte(`
+variants:
+  - vars: { v: "2" }
+    apply_first: { v: "1" }
+    plan:
+      - expr: plan.resource_changes.size() == 1
+        message: "m"
+  - vars: { v: "3" }
+    apply_first: { v: "1" }
+    expect_error: "prevent_destroy"
+    message: "refused"
+`))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if c.Variants[0].ApplyFirst["v"] != "1" || c.Variants[1].ExpectError != "prevent_destroy" {
+		t.Errorf("unexpected variants %+v", c.Variants)
+	}
+	if c.Count() != 2 {
+		t.Errorf("Count = %d, want 2 (one assertion, one expected error)", c.Count())
+	}
+	for name, doc := range map[string]string{
+		"expect_error without message": "variants:\n  - vars: {v: \"1\"}\n    expect_error: x\n",
+		"expect_error with assertions": "variants:\n  - vars: {v: \"1\"}\n    expect_error: x\n    message: m\n    plan:\n      - expr: \"true\"\n        message: m\n",
+	} {
+		if _, err := Load([]byte(doc)); err == nil {
+			t.Errorf("%s: expected an error", name)
+		}
+	}
+}

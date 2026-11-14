@@ -1,0 +1,8 @@
+plan:
+  - expr: plan.resource_changes.exists(r, r.address == "terraform_data.database" && "create" in r.change.actions)
+    message: "terraform_data.database should be created."
+variants:
+  - vars: { name: "payments" }
+    apply_first: { name: "orders" }
+    expect_error: "lifecycle.prevent_destroy"
+    message: "A plan that would destroy terraform_data.database should be refused by Terraform."

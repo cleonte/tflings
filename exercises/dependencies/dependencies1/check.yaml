@@ -1,0 +1,10 @@
+plan:
+  - expr: plan.resource_changes.filter(r, r.type == "terraform_data").size() == 2
+    message: "Both resources should still be there."
+config:
+  - expr: config.root_module.resources.filter(r, r.address == "terraform_data.app").all(r, "terraform_data.database" in r.depends_on)
+    message: "terraform_data.app should wait for terraform_data.database."
+explanation: >-
+  depends_on is for dependencies Terraform cannot see. When an attribute is
+  used, as in aws_s3_bucket.a.id, the dependency is implicit and depends_on is
+  not needed.
