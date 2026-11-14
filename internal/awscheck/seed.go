@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/aws/aws-sdk-go-v2/service/ssm"
 	ssmtypes "github.com/aws/aws-sdk-go-v2/service/ssm/types"
 )
@@ -23,7 +24,10 @@ type mutation struct {
 }
 
 var mutations = map[string]mutation{
-	"ssm.put_parameter": {required: []string{"name", "value"}, run: (*Client).putParameter},
+	"ssm.put_parameter":    {required: []string{"name", "value"}, run: (*Client).putParameter},
+	"ssm.delete_parameter": {required: []string{"name"}, run: (*Client).deleteParameter},
+	"s3.create_bucket":     {required: []string{"bucket"}, run: (*Client).createBucket},
+	"s3.put_object":        {required: []string{"bucket", "key", "body"}, run: (*Client).putObject},
 }
 
 // MutationNames lists the calls a seed can use.
@@ -81,3 +85,25 @@ func (c *Client) putParameter(ctx context.Context, a Args) error {
 }
 
 func ssmType(s string) ssmtypes.ParameterType { return ssmtypes.ParameterType(s) }
+
+// deleteParameter removes a parameter, as someone with console access would.
+func (c *Client) deleteParameter(ctx context.Context, a Args) error {
+	_, err := c.ssm.DeleteParameter(ctx, &ssm.DeleteParameterInput{Name: aws.String(a.str("name"))})
+	return err
+}
+
+// createBucket makes a bucket the way someone with console access would, so that
+// Terraform knows nothing about it.
+func (c *Client) createBucket(ctx context.Context, a Args) error {
+	_, err := c.s3.CreateBucket(ctx, &s3.CreateBucketInput{Bucket: aws.String(a.str("bucket"))})
+	return err
+}
+
+// putObject writes a text object, for example a file somebody left in a bucket,
+// or the lock file of a run that was killed.
+func (c *Client) putObject(ctx context.Context, a Args) error {
+	_, err := c.s3.PutObject(ctx, &s3.PutObjectInput{
+		Bucket: aws.String(a.str("bucket")), Key: aws.String(a.str("key")), Body: strings.NewReader(a.str("body")),
+	})
+	return err
+}

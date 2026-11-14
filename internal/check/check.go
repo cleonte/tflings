@@ -47,6 +47,11 @@ type File struct {
 	// Config assertions see `config`, the "configuration" part of that JSON
 	// (root_module.variables, root_module.resources, root_module.outputs, ...).
 	Config []Assertion `json:"config,omitempty"`
+	// Files assertions see `files`, a map from the name of each of the learner's
+	// files (relative to the exercise folder) to its text. They are for what a
+	// plan cannot show: that a moved block is used, or which operator a version
+	// constraint has. Use them sparingly; a plan check is better when one exists.
+	Files []Assertion `json:"files,omitempty"`
 	// Variants plan the configuration again with other variable values and
 	// check that plan too. They catch an answer that hard-codes the value the
 	// first plan happens to use.
@@ -94,7 +99,7 @@ type Variant struct {
 type Compiled struct {
 	File
 	plan, config, state []cel.Program
-	aws                 []cel.Program
+	aws, files          []cel.Program
 }
 
 // Load parses a check.yaml, compiles every expression and rejects anything
@@ -120,6 +125,7 @@ func Load(raw []byte) (*Compiled, error) {
 		// an assertion can tell "this resource was kept" from "this one was
 		// destroyed and built again". Empty in the other modes.
 		cel.Variable("seed", cel.DynType),
+		cel.Variable("files", cel.DynType),
 		cel.Variable("result", cel.DynType),
 	)
 	if err != nil {
@@ -133,6 +139,9 @@ func Load(raw []byte) (*Compiled, error) {
 		return nil, err
 	}
 	if c.state, err = compile(env, f.State, "state"); err != nil {
+		return nil, err
+	}
+	if c.files, err = compile(env, f.Files, "files"); err != nil {
 		return nil, err
 	}
 	for i, a := range f.AWS {
@@ -194,7 +203,7 @@ func compile(env *cel.Env, as []Assertion, section string) ([]cel.Program, error
 
 // Count is how many assertions the check has, variants included.
 func (c *Compiled) Count() int {
-	n := len(c.plan) + len(c.config) + len(c.state) + len(c.aws)
+	n := len(c.plan) + len(c.config) + len(c.state) + len(c.aws) + len(c.files)
 	if c.EmptyPlanAfter {
 		n++
 	}
@@ -245,6 +254,24 @@ func (c *Compiled) RunAWS(ctx context.Context, caller AWSCaller, state map[strin
 		}
 	}
 	return failures, nil
+}
+
+// RunFiles evaluates the files assertions against the text of the learner's
+// files, and returns the messages of those that failed.
+func (c *Compiled) RunFiles(files map[string][]byte) []string {
+	text := make(map[string]any, len(files))
+	for n, data := range files {
+		text[n] = string(data)
+	}
+	vars := map[string]any{"files": text, "plan": map[string]any{}, "config": map[string]any{}, "state": map[string]any{}, "seed": map[string]any{}}
+	var failures []string
+	for i, a := range c.Files {
+		out, _, err := c.files[i].Eval(vars)
+		if err != nil || out.Value() != true {
+			failures = append(failures, a.Message)
+		}
+	}
+	return failures
 }
 
 // RunPlanOnly is RunPlan without the config assertions: apply mode checks the

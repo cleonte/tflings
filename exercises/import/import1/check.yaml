@@ -1,0 +1,14 @@
+state:
+  - expr: state.values.root_module.resources.exists(r, r.address == "aws_s3_bucket.legacy")
+    message: "aws_s3_bucket.legacy should be in the state."
+aws:
+  - call: s3.object
+    args: { bucket: tflings-legacy, key: keep.txt }
+    expr: result.exists && result.body == "Do not lose this file."
+    message: "The file keep.txt must still be in the bucket: the bucket must be brought under Terraform, not rebuilt."
+empty_plan_after: true
+explanation: >-
+  `terraform import` (or an `import` block) attaches an existing object to a
+  resource in the configuration. It writes the state only, and never creates or
+  changes the real thing. What the provider cannot read back, such as
+  force_destroy, shows up in the next plan, and an apply settles it.

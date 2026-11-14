@@ -5,6 +5,7 @@ import (
 	"errors"
 	"io/fs"
 	"os"
+	"runtime"
 	"strconv"
 	"testing"
 	"time"
@@ -43,8 +44,23 @@ func TestEveryExerciseIsProven(t *testing.T) {
 	if flociReady {
 		env.Home = flociHome
 	}
+	// Every exercise has its own scratch folder and fake account, so the proofs
+	// can run side by side. Most of the time goes into starting Terraform and the
+	// AWS provider, which wants a core each: TFLINGS_TEST_PARALLEL sets how many
+	// run at once (default: half the cores, at least 2).
+	par := runtime.NumCPU() / 2
+	if par < 2 {
+		par = 2
+	}
+	if v, err := strconv.Atoi(os.Getenv("TFLINGS_TEST_PARALLEL")); err == nil && v > 0 {
+		par = v
+	}
+	sem := make(chan struct{}, par)
 	for _, ex := range all {
 		t.Run(ex.Name, func(t *testing.T) {
+			t.Parallel()
+			sem <- struct{}{}
+			defer func() { <-sem }()
 			if ex.NeedsFloci() && !flociReady {
 				t.Skip("needs Floci running and TFLINGS_TEST_HOME (a home with the AWS provider prefetched)")
 			}

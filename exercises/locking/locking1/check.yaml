@@ -1,0 +1,19 @@
+state:
+  - expr: state.values.root_module.resources.exists(r, r.address == "terraform_data.app")
+    message: "The state should still have terraform_data.app: do not throw the state away."
+aws:
+  - call: s3.object
+    args: { bucket: tflings-state, key: app/terraform.tfstate.tflock }
+    expr: "!result.exists"
+    message: "The lock file is still there. Release the lock; do not work around it."
+  - call: s3.object
+    args: { bucket: tflings-state, key: app/terraform.tfstate }
+    expr: result.exists && result.size > 0
+    message: "The state file in the bucket should still exist."
+empty_plan_after: true
+explanation: >-
+  A lock left behind by a run that died stays until somebody removes it.
+  `terraform force-unlock <ID>` releases it, and the ID is in the error message.
+  Only do that when you are sure that nobody is really running: `-lock=false`
+  skips the lock without removing it, and removing the lock of a live run risks
+  a corrupted state.

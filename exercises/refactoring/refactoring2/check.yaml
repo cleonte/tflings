@@ -1,0 +1,16 @@
+files:
+  - expr: files["main.tf"].matches("(?m)^\\s*moved\\s*\\{")
+    message: "Use a moved block in main.tf, so that everyone who shares this configuration gets the rename, not only your state."
+state:
+  - expr: state.values.root_module.resources.exists(r, r.address == "terraform_data.server")
+    message: "terraform_data.server should be in the state."
+  - expr: "!state.values.root_module.resources.exists(r, r.address == \"terraform_data.web\")"
+    message: "terraform_data.web should no longer be in the state."
+  - expr: state.values.root_module.resources.filter(r, r.address == "terraform_data.server").all(r, r.values.id == seed.values.root_module.resources.filter(s, s.address == "terraform_data.web")[0].values.id)
+    message: "The server was destroyed and built again. It should be the same object, only with a new name."
+empty_plan_after: true
+explanation: >-
+  A moved block records the rename in the configuration. Terraform applies it
+  during the next plan and apply, in every state that still has the old address,
+  so teammates and pipelines need no manual command. `terraform state mv` only
+  changes the one state you run it against.

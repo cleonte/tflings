@@ -117,3 +117,32 @@ func TestPlanNeedsApply(t *testing.T) {
 		t.Error("an empty plan has nothing to apply")
 	}
 }
+
+func TestHasSavedStateCountsSeededFixExercises(t *testing.T) {
+	home := t.TempDir()
+	env := &Env{Home: home}
+	dir := filepath.Join(home, "runs", "locking1")
+	if err := os.MkdirAll(dir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	// A fix exercise built without Floci holds nothing in it.
+	if err := os.WriteFile(filepath.Join(dir, seededMarker), []byte("ok\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if env.HasSavedState() {
+		t.Error("a situation built without Floci has nothing in Floci")
+	}
+	// One built in Floci (a bucket, a lock file) would be lost if Floci were emptied.
+	if err := os.WriteFile(filepath.Join(dir, seededMarker), []byte(seededInFloci+"\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if !env.HasSavedState() {
+		t.Error("a situation built in Floci is work in progress")
+	}
+	if err := env.ForgetRun("locking1"); err != nil {
+		t.Fatal(err)
+	}
+	if env.HasSavedState() {
+		t.Error("reset forgets it")
+	}
+}

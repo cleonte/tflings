@@ -236,9 +236,16 @@ func (e *Env) ForgetRun(name string) error {
 
 // HasSavedState reports whether any exercise has something built that tflings
 // remembers: a Terraform state with at least one resource in its scratch
-// folder. While that is so, emptying Floci would pull the rug from under work
-// in progress.
+// folder, or a fix exercise whose situation was built in Floci (its state may
+// be in Floci too). While that is so, emptying Floci would pull the rug from
+// under work in progress.
 func (e *Env) HasSavedState() bool {
+	seeded, _ := filepath.Glob(filepath.Join(e.home(), "runs", "*", seededMarker))
+	for _, m := range seeded {
+		if data, err := os.ReadFile(m); err == nil && strings.TrimSpace(string(data)) == seededInFloci {
+			return true
+		}
+	}
 	matches, _ := filepath.Glob(filepath.Join(e.home(), "runs", "*", "src", "terraform.tfstate"))
 	for _, m := range matches {
 		data, err := os.ReadFile(m)
