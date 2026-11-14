@@ -1,0 +1,5 @@
+config:
+  - expr: config.root_module.outputs.connection_string.sensitive == true
+    message: "The output connection_string should be marked sensitive."
+  - expr: config.root_module.variables.db_password.sensitive == true
+    message: "Keep the variable db_password sensitive; do not remove it to make the error go away."

@@ -89,6 +89,11 @@ func proveWithFiles(t *testing.T, env *exercises.Env, ex exercises.Exercise) {
 	if env.Engine == nil {
 		t.Skip("no Terraform found: set TFLINGS_TEST_TERRAFORM")
 	}
+	// The account salt is new on every test run, so a state kept in a shared home
+	// by an earlier run belongs to an account that is gone (and Floci finds a
+	// secret by its ARN in any account, so that stale state would not refresh away).
+	_ = env.ForgetRun(ex.Name)
+	t.Cleanup(func() { _ = env.ForgetRun(ex.Name) })
 	for _, p := range []string{ex.CheckPath(), ex.Source(), ex.SolutionPath()} {
 		var fsys fs.FS = tflings.FS
 		if p == ex.SolutionPath() {

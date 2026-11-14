@@ -1,0 +1,8 @@
+plan:
+  - expr: plan.resource_changes.exists(r, r.address == "terraform_data.client" && "create" in r.change.actions)
+    message: "terraform_data.client should be created."
+  - expr: plan.resource_changes.filter(r, r.address == "terraform_data.client").all(r, r.change.after_sensitive.input == true)
+    message: "The value of the API key is still shown in the plan: mark the variable as sensitive."
+explanation: >-
+  sensitive = true hides a value in plan and apply output and in logs. It does
+  not encrypt it: the value is still written in clear text to the state.
