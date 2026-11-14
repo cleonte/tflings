@@ -1,0 +1,3 @@
+plan:
+  - expr: plan.planned_values.outputs.greeting.value == "Hello, tflings"
+    message: "The output greeting should be \"Hello, tflings\"."

@@ -1,0 +1,6 @@
+plan:
+  - expr: plan.planned_values.outputs.port_count.value == 2
+    message: "port_count should be 2."
+config:
+  - expr: config.root_module.variables.allowed_ports.default == [80, 443]
+    message: "The default should be the ports 80 and 443."

@@ -1,0 +1,4 @@
+fmt: true
+plan:
+  - expr: plan.planned_values.outputs.name.value == "tflings"
+    message: "The output name should still be \"tflings\"."

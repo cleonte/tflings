@@ -1,0 +1,11 @@
+plan:
+  - expr: plan.planned_values.outputs.name.value == "app-dev"
+    message: "The output name should be \"app-dev\"."
+config:
+  - expr: config.root_module.variables.environment.description == "Which environment this is."
+    message: "Keep the variable's description."
+variants:
+  - vars: { environment: "stage" }
+    plan:
+      - expr: plan.planned_values.outputs.name.value == "app-stage"
+        message: "The output name should follow the variable: it must not be written out by hand."

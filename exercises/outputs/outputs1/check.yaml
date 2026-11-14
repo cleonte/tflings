@@ -1,0 +1,6 @@
+plan:
+  - expr: plan.planned_values.outputs.server_count.value == 3
+    message: "There should be an output called server_count with the value 3."
+config:
+  - expr: config.root_module.outputs.server_count.expression.references.size() > 0
+    message: "server_count should be computed from the servers, not written out by hand."

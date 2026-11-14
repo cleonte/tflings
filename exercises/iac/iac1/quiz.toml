@@ -1,0 +1,12 @@
+# I AM NOT DONE
+
+question = "Which statement best describes Infrastructure as Code?"
+options = [
+  "a) Writing scripts that open a cloud console and click the buttons for you.",
+  "b) Describing the infrastructure you want in files that can be reviewed and kept in version control.",
+  "c) Running a database server on the same machine as the application code.",
+  "d) Documenting existing servers in a spreadsheet.",
+]
+
+# TODO: set your answer, for example answer = "a"
+answer = ""

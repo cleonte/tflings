@@ -1,0 +1,143 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # Terraform is installed bare: the setup action's default wrapper script
+  # would capture stdout and break every run tflings makes.
+  TF_IN_AUTOMATION: "1"
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+      - uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6
+        with:
+          go-version-file: go.mod
+      - name: gofmt
+        run: |
+          unformatted=$(gofmt -l .)
+          if [ -n "$unformatted" ]; then
+            echo "These files need gofmt:"; echo "$unformatted"; exit 1
+          fi
+      - run: go vet ./...
+      - run: go build ./...
+
+  # Everything that needs no Floci: unit tests, the exercise lint, and the proof
+  # that every provider-free exercise fails as shipped and passes with its
+  # solution, on the exam's Terraform (1.12) and the latest.
+  test:
+    needs: lint
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        terraform: ["~1.12.0", "latest"]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+      - uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6
+        with:
+          go-version-file: go.mod
+      - uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3
+        with:
+          terraform_version: ${{ matrix.terraform }}
+          terraform_wrapper: false
+      - run: terraform version
+      - name: Tests
+        env:
+          # The tests that need Docker run in the aws job (macOS runners have none).
+          TFLINGS_SKIP_DOCKER: "1"
+        run: go test ./...
+
+  # The exercises that use the AWS provider, against a real Floci, from the
+  # prefetched plugin cache.
+  aws:
+    needs: lint
+    strategy:
+      fail-fast: false
+      matrix:
+        terraform: ["~1.12.0", "latest"]
+    runs-on: ubuntu-latest
+    env:
+      TFLINGS_HOME: ${{ github.workspace }}/.tflings-home
+      TFLINGS_TEST_HOME: ${{ github.workspace }}/.tflings-home
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+      - uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6
+        with:
+          go-version-file: go.mod
+      - uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3
+        with:
+          terraform_version: ${{ matrix.terraform }}
+          terraform_wrapper: false
+      - run: go build -o tflings ./cmd/tflings
+      - name: AWS provider cache
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: ${{ env.TFLINGS_HOME }}/plugins
+          # The provider version is a constant in internal/doctor/doctor.go.
+          key: aws-provider-${{ runner.os }}-${{ hashFiles('internal/doctor/doctor.go') }}
+      - name: Start Floci
+        run: ./tflings aws up
+      - name: Prefetch the AWS provider
+        run: ./tflings doctor --prefetch
+      - name: doctor
+        run: ./tflings doctor
+      - name: Tests (exercises that use the AWS provider included)
+        run: go test ./...
+      - if: failure()
+        run: docker logs tflings-floci | tail -50
+
+  # Provider-free exercises with the network switched off: init and plan must
+  # need nothing from the outside (spike 07, decision 10).
+  offline:
+    needs: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+      - uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6
+        with:
+          go-version-file: go.mod
+      - uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3
+        with:
+          terraform_version: "~1.12.0"
+          terraform_wrapper: false
+      - name: Build the test binary
+        run: go test -c -o exercises.test ./internal/exercises
+      - name: Prove the provider-free exercises with no network
+        run: |
+          sudo unshare --net -- env "PATH=$PATH" "HOME=$HOME" \
+            ./exercises.test -test.run 'TestEveryExerciseIsProven|TestShortcutsAreRefused' -test.v 2>&1 | tee offline.log
+          grep -q -- '--- PASS: TestEveryExerciseIsProven/hcl1' offline.log
+          ! grep -q -- '--- FAIL' offline.log
+
+  # Windows is not supported yet (the runner kills only the child process there).
+  # This job reports what breaks, and does not block.
+  windows:
+    needs: lint
+    runs-on: windows-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+      - uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6
+        with:
+          go-version-file: go.mod
+      - uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3
+        with:
+          terraform_version: "~1.12.0"
+          terraform_wrapper: false
+      - run: go test ./...
+        env:
+          TFLINGS_SKIP_DOCKER: "1"

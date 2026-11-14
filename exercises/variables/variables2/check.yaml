@@ -1,0 +1,11 @@
+plan:
+  - expr: plan.planned_values.outputs.total_cost.value == 30
+    message: "total_cost should be 30 when there are three instances."
+config:
+  - expr: config.root_module.variables.instance_count.default == 3
+    message: "The default number of instances should be three."
+variants:
+  - vars: { instance_count: "5" }
+    plan:
+      - expr: plan.planned_values.outputs.total_cost.value == 50
+        message: "total_cost should follow the variable (10 per instance)."

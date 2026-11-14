@@ -2,7 +2,7 @@
 
 tflings is "rustlings for Terraform": a Go CLI that teaches Terraform (aimed at the Terraform Associate 004 exam) through small broken exercises. Exercises run the real `hashicorp/aws` provider against **Floci**, a local AWS emulator in Docker, so nothing touches a real cloud. It is the sibling of k8slings and golings and copies their shape.
 
-**Status (2026-11-14):** Phase 0 (spikes) is finished. No Go code yet; Phase 1 starts with the skeleton. `ROADMAP.md` is the plan, the decisions and the phases. `spikes/RESULTS.md` is the one-page summary of the spikes; each spike's evidence is in `spikes/<nn>-<name>/RESULTS.md`. Facts below say which spike established them. Untested things are marked **untested**.
+**Status (2026-11-14):** Phase 0 (spikes) is finished. Phase 1 is under way on branch `phase1-skeleton`: the CLI skeleton builds (`init`, `list`, `run`, `hint`, `reset`, `solution`, `update`, `verify`, plain `watch`) and quiz exercises run end to end; plan mode works end to end for exercises that need no Floci: the runner (`internal/engine`, `internal/runner`) and CEL checks (`internal/check`, with `plan`, `config`, `fmt` and `variants` that re-plan with other input to refuse hard-coded answers) run 8 provider-free exercises, proven on Terraform 1.12.2 and 1.17.2. The Floci manager (`tflings aws up|down|status|reset`, `internal/floci`) and `doctor` (`--prefetch` downloads the AWS provider) are built; `resources1` proves the AWS provider path end to end (offline `init` from the cache, plan against Floci, 2.9 s per run). CI workflows are written (`.github/workflows/ci.yml`: lint, test on Linux and macOS, aws with Floci, offline with the network off, windows informational) and the exercise lint test enforces the exercise rules, but all jobs passed on GitHub on 2026-11-14 (Linux, macOS, Windows for the provider-free proofs; Linux with Docker for the AWS-provider proofs). The full-screen `watch` (Bubble Tea v2, adapted from k8slings: hint, solution, reset, edit, next, list, check all; runs report "terraform plan…" while they work) is built and was tried in a real terminal (pty); model tests cover the keys. Not built: `hc-install`, apply/fix/cli modes, the automatic global Floci reset of decision 5 (only the explicit `aws reset` exists). `ROADMAP.md` is the plan, the decisions and the phases. `spikes/RESULTS.md` is the one-page summary of the spikes; each spike's evidence is in `spikes/<nn>-<name>/RESULTS.md`. Facts below say which spike established them. Untested things are marked **untested**.
 
 ## Where things are
 
@@ -14,13 +14,14 @@ tflings is "rustlings for Terraform": a Go CLI that teaches Terraform (aimed at 
 ## Architecture (planned; copy k8slings, replace Kubernetes with Terraform + Floci)
 
 ```
-cmd/tflings/            cobra entry point
+cmd/tflings/            entry point (main)
+internal/cmd/           cobra commands
 internal/engine/        Engine interface (Terraform now, OpenTofu in Phase 8); the only place that execs a terraform binary
 internal/runner/        builds the isolated environment, runs init/validate/plan/apply/show with timeouts and output caps
 internal/floci/         container lifecycle (docker CLI), health wait, account allocation, reset
 internal/check/         check.yaml loader, CEL evaluation over plan/config/state JSON, `aws` SDK read-only calls, lints
 internal/exercise/      info.toml manifest, modes, workspace, markers, progress file
-internal/tui/           Bubble Tea watch
+internal/tui/           Bubble Tea full-screen watch (built)
 exercises/<topic>/<name>/   broken config, README.md, .terraform.lock.hcl; check.yaml, setup/ embedded
 solutions/<topic>/<name>/   fixed files or solution.sh, plus shortcut-*.sh the check must refuse
 ```
@@ -72,8 +73,8 @@ AWS_ENDPOINT_URL_S3_CONTROL=http://localhost:4577
 ## Terraform, providers, cache
 
 - Versions: floor Terraform 1.12 (the exam version), CI on 1.12 and latest; AWS provider `~> 6.0` (6.73.0 in the spikes). Pin Terraform and provider versions in writing; CI proves every exercise ("broken fails, solution passes").
-- The AWS provider is 729 MB. `doctor --prefetch` fills a shared cache by running `init` once online. **The plugin cache alone does not make `init` work offline** (Terraform still asks the registry). The runner writes a CLI config (`TF_CLI_CONFIG_FILE`) with `filesystem_mirror { path = "<cache>" include = ["hashicorp/aws"] }` plus `direct { exclude = ["hashicorp/aws"] }`; then `init` is offline and 0.4 s, and each exercise's `.terraform` is about 30 KB (symlink). Ship exercise lock files with `zh:` hashes only (spike 07; verified on Linux, macOS and Windows **untested**).
-- Plan-per-save budget (spike 07, macOS): `validate` + `plan -out` + `show -json` takes 3.1 s (no resources), 3.8 s (1), 5.1 s (13); each command costs about 1 s for the provider start. Plan-mode checks should use `-refresh=false` (about 1.3 s saved at 13 resources). Whether `plan` alone can replace `validate` and whether `show -json` has enough configuration for the `config` CEL checks is **untested**.
+- The AWS provider is 729 MB. `doctor --prefetch` fills a shared cache by running `init` once online. **The plugin cache alone does not make `init` work offline** (Terraform still asks the registry). The runner writes a CLI config (`TF_CLI_CONFIG_FILE`) with `filesystem_mirror { path = "<cache>" include = ["hashicorp/aws"] }` plus `direct { exclude = ["hashicorp/aws"] }`; **the mirror folder must not also be `TF_PLUGIN_CACHE_DIR`** (Terraform fails with "cannot install existing provider directory ... to itself"), so runs use `<home>/plugins` as the mirror and `<home>/plugins-extra` as the cache for other providers. Then `init` is offline and 0.4 s, and each exercise's `.terraform` is about 30 KB (symlink). Ship exercise lock files with `zh:` hashes only (`resources1` does; embed uses `all:` so dotfiles like `.terraform.lock.hcl` are included). Spike 07 verified the mirror on Linux; `resources1` verified it on macOS; Windows is **untested**.
+- Plan-per-save budget (spike 07, macOS): `validate` + `plan -out` + `show -json` takes 3.1 s (no resources), 3.8 s (1), 5.1 s (13); each command costs about 1 s for the provider start. Plan-mode checks should use `-refresh=false` (about 1.3 s saved at 13 resources). Plan mode runs `init` then `plan -out` then `show -json` and no separate `validate`: init and plan report every syntax and type error the broken exercises have, and the `configuration` part of the plan JSON carries variables, outputs and resources for the `config` checks (verified by the 8 plan exercises on Terraform 1.12.2 and 1.17.2).
 - Remote state (spike 03): `backend "s3" {}` plus a generated `-backend-config` file with only `bucket`, `key`, `region` and `use_lockfile = true` or `dynamodb_table`. Stuck lock, `force-unlock` and `init -migrate-state` all work on 1.12.2 and 1.17.2. `dynamodb_table` warns as deprecated on 1.17.2 but not on 1.12.2 (the exam version), so both lock modes are taught.
 
 ## Exercise rules (checked by a lint in the exercise checker where noted)
@@ -91,7 +92,7 @@ Terraform Associate 004 tests Terraform 1.12; 1 hour, multiple choice, online pr
 
 ## Not yet tested
 
-Windows, macOS with the network off, Linux amd64, systemd-resolved, Docker Desktop/Colima/OrbStack/native Linux Docker for the Floci container, the mirror recipe on macOS and Windows. CI must cover these before release.
+Windows with Docker and the AWS-provider exercises, macOS with the network off, systemd-resolved, Docker Desktop/Colima/OrbStack for the Floci container, the offline mirror recipe on Windows. (Linux amd64 and native Linux Docker are covered by `ubuntu-latest` in CI.) CI must cover these before release.
 
 ## Conventions
 
