@@ -1,0 +1,11 @@
+plan:
+  - expr: plan.resource_changes.exists(r, r.address == "terraform_data.app" && "create" in r.change.actions)
+    message: "terraform_data.app should be created."
+variants:
+  - vars: { environment: "test" }
+    expect_error: "Resource precondition failed"
+    message: "The environment test should be refused by a precondition."
+  - vars: { environment: "staging" }
+    plan:
+      - expr: plan.resource_changes.exists(r, r.address == "terraform_data.app" && "create" in r.change.actions)
+        message: "The environment staging is allowed and should plan."

@@ -217,3 +217,39 @@ mode      = "plan"
 objective = "4a"
 hint      = "replace_triggered_by takes a list of references to the resources whose change should cause a replacement."
 docs      = "https://developer.hashicorp.com/terraform/language/meta-arguments/lifecycle"
+
+[[exercises]]
+name      = "conditions1"
+path      = "exercises/conditions/conditions1"
+topic     = "conditions"
+mode      = "plan"
+objective = "4c"
+hint      = "Put a validation block inside the variable, with a condition and an error_message."
+docs      = "https://developer.hashicorp.com/terraform/language/expressions/custom-conditions#input-variable-validation"
+
+[[exercises]]
+name      = "conditions2"
+path      = "exercises/conditions/conditions2"
+topic     = "conditions"
+mode      = "plan"
+objective = "4e"
+hint      = "A precondition goes inside the resource's lifecycle block; contains() tests list membership."
+docs      = "https://developer.hashicorp.com/terraform/language/expressions/custom-conditions#preconditions-and-postconditions"
+
+[[exercises]]
+name      = "conditions3"
+path      = "exercises/conditions/conditions3"
+topic     = "conditions"
+mode      = "plan"
+objective = "4e"
+hint      = "The precondition block goes inside the output block; % is the remainder operator."
+docs      = "https://developer.hashicorp.com/terraform/language/expressions/custom-conditions#preconditions-and-postconditions"
+
+[[exercises]]
+name      = "conditions4"
+path      = "exercises/conditions/conditions4"
+topic     = "conditions"
+mode      = "plan"
+objective = "4e"
+hint      = "check \"name\" { assert { condition = ... error_message = ... } }"
+docs      = "https://developer.hashicorp.com/terraform/language/block/check"

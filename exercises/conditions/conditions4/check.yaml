@@ -1,0 +1,5 @@
+plan:
+  - expr: plan.resource_changes.exists(r, r.address == "terraform_data.logs" && "create" in r.change.actions)
+    message: "terraform_data.logs should be created, even if the check warns."
+  - expr: has(plan.checks) && plan.checks.exists(c, c.address.name == "retention")
+    message: "There should be a check block named retention."
