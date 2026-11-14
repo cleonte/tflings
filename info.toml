@@ -55,6 +55,15 @@ hint      = "length() works on a map, and on a resource that has for_each."
 docs      = "https://developer.hashicorp.com/terraform/language/values/outputs"
 
 [[exercises]]
+name      = "outputs2"
+path      = "exercises/outputs/outputs2"
+topic     = "outputs"
+mode      = "plan"
+objective = "4d"
+hint      = "A resource with count is a list of instances: use the splat expression resource.name[*].attribute."
+docs      = "https://developer.hashicorp.com/terraform/language/expressions/splat"
+
+[[exercises]]
 name      = "types1"
 path      = "exercises/types/types1"
 topic     = "types"
@@ -73,6 +82,15 @@ hint      = "condition ? value_if_true : value_if_false, with a comparison using
 docs      = "https://developer.hashicorp.com/terraform/language/expressions/conditionals"
 
 [[exercises]]
+name      = "expressions2"
+path      = "exercises/expressions/expressions2"
+topic     = "expressions"
+mode      = "plan"
+objective = "4e"
+hint      = "lookup(map, key, default) returns the default when the key is missing; try() does the same for any expression that fails."
+docs      = "https://developer.hashicorp.com/terraform/language/functions/lookup"
+
+[[exercises]]
 name      = "functions1"
 path      = "exercises/functions/functions1"
 topic     = "functions"
@@ -80,6 +98,24 @@ mode      = "plan"
 objective = "4e"
 hint      = "The function is called upper."
 docs      = "https://developer.hashicorp.com/terraform/language/functions"
+
+[[exercises]]
+name      = "functions2"
+path      = "exercises/functions/functions2"
+topic     = "functions"
+mode      = "plan"
+objective = "4e"
+hint      = "merge(a, b) combines maps; keys of the later map win."
+docs      = "https://developer.hashicorp.com/terraform/language/functions/merge"
+
+[[exercises]]
+name      = "functions3"
+path      = "exercises/functions/functions3"
+topic     = "functions"
+mode      = "plan"
+objective = "4e"
+hint      = "cidrsubnet(prefix, newbits, netnum): newbits=8 turns a /16 into /24 subnets; netnum counts from 0."
+docs      = "https://developer.hashicorp.com/terraform/language/functions/cidrsubnet"
 
 [[exercises]]
 name      = "resources1"
@@ -165,6 +201,33 @@ hint      = "A dynamic block has a for_each and a content block; inside, the ite
 docs      = "https://developer.hashicorp.com/terraform/language/expressions/dynamic-blocks"
 
 [[exercises]]
+name      = "iteration4"
+path      = "exercises/iteration/iteration4"
+topic     = "iteration"
+mode      = "plan"
+objective = "4e"
+hint      = "count = var.enabled ? 1 : 0 builds the resource once or not at all."
+docs      = "https://developer.hashicorp.com/terraform/language/meta-arguments/count"
+
+[[exercises]]
+name      = "iteration5"
+path      = "exercises/iteration/iteration5"
+topic     = "iteration"
+mode      = "plan"
+objective = "4e"
+hint      = "for_each needs a map or a set of strings. toset() turns a list into a set; each.key is the current element."
+docs      = "https://developer.hashicorp.com/terraform/language/meta-arguments/for_each"
+
+[[exercises]]
+name      = "iteration6"
+path      = "exercises/iteration/iteration6"
+topic     = "iteration"
+mode      = "plan"
+objective = "4e"
+hint      = "A for expression over a map: { for k, v in var.servers : upper(k) => v }."
+docs      = "https://developer.hashicorp.com/terraform/language/expressions/for"
+
+[[exercises]]
 name      = "data-sources1"
 path      = "exercises/data-sources/data-sources1"
 topic     = "data-sources"
@@ -181,6 +244,15 @@ mode      = "plan"
 objective = "4f"
 hint      = "The meta-argument is called depends_on and takes a list of resource addresses."
 docs      = "https://developer.hashicorp.com/terraform/language/meta-arguments/depends_on"
+
+[[exercises]]
+name      = "dependencies2"
+path      = "exercises/dependencies/dependencies2"
+topic     = "dependencies"
+mode      = "plan"
+objective = "4a"
+hint      = "An argument that uses an attribute of another resource makes Terraform build that one first. No depends_on needed."
+docs      = "https://developer.hashicorp.com/terraform/language/resources/behavior#resource-dependencies"
 
 [[exercises]]
 name      = "lifecycle1"

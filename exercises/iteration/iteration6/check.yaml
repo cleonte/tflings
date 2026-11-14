@@ -1,0 +1,10 @@
+plan:
+  - expr: plan.planned_values.outputs.addresses.value["WEB"] == "10.0.0.1" && plan.planned_values.outputs.addresses.value["DB"] == "10.0.0.2"
+    message: "addresses should have the keys WEB and DB, with the same addresses."
+  - expr: plan.planned_values.outputs.addresses.value.size() == 2
+    message: "addresses should have exactly two entries."
+variants:
+  - vars: { servers: '{cache = "10.0.0.9"}' }
+    plan:
+      - expr: plan.planned_values.outputs.addresses.value["CACHE"] == "10.0.0.9" && plan.planned_values.outputs.addresses.value.size() == 1
+        message: "addresses should follow the variable."

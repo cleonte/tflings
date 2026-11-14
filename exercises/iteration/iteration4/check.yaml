@@ -1,0 +1,8 @@
+plan:
+  - expr: plan.resource_changes.exists(r, r.address == "terraform_data.feature[0]" && "create" in r.change.actions)
+    message: "With enabled = true, terraform_data.feature[0] should be created."
+variants:
+  - vars: { enabled: "false" }
+    plan:
+      - expr: "!has(plan.resource_changes) || plan.resource_changes.filter(r, r.type == \"terraform_data\").size() == 0"
+        message: "With enabled = false, nothing should be built."

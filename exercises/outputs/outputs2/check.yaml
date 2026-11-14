@@ -1,0 +1,8 @@
+plan:
+  - expr: plan.planned_values.outputs.node_names.value.size() == 3 && plan.planned_values.outputs.node_names.value[1] == "node-1"
+    message: "node_names should list the input of the three nodes, in order."
+variants:
+  - vars: { nodes: "2" }
+    plan:
+      - expr: plan.planned_values.outputs.node_names.value == ["node-0", "node-1"]
+        message: "node_names should follow the number of nodes."

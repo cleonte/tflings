@@ -1,0 +1,8 @@
+plan:
+  - expr: plan.planned_values.outputs.timeout.value == "30"
+    message: "Without a timeout key, the value should be 30."
+variants:
+  - vars: { settings: '{timeout = "60"}' }
+    plan:
+      - expr: plan.planned_values.outputs.timeout.value == "60"
+        message: "When the key exists, its value should be used."
