@@ -62,3 +62,7 @@ Observations:
 - `validate` can probably be dropped from the save loop: `plan` already validates, so the loop could be `plan -out` + `show -json` (about 2.1 s, 2.6 s, 3.9 s by adding the measured medians; not measured as a pair). Not tested whether `show -json` includes enough of the configuration for the CEL `config` checks.
 - Terraform 1.12.2 and 1.17.2 are within 0.05 s of each other everywhere.
 - I did not test why a bare provider start costs about 1 s; the 729 MB binary is the obvious suspect.
+
+## Addendum (2026-11-14): provider-free configurations need no network at all
+
+`nonet.sh`, run in a Debian container with `--network none`, Terraform 1.12.2 and 1.17.2: a configuration with only `terraform_data` and an output (no `provider` block) runs `init` ("terraform.io/builtin/terraform is built in to Terraform"), then `plan` ("Plan: 1 to add") with an empty environment and `CHECKPOINT_DISABLE=1`. So plan-mode exercises that do not declare the AWS provider need neither Floci, nor the provider download, nor DNS. This is what the first plan-mode topics (`hcl`, `variables`, `outputs`, `types`, `expressions`, `functions`) can use.
