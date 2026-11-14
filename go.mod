@@ -21,7 +21,7 @@ require (
 	github.com/hashicorp/hcl/v2 v2.25.0
 	github.com/pelletier/go-toml/v2 v2.4.3
 	github.com/spf13/cobra v1.10.2
-	github.com/zclconf/go-cty v1.19.0
+	github.com/zclconf/go-cty v1.20.0
 	golang.org/x/term v0.48.0
 	sigs.k8s.io/yaml v1.6.0
 )
