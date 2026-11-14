@@ -123,7 +123,7 @@ Terraform Associate 004 tests Terraform 1.12; 1 hour, multiple choice, online pr
 
 Every exercise proof passed, AWS-provider exercises against Floci included, on:
 - Linux arm64, Ubuntu 26.04 in a Lima `vz` VM with native Docker (Floci 2.4.0), Terraform 1.12.2 and 1.17.2: 375 s cold, 131 s warm (2 proofs at a time). `*.localhost` resolved to `::1` with no `/etc/hosts` line.
-- Linux x86_64, Debian 13 on an i9-9980HK with native Docker, Terraform 1.12.2 (1048 s; the provider takes about 5 s to start there, against about 1 s on an M-series Mac, so one AWS exercise takes 36 to 90 s and Go's default 10 minute test timeout is too short: use `-timeout 60m`). Terraform 1.17.2 passed the provider-free and `tflings`-only packages; its AWS proofs were still running when this was written.
+- Linux x86_64, Debian 13 on an i9-9980HK with native Docker, Terraform 1.12.2 (1048 s) and 1.17.2 (1053 s). The provider takes about 5 s to start there, against about 1 s on an M-series Mac, so one AWS exercise takes 36 to 90 s and Go's default 10 minute test timeout is too short: use `-timeout 60m`.
 - To test on Linux without a Go toolchain there (the Lima VM ran out of memory compiling the AWS SDK, with kind clusters alongside): cross-compile on the Mac with `GOOS=linux GOARCH=arm64 go build ./cmd/tflings` and `go test -c ./internal/exercises` (the exercises are embedded in the test binary), copy both, run `tflings doctor --prefetch` there, then run the test binary with `TFLINGS_TEST_HOME` and `TFLINGS_TEST_TERRAFORM` set.
 - The proofs run in parallel (`TFLINGS_TEST_PARALLEL`, default half the cores): on macOS 170 s one at a time, 54 s with 4, 42 s with 8.
 
