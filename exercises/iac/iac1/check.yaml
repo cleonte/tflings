@@ -1,0 +1,4 @@
+answer: [b]
+explanation: >-
+  IaC means describing infrastructure in files (declaratively, in Terraform's
+  case), so that changes are reviewed, versioned and repeatable.

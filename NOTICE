@@ -1,0 +1,10 @@
+tflings
+Copyright 2026 Cristian Leonte
+
+This product includes code adapted from k8slings and golings by the same
+author, licensed under the Apache License, Version 2.0.
+
+tflings downloads and runs Floci (https://github.com/floci-io/floci, MIT
+license) as a local AWS emulator. Floci is not part of this repository.
+
+Exercises are adapted from the author's own study notes (learn/tf-associate).

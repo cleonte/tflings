@@ -169,7 +169,7 @@ Easier with Floci than with a custom provider: Floci already tests OpenTofu in i
 - [x] Architecture `CLAUDE.md` written (replaces the Phase 0 one).
 
 ### Phase 1 — Skeleton and plan mode
-- [ ] Copy the CLI shell from k8slings (cobra, Bubble Tea v2, workspace, `update`, markers, progress file), rename, strip Kubernetes.
+- [~] Copy the CLI shell from k8slings: done for cobra commands, workspace, `update`, markers, progress file (`.tflings.json`, with a reset counter), plain `watch` and quiz mode (`iac1` proves the loop and the "broken fails, solution passes" test). Bubble Tea full-screen view still to copy.
 - [ ] Terraform runner: isolated env, per-exercise `TF_DATA_DIR`, plugin cache, timeouts, output caps, `hc-install`; the provider-block safety check.
 - [ ] Floci manager (`aws up|down|status`), `doctor` (terraform, Floci, plugin cache, Docker optional).
 - [ ] Plan mode + `check.yaml` (plan/config). Topics: `hcl`, `workflow`, `fmt`, `variables`, `outputs`, `types`, `expressions`, `functions`.

@@ -2,7 +2,7 @@
 
 tflings is "rustlings for Terraform": a Go CLI that teaches Terraform (aimed at the Terraform Associate 004 exam) through small broken exercises. Exercises run the real `hashicorp/aws` provider against **Floci**, a local AWS emulator in Docker, so nothing touches a real cloud. It is the sibling of k8slings and golings and copies their shape.
 
-**Status (2026-11-14):** Phase 0 (spikes) is finished. No Go code yet; Phase 1 starts with the skeleton. `ROADMAP.md` is the plan, the decisions and the phases. `spikes/RESULTS.md` is the one-page summary of the spikes; each spike's evidence is in `spikes/<nn>-<name>/RESULTS.md`. Facts below say which spike established them. Untested things are marked **untested**.
+**Status (2026-11-14):** Phase 0 (spikes) is finished. Phase 1 is under way on branch `phase1-skeleton`: the CLI skeleton builds (`init`, `list`, `run`, `hint`, `reset`, `solution`, `update`, `verify`, plain `watch`) and quiz exercises run end to end; the Terraform runner, Floci manager, `doctor`, plan mode and the full-screen view are not built yet. `ROADMAP.md` is the plan, the decisions and the phases. `spikes/RESULTS.md` is the one-page summary of the spikes; each spike's evidence is in `spikes/<nn>-<name>/RESULTS.md`. Facts below say which spike established them. Untested things are marked **untested**.
 
 ## Where things are
 
@@ -14,7 +14,8 @@ tflings is "rustlings for Terraform": a Go CLI that teaches Terraform (aimed at 
 ## Architecture (planned; copy k8slings, replace Kubernetes with Terraform + Floci)
 
 ```
-cmd/tflings/            cobra entry point
+cmd/tflings/            entry point (main)
+internal/cmd/           cobra commands
 internal/engine/        Engine interface (Terraform now, OpenTofu in Phase 8); the only place that execs a terraform binary
 internal/runner/        builds the isolated environment, runs init/validate/plan/apply/show with timeouts and output caps
 internal/floci/         container lifecycle (docker CLI), health wait, account allocation, reset

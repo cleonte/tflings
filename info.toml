@@ -1,0 +1,10 @@
+# The exercises, in learning order. Order matters; do not append at the end by habit.
+
+[[exercises]]
+name      = "iac1"
+path      = "exercises/iac/iac1"
+topic     = "iac"
+mode      = "quiz"
+objective = "1a"
+hint      = "Think about what the code in the name stands for: a description of the infrastructure you want, kept in files."
+docs      = "https://developer.hashicorp.com/terraform/tutorials/certification-004/associate-review-004"
