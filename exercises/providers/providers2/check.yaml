@@ -1,0 +1,6 @@
+plan:
+  - expr: plan.resource_changes.exists(r, r.address == "aws_s3_bucket.logs" && "create" in r.change.actions)
+    message: "The plan should create aws_s3_bucket.logs."
+config:
+  - expr: config.provider_config.aws.version_constraint.startsWith("~>")
+    message: "Use the pessimistic operator ~> in the version constraint."

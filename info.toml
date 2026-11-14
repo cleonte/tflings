@@ -253,3 +253,32 @@ mode      = "plan"
 objective = "4e"
 hint      = "check \"name\" { assert { condition = ... error_message = ... } }"
 docs      = "https://developer.hashicorp.com/terraform/language/block/check"
+
+[[exercises]]
+name      = "providers1"
+path      = "exercises/providers/providers1"
+topic     = "providers"
+mode      = "plan"
+objective = "2b"
+requires  = ["floci"]
+hint      = "Add a second provider \"aws\" block with alias = \"west\" and region = \"us-west-2\"."
+docs      = "https://developer.hashicorp.com/terraform/language/block/provider#alias-multiple-provider-configurations"
+
+[[exercises]]
+name      = "providers2"
+path      = "exercises/providers/providers2"
+topic     = "providers"
+mode      = "plan"
+objective = "2b"
+requires  = ["floci"]
+hint      = "~> 6.0 allows 6.0 and newer, below 7.0."
+docs      = "https://developer.hashicorp.com/terraform/language/expressions/version-constraints"
+
+[[exercises]]
+name      = "versions1"
+path      = "exercises/versions/versions1"
+topic     = "versions"
+mode      = "plan"
+objective = "2b"
+hint      = "required_version = \"~> 1.12\" allows 1.12 and newer, below 2.0."
+docs      = "https://developer.hashicorp.com/terraform/language/expressions/version-constraints"
