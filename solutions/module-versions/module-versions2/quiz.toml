@@ -1,0 +1,9 @@
+question = "You add a new module block to a configuration that you already initialised. What does terraform plan do before you run terraform init again?"
+options = [
+  "a) It downloads the module on the fly and continues.",
+  "b) It fails: the module is not installed yet, and init (or terraform get) installs it.",
+  "c) It ignores the module block until the next apply.",
+  "d) It asks you for the source interactively.",
+]
+
+answer = "b"

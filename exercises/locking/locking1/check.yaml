@@ -3,11 +3,11 @@ state:
     message: "The state should still have terraform_data.app: do not throw the state away."
 aws:
   - call: s3.object
-    args: { bucket: tflings-state, key: app/terraform.tfstate.tflock }
+    args: { bucket: tflings-lock-state, key: app/terraform.tfstate.tflock }
     expr: "!result.exists"
     message: "The lock file is still there. Release the lock; do not work around it."
   - call: s3.object
-    args: { bucket: tflings-state, key: app/terraform.tfstate }
+    args: { bucket: tflings-lock-state, key: app/terraform.tfstate }
     expr: result.exists && result.size > 0
     message: "The state file in the bucket should still exist."
 empty_plan_after: true

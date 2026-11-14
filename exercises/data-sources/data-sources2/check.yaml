@@ -1,0 +1,14 @@
+config:
+  - expr: config.root_module.resources.exists(r, r.mode == "data" && r.type == "aws_vpc")
+    message: "Use the data source aws_vpc to find the default VPC."
+state:
+  - expr: state.values.root_module.resources.filter(r, r.address == "aws_security_group.web").all(r, r.values.vpc_id.startsWith("vpc-") && r.values.vpc_id != "vpc-0123456789abcdef0")
+    message: "The security group should be in a real VPC."
+aws:
+  - call: ec2.vpcs
+    expr: state.values.root_module.resources.filter(r, r.address == "aws_security_group.web")[0].values.vpc_id == result.vpcs.filter(v, v.is_default)[0].id
+    message: "The security group should be in the default VPC of the account."
+empty_plan_after: true
+explanation: >-
+  A data source reads something that already exists. aws_vpc with default = true
+  finds the default VPC of the account and region, so no id has to be typed in.

@@ -1,0 +1,12 @@
+plan:
+  - expr: plan.resource_changes.exists(r, r.address == "module.app[\"web\"].terraform_data.this" && r.change.after.input == "web")
+    message: "module.app[\"web\"] should exist and be named web."
+  - expr: plan.resource_changes.exists(r, r.address == "module.app[\"api\"].terraform_data.this" && r.change.after.input == "api")
+    message: "module.app[\"api\"] should exist and be named api."
+variants:
+  - vars: { apps: '["db"]' }
+    plan:
+      - expr: plan.resource_changes.filter(r, r.type == "terraform_data").size() == 1
+        message: "There should be one copy of the module for every app and no more."
+      - expr: plan.resource_changes.exists(r, r.address == "module.app[\"db\"].terraform_data.this" && r.change.after.input == "db")
+        message: "Each copy should be named after its app."

@@ -1,0 +1,8 @@
+plan:
+  - expr: plan.resource_changes.exists(r, r.address == "module.app.terraform_data.this" && r.change.after.input == "app-prod")
+    message: "module.app.terraform_data.this should hold app-prod."
+variants:
+  - vars: { environment: "staging" }
+    plan:
+      - expr: plan.resource_changes.exists(r, r.address == "module.app.terraform_data.this" && r.change.after.input == "app-staging")
+        message: "The module should get the environment from the variable."

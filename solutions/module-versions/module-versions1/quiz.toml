@@ -1,0 +1,9 @@
+question = "Which module source can take a version argument?"
+options = [
+  "a) ./modules/network",
+  "b) terraform-aws-modules/vpc/aws",
+  "c) git::https://example.com/vpc.git?ref=v1.2.0",
+  "d) ../shared/network",
+]
+
+answer = "b"

@@ -1,0 +1,3 @@
+answer: [b]
+explanation: >-
+  The version argument only exists for modules installed from a registry, such as the public Terraform Registry or a private one. Local paths have no versions, and a Git source selects a version with ?ref= in the address instead.

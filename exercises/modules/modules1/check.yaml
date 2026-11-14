@@ -1,0 +1,8 @@
+plan:
+  - expr: plan.resource_changes.exists(r, r.address == "module.app.terraform_data.this" && r.change.after.input == "orders")
+    message: "module.app.terraform_data.this should hold orders."
+variants:
+  - vars: { name: "payments" }
+    plan:
+      - expr: plan.resource_changes.exists(r, r.address == "module.app.terraform_data.this" && r.change.after.input == "payments")
+        message: "The module should get the name from the variable, not a fixed text."

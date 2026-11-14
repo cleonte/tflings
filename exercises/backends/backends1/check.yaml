@@ -10,9 +10,9 @@ state:
     message: "terraform_data.app was built again. Move the existing state instead."
 aws:
   - call: s3.object
-    args: { bucket: tflings-state, key: app/terraform.tfstate }
+    args: { bucket: tflings-move-state, key: app/terraform.tfstate }
     expr: result.exists && result.size > 0
-    message: "There is no state at app/terraform.tfstate in the bucket tflings-state yet."
+    message: "There is no state at app/terraform.tfstate in the bucket tflings-move-state yet."
 empty_plan_after: true
 explanation: >-
   A backend decides where the state is stored and how it is locked. Changing it

@@ -1,0 +1,8 @@
+plan:
+  - expr: plan.planned_values.outputs.app_name.value == "orders"
+    message: "app_name should be orders."
+variants:
+  - vars: { name: "payments" }
+    plan:
+      - expr: plan.planned_values.outputs.app_name.value == "payments"
+        message: "app_name should follow the name given to the module."
