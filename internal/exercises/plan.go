@@ -373,6 +373,9 @@ func (e Exercise) prepare(ctx context.Context, env *Env, c *check.Compiled, file
 		}
 		return nil, ctx, nil, &FailedError{Lines: append([]string{"tflings will not run this configuration:"}, lines...)}
 	}
+	if failures := c.RunFiles(files); len(failures) > 0 {
+		return nil, ctx, nil, &FailedError{Lines: failures}
+	}
 	run, err := env.newRun(e, files)
 	if err != nil {
 		return nil, ctx, nil, err

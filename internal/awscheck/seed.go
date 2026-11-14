@@ -23,7 +23,8 @@ type mutation struct {
 }
 
 var mutations = map[string]mutation{
-	"ssm.put_parameter": {required: []string{"name", "value"}, run: (*Client).putParameter},
+	"ssm.put_parameter":    {required: []string{"name", "value"}, run: (*Client).putParameter},
+	"ssm.delete_parameter": {required: []string{"name"}, run: (*Client).deleteParameter},
 }
 
 // MutationNames lists the calls a seed can use.
@@ -81,3 +82,9 @@ func (c *Client) putParameter(ctx context.Context, a Args) error {
 }
 
 func ssmType(s string) ssmtypes.ParameterType { return ssmtypes.ParameterType(s) }
+
+// deleteParameter removes a parameter, as someone with console access would.
+func (c *Client) deleteParameter(ctx context.Context, a Args) error {
+	_, err := c.ssm.DeleteParameter(ctx, &ssm.DeleteParameterInput{Name: aws.String(a.str("name"))})
+	return err
+}

@@ -349,3 +349,22 @@ objective = "7a"
 requires  = ["floci"]
 hint      = "apply -refresh-only updates the state from the real thing without changing anything real. Then make main.tf agree."
 docs      = "https://developer.hashicorp.com/terraform/tutorials/state/resource-drift"
+
+[[exercises]]
+name      = "refactoring2"
+path      = "exercises/refactoring/refactoring2"
+topic     = "refactoring"
+mode      = "fix"
+objective = "6d"
+hint      = "A moved block has from and to, written as resource addresses. Apply it; do not run state mv."
+docs      = "https://developer.hashicorp.com/terraform/language/modules/develop/refactoring"
+
+[[exercises]]
+name      = "drift3"
+path      = "exercises/drift/drift3"
+topic     = "drift"
+mode      = "fix"
+objective = "7a"
+requires  = ["floci"]
+hint      = "The configuration is right and the parameter is gone. What does a plan do with something the configuration has and the world does not?"
+docs      = "https://developer.hashicorp.com/terraform/tutorials/state/resource-drift"

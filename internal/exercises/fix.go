@@ -242,6 +242,7 @@ func (e Exercise) runFix(ctx context.Context, env *Env, c *check.Compiled, files
 	}
 	failures := c.RunPlanOnly(plan)
 	failures = append(failures, c.RunConfigOnly(plan)...)
+	failures = append(failures, c.RunFiles(files)...)
 	failures = append(failures, c.RunStateSeeded(state, r.seedState())...)
 	if len(c.AWS) > 0 {
 		awsFailures, err := c.RunAWS(ctx, awscheck.New(runner.Endpoint(), r.cfg.Account), state)

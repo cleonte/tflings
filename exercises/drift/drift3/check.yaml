@@ -1,0 +1,10 @@
+aws:
+  - call: ssm.parameter
+    args: { name: /tflings/motd }
+    expr: result.exists && result.value == "Welcome to tflings"
+    message: "The parameter /tflings/motd should exist again, with the value from the configuration."
+empty_plan_after: true
+explanation: >-
+  A plan refreshes first. An object that was deleted outside Terraform
+  disappears from the state, and the configuration, which still describes it,
+  makes the plan create it again.

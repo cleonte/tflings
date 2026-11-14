@@ -234,7 +234,7 @@ func TestMutationAllowlist(t *testing.T) {
 		t.Errorf("a valid seeding call was refused: %v", err)
 	}
 	for name, args := range map[string]map[string]any{
-		"ssm.delete_parameter": {"name": "/a"},
+		"ssm.delete_everything": {"name": "/a"},
 		"ssm.put_parameter":    {"name": "/a"},
 	} {
 		if ValidateMutation(name, args) == nil {

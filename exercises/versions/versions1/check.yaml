@@ -1,3 +1,6 @@
 plan:
   - expr: plan.resource_changes.exists(r, r.address == "terraform_data.app" && "create" in r.change.actions)
     message: "terraform_data.app should be created."
+files:
+  - expr: files["main.tf"].matches("required_version\\s*=\\s*\"~>")
+    message: "Use the pessimistic operator ~> in required_version."

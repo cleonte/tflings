@@ -222,3 +222,26 @@ state:
 		t.Errorf("a different id should fail: %v", f)
 	}
 }
+
+func TestFilesAssertions(t *testing.T) {
+	c, err := Load([]byte(`
+files:
+  - expr: files["main.tf"].matches("(?m)^\\s*moved\\s*\\{")
+    message: "use a moved block"
+`))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if c.Count() != 1 {
+		t.Errorf("a files assertion should count, got %d", c.Count())
+	}
+	if f := c.RunFiles(map[string][]byte{"main.tf": []byte("resource \"a\" \"b\" {}\n\nmoved {\n  from = a.b\n  to = a.c\n}\n")}); len(f) != 0 {
+		t.Errorf("a moved block should pass: %v", f)
+	}
+	if f := c.RunFiles(map[string][]byte{"main.tf": []byte("# moved { not real }\nresource \"a\" \"c\" {}\n")}); len(f) != 1 {
+		t.Errorf("a commented moved block should fail: %v", f)
+	}
+	if f := c.RunFiles(map[string][]byte{"other.tf": []byte("moved {}")}); len(f) != 1 {
+		t.Errorf("a missing file should fail, not crash: %v", f)
+	}
+}

@@ -1,0 +1,5 @@
+steps:
+  - apply: initial
+  - mutate:
+      call: ssm.delete_parameter
+      args: { name: /tflings/motd }
