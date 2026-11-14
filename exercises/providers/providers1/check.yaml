@@ -1,0 +1,10 @@
+plan:
+  - expr: plan.resource_changes.filter(r, r.type == "aws_s3_bucket").size() == 2
+    message: "Both buckets should be planned."
+config:
+  - expr: config.provider_config["aws.west"].expressions.region.constant_value == "us-west-2"
+    message: "The provider aws with alias west should use the region us-west-2."
+  - expr: config.root_module.resources.filter(r, r.address == "aws_s3_bucket.backup").all(r, r.provider_config_key == "aws.west")
+    message: "aws_s3_bucket.backup should use the aliased provider."
+  - expr: config.root_module.resources.filter(r, r.address == "aws_s3_bucket.main").all(r, r.provider_config_key == "aws")
+    message: "aws_s3_bucket.main should keep the default provider."
