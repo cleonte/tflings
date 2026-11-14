@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"context"
 	"io"
+	"os"
 	"path/filepath"
 	"strings"
 	"time"
@@ -12,6 +13,7 @@ import (
 	"github.com/cleonte/tflings/internal/watcher"
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
+	"golang.org/x/term"
 )
 
 // debounce is how long the watcher waits for a burst of file events to settle.
@@ -25,9 +27,11 @@ func WatchCmd(infoFile string) *cobra.Command {
 		Short: "Check exercises when files are saved",
 		Long: `Checks the next exercise whenever you save a file.
 
-Prints line-by-line output. (The full-screen view comes later.)
+In a terminal this opens a full-screen view. Use --plain for simple line-by-line
+output; that is also what you get when input or output is not a terminal, for
+example when piping.
 
-Type a command and press Enter: h (hint), l (list), r (run
+In plain mode, type a command and press Enter: h (hint), l (list), r (run
 again) or q (quit).`,
 		Args:          cobra.NoArgs,
 		SilenceUsage:  true,
@@ -44,6 +48,10 @@ again) or q (quit).`,
 				return err
 			}
 
+			if !plain && isTerminal(cmd.InOrStdin()) && isTerminal(cmd.OutOrStdout()) {
+				return runTUI(ctx, changes)
+			}
+
 			noticeNewExercises()
 			watchLoop(cmd.InOrStdin(), changes, watchActions{
 				run:  func() { _ = runNext(ctx, infoFile) },
@@ -53,8 +61,14 @@ again) or q (quit).`,
 			return nil
 		},
 	}
-	watchCmd.Flags().BoolVar(&plain, "plain", false, "line-by-line output (the full-screen view is not built yet, so this is the only mode)")
+	watchCmd.Flags().BoolVar(&plain, "plain", false, "print plain lines instead of the full-screen view")
 	return watchCmd
+}
+
+// isTerminal reports whether f is an interactive terminal (and not, say, a pipe).
+func isTerminal(f any) bool {
+	file, ok := f.(*os.File)
+	return ok && term.IsTerminal(int(file.Fd()))
 }
 
 func printNextHint(ctx context.Context, infoFile string) {

@@ -270,6 +270,7 @@ func (e *Env) newRun(ex Exercise, files map[string][]byte) (*run, error) {
 // tf runs one Terraform command: the command, then its non-interactive flags
 // as that command accepts them, then extra flags, then positional arguments.
 func (r *run) tf(ctx context.Context, command string, flags, positional []string) (runner.Output, error) {
+	report(ctx, "terraform "+command)
 	args := append([]string{command}, r.env.Engine.Flags(command)...)
 	args = append(args, flags...)
 	args = append(args, positional...)
