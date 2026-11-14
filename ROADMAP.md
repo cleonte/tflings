@@ -170,7 +170,7 @@ Easier with Floci than with a custom provider: Floci already tests OpenTofu in i
 
 ### Phase 1 — Skeleton and plan mode
 - [~] Copy the CLI shell from k8slings: done for cobra commands, workspace, `update`, markers, progress file (`.tflings.json`, with a reset counter), plain `watch` and quiz mode (`iac1` proves the loop and the "broken fails, solution passes" test). Bubble Tea full-screen view still to copy.
-- [ ] Terraform runner: isolated env, per-exercise `TF_DATA_DIR`, plugin cache, timeouts, output caps, `hc-install`; the provider-block safety check.
+- [~] Terraform runner: isolated env, per-exercise `TF_DATA_DIR`, plugin cache mirror config, process-group timeouts, output caps, the provider/backend safety check and the Engine interface are built and tested (`internal/engine`, `internal/runner`). Still to do: `hc-install` fallback, wiring into plan mode.
 - [ ] Floci manager (`aws up|down|status`), `doctor` (terraform, Floci, plugin cache, Docker optional).
 - [ ] Plan mode + `check.yaml` (plan/config). Topics: `hcl`, `workflow`, `fmt`, `variables`, `outputs`, `types`, `expressions`, `functions`.
 - [ ] CI: every exercise proven on Terraform 1.12 and latest, with Floci.
