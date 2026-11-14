@@ -43,6 +43,9 @@ const StepsFile = "steps.yaml"
 // seededMarker is the file in a run folder that says the situation was built.
 const seededMarker = "seeded"
 
+// seededInFloci is what the marker holds when the situation was built in Floci.
+const seededInFloci = "floci"
+
 // seedStateFile keeps the state right after seeding, for `seed` in check.yaml.
 const seedStateFile = "seed-state.json"
 
@@ -140,6 +143,9 @@ func (e Exercise) prepareFix(ctx context.Context, env *Env, files map[string][]b
 	if err != nil {
 		return nil, ctx, nil, err
 	}
+	if err := preflightHosts(ctx, r.cfg.Account, files); err != nil {
+		return nil, ctx, nil, err
+	}
 	ctx, cancel := context.WithTimeout(ctx, e.RunTimeout())
 	if _, err := os.Stat(filepath.Join(r.dir, seededMarker)); err != nil {
 		if err := r.seed(ctx, steps, files); err != nil {
@@ -202,7 +208,13 @@ func (r *run) seed(ctx context.Context, steps setupSteps, learnerFiles map[strin
 	if err := writeSource(r.src, learnerFiles, true); err != nil {
 		return fail("writing your files", err)
 	}
-	return os.WriteFile(filepath.Join(r.dir, seededMarker), []byte("ok\n"), 0o644)
+	// The marker also says whether the situation lives in Floci, so that
+	// HasSavedState knows that emptying Floci would destroy it.
+	marker := "ok\n"
+	if r.cfg.Account != "" {
+		marker = seededInFloci + "\n"
+	}
+	return os.WriteFile(filepath.Join(r.dir, seededMarker), []byte(marker), 0o644)
 }
 
 func (r *run) seedState() map[string]any {

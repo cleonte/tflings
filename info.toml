@@ -368,3 +368,23 @@ objective = "7a"
 requires  = ["floci"]
 hint      = "The configuration is right and the parameter is gone. What does a plan do with something the configuration has and the world does not?"
 docs      = "https://developer.hashicorp.com/terraform/tutorials/state/resource-drift"
+
+[[exercises]]
+name      = "import1"
+path      = "exercises/import/import1"
+topic     = "import"
+mode      = "fix"
+objective = "7a"
+requires  = ["floci"]
+hint      = "terraform import ADDRESS ID attaches an existing object to a resource. Then read what the next plan still wants."
+docs      = "https://developer.hashicorp.com/terraform/cli/import"
+
+[[exercises]]
+name      = "locking1"
+path      = "exercises/locking/locking1"
+topic     = "locking"
+mode      = "fix"
+objective = "6c"
+requires  = ["floci"]
+hint      = "The error shows the lock ID. terraform force-unlock releases a lock; -lock=false only ignores it."
+docs      = "https://developer.hashicorp.com/terraform/cli/commands/force-unlock"

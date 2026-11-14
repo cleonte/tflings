@@ -1,0 +1,7 @@
+steps:
+  - mutate:
+      call: s3.create_bucket
+      args: { bucket: tflings-legacy }
+  - mutate:
+      call: s3.put_object
+      args: { bucket: tflings-legacy, key: keep.txt, body: "Do not lose this file." }

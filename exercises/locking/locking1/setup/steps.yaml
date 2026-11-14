@@ -1,0 +1,11 @@
+steps:
+  - mutate:
+      call: s3.create_bucket
+      args: { bucket: tflings-state }
+  - apply: initial
+  - mutate:
+      call: s3.put_object
+      args:
+        bucket: tflings-state
+        key: app/terraform.tfstate.tflock
+        body: '{"ID":"8f0c7a52-3b1e-4d0e-9a4c-5f6e7d8c9b0a","Operation":"OperationTypeApply","Info":"","Who":"ci@build-agent-7","Version":"1.12.2","Created":"2026-11-13T22:14:09.113421Z","Path":"tflings-state/app/terraform.tfstate"}'
