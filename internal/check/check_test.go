@@ -205,3 +205,20 @@ variants:
 		}
 	}
 }
+
+func TestSeedVariable(t *testing.T) {
+	c, err := Load([]byte(`
+state:
+  - expr: state.id == seed.id
+    message: "the object was rebuilt"
+`))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if f := c.RunStateSeeded(map[string]any{"id": "a"}, map[string]any{"id": "a"}); len(f) != 0 {
+		t.Errorf("same id should pass: %v", f)
+	}
+	if f := c.RunStateSeeded(map[string]any{"id": "b"}, map[string]any{"id": "a"}); len(f) != 1 {
+		t.Errorf("a different id should fail: %v", f)
+	}
+}

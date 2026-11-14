@@ -180,7 +180,7 @@ Easier with Floci than with a custom provider: Floci already tests OpenTofu in i
 - [~] Topics: 14 exercises done on top of `resources1`: `resources2-3`, `references1-3`, `iteration1-3`, `data-sources1`, `dependencies1` and `lifecycle1-4` (create_before_destroy, prevent_destroy, ignore_changes, replace_triggered_by; provider-free, proven on Terraform 1.12 and latest). Apply exercises prove themselves against Floci in CI. Still to do: more exercises in these topics, then `providers`, `versions`, `conditions`, `sensitive`.
 
 ### Phase 3 — State and fix mode
-- [ ] Seeding (Floci resources, tfstate, locks), `reset` re-seeds, done is kept; `drift`.
+- [x] Fix mode: seeding (`apply` steps and allowlisted Floci `mutate` steps), `tflings tf` and `tflings env`, `run` checks the end state, `reset` re-seeds. Built on 2026-11-14 with `refactoring1`, `drift1`, `drift2`. Not seeded yet: a tfstate written by hand, a stuck lock.
 - [ ] Topics: `state-basics`, `backends`, `locking`, `drift` (refresh-only), `refactoring` (moved/removed/state mv), `import` (import blocks, `-generate-config-out`), `debugging`.
 - [ ] cli mode and the `inspect` topic.
 

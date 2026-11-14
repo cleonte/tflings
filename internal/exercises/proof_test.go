@@ -48,7 +48,7 @@ func TestEveryExerciseIsProven(t *testing.T) {
 			if ex.NeedsFloci() && !flociReady {
 				t.Skip("needs Floci running and TFLINGS_TEST_HOME (a home with the AWS provider prefetched)")
 			}
-			if ex.Mode == exercises.ModePlan || ex.Mode == exercises.ModeApply {
+			if ex.Mode == exercises.ModePlan || ex.Mode == exercises.ModeApply || ex.Mode == exercises.ModeFix {
 				proveWithFiles(t, env, ex)
 				return
 			}
@@ -114,6 +114,16 @@ func proveWithFiles(t *testing.T, env *exercises.Env, ex exercises.Exercise) {
 	}
 	if !errors.As(err, &failed) {
 		t.Fatalf("the shipped exercise should fail with a message for the learner, got: %v", err)
+	}
+	if ex.Mode == exercises.ModeFix {
+		if _, err := ex.RunSolution(context.Background(), env); err != nil {
+			var f *exercises.FailedError
+			if errors.As(err, &f) {
+				t.Fatalf("the solution should pass:\n%v\n%v", f.Lines, f.Details)
+			}
+			t.Fatalf("the solution should pass: %v", err)
+		}
+		return
 	}
 	solved, err := ex.ProofFiles(env)
 	if err != nil {

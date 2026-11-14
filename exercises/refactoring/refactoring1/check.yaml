@@ -1,0 +1,12 @@
+state:
+  - expr: state.values.root_module.resources.exists(r, r.address == "terraform_data.server")
+    message: "terraform_data.server should be in the state."
+  - expr: "!state.values.root_module.resources.exists(r, r.address == \"terraform_data.web\")"
+    message: "terraform_data.web should no longer be in the state."
+  - expr: state.values.root_module.resources.filter(r, r.address == "terraform_data.server").all(r, r.values.id == seed.values.root_module.resources.filter(s, s.address == "terraform_data.web")[0].values.id)
+    message: "The server was destroyed and built again. It should be the same object, only with a new name."
+empty_plan_after: true
+explanation: >-
+  `terraform state mv` changes the address of an object in the state without
+  touching the real thing. A `moved` block in the configuration does the same
+  and is kept for everyone who shares the configuration.

@@ -1,0 +1,10 @@
+aws:
+  - call: ssm.parameter
+    args: { name: /tflings/motd }
+    expr: result.exists && result.value == "Welcome to tflings"
+    message: "The parameter /tflings/motd should hold the value from the configuration again."
+empty_plan_after: true
+explanation: >-
+  Terraform compares the configuration with what really exists, not only with the
+  state: `plan` and `apply` refresh first. A manual change is drift, and a normal
+  `apply` brings the real thing back to what the configuration says.

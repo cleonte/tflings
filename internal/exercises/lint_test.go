@@ -84,16 +84,24 @@ func TestExerciseLint(t *testing.T) {
 				t.Error("a plan exercise needs at least one assertion")
 			}
 
-			// The file the learner edits starts with the marker and has a TODO.
+			// The file the learner edits starts with the marker and has a TODO. A fix
+			// exercise is repaired with commands: its main.tf is the configuration as
+			// it is, and its setup must be valid.
 			src, err := fs.ReadFile(tflings.FS, ex.Source())
 			if err != nil {
 				t.Fatalf("no %s", ex.Source())
 			}
-			if first, _, _ := strings.Cut(string(src), "\n"); !strings.HasPrefix(strings.TrimSpace(first), "# I AM NOT DONE") {
-				t.Errorf("%s must start with the line # I AM NOT DONE", ex.Source())
-			}
-			if !regexp.MustCompile(`#\s*TODO:`).Match(src) {
-				t.Errorf("%s needs a # TODO: comment at the fix site", ex.Source())
+			if ex.Mode == exercises.ModeFix {
+				if _, err := ex.LoadSteps(tflings.FS); err != nil {
+					t.Errorf("setup: %v", err)
+				}
+			} else {
+				if first, _, _ := strings.Cut(string(src), "\n"); !strings.HasPrefix(strings.TrimSpace(first), "# I AM NOT DONE") {
+					t.Errorf("%s must start with the line # I AM NOT DONE", ex.Source())
+				}
+				if !regexp.MustCompile(`#\s*TODO:`).Match(src) {
+					t.Errorf("%s needs a # TODO: comment at the fix site", ex.Source())
+				}
 			}
 
 			// The solution exists and carries neither the marker nor a TODO.

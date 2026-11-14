@@ -50,6 +50,8 @@ func NewRootCmd(version string) *cobra.Command {
 	rootCmd.AddCommand(ResetCmd(tflings.FS, "."))
 	rootCmd.AddCommand(RunCmd(infoFile))
 	rootCmd.AddCommand(SolutionCmd(infoFile, tflings.Solutions))
+	rootCmd.AddCommand(TfCmd(infoFile))
+	rootCmd.AddCommand(EnvCmd(infoFile))
 	rootCmd.AddCommand(UpdateCmd(tflings.FS, "."))
 	rootCmd.AddCommand(VerifyCmd(infoFile))
 	rootCmd.AddCommand(WatchCmd(infoFile))

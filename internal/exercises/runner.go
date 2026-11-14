@@ -123,7 +123,7 @@ func (e Exercise) Run(ctx context.Context, env *Env) (Result, error) {
 	var res Result
 	var err error
 	switch e.Mode {
-	case ModePlan, ModeApply:
+	case ModePlan, ModeApply, ModeFix:
 		files, ferr := WorkspaceFiles(os.DirFS(env.workspace()), filepath.ToSlash(e.Path))
 		if ferr != nil {
 			return Result{}, fmt.Errorf("cannot read %s: %w", e.Path, ferr)
@@ -186,8 +186,10 @@ func (e Exercise) RunFiles(ctx context.Context, env *Env, files map[string][]byt
 		return e.runPlan(ctx, env, c, files)
 	case ModeApply:
 		return e.runApply(ctx, env, c, files)
+	case ModeFix:
+		return e.runFix(ctx, env, c, files)
 	}
-	return Result{}, fmt.Errorf("%s: RunFiles is for plan and apply exercises, not %s", e.Name, e.Mode)
+	return Result{}, fmt.Errorf("%s: RunFiles is for plan, apply and fix exercises, not %s", e.Name, e.Mode)
 }
 
 // runQuiz compares the answer in quiz.toml with the key.
