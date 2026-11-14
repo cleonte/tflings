@@ -1,0 +1,11 @@
+plan:
+  - expr: plan.planned_values.outputs.replicas.value == 3
+    message: "Three replicas should plan."
+variants:
+  - vars: { replicas: "4" }
+    expect_error: "Module output value precondition failed"
+    message: "Four replicas should be refused by a precondition on the output."
+  - vars: { replicas: "5" }
+    plan:
+      - expr: plan.planned_values.outputs.replicas.value == 5
+        message: "Five replicas is odd and should plan."

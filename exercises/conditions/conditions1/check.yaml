@@ -1,0 +1,14 @@
+plan:
+  - expr: plan.planned_values.outputs.port.value == 8080
+    message: "The default port 8080 should still plan."
+variants:
+  - vars: { port: "70000" }
+    expect_error: "Invalid value for variable"
+    message: "Port 70000 should be refused by a validation block."
+  - vars: { port: "0" }
+    expect_error: "Invalid value for variable"
+    message: "Port 0 should be refused by a validation block."
+  - vars: { port: "443" }
+    plan:
+      - expr: plan.planned_values.outputs.port.value == 443
+        message: "Port 443 is valid and should plan."
