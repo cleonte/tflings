@@ -2,6 +2,7 @@ package exercises
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io/fs"
@@ -229,4 +230,25 @@ func (e *Env) HomeDir() string { return e.home() }
 // resources that are not there.
 func (e *Env) ForgetRun(name string) error {
 	return os.RemoveAll(filepath.Join(e.home(), "runs", name))
+}
+
+// HasSavedState reports whether any exercise has something built that tflings
+// remembers: a Terraform state with at least one resource in its scratch
+// folder. While that is so, emptying Floci would pull the rug from under work
+// in progress.
+func (e *Env) HasSavedState() bool {
+	matches, _ := filepath.Glob(filepath.Join(e.home(), "runs", "*", "src", "terraform.tfstate"))
+	for _, m := range matches {
+		data, err := os.ReadFile(m)
+		if err != nil {
+			continue
+		}
+		var s struct {
+			Resources []json.RawMessage `json:"resources"`
+		}
+		if json.Unmarshal(data, &s) == nil && len(s.Resources) > 0 {
+			return true
+		}
+	}
+	return false
 }

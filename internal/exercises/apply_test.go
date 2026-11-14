@@ -62,3 +62,35 @@ func TestPreflightOnlyChecksWhatNeedsIt(t *testing.T) {
 		t.Errorf("only buckets need the host name: %v", err)
 	}
 }
+
+func TestHasSavedState(t *testing.T) {
+	home := t.TempDir()
+	env := &Env{Home: home}
+	if env.HasSavedState() {
+		t.Error("nothing is saved yet")
+	}
+	src := filepath.Join(home, "runs", "buckets1", "src")
+	if err := os.MkdirAll(src, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	empty := `{"version":4,"resources":[]}`
+	if err := os.WriteFile(filepath.Join(src, "terraform.tfstate"), []byte(empty), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if env.HasSavedState() {
+		t.Error("a state with no resources holds nothing")
+	}
+	full := `{"version":4,"resources":[{"type":"aws_s3_bucket","name":"b"}]}`
+	if err := os.WriteFile(filepath.Join(src, "terraform.tfstate"), []byte(full), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if !env.HasSavedState() {
+		t.Error("a state with a resource is work in progress")
+	}
+	if err := env.ForgetRun("buckets1"); err != nil {
+		t.Fatal(err)
+	}
+	if env.HasSavedState() {
+		t.Error("reset forgets the state")
+	}
+}
