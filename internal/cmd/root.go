@@ -4,18 +4,30 @@ import (
 	"context"
 	"os"
 	"os/signal"
+	"path/filepath"
 
 	"github.com/cleonte/tflings"
+	"github.com/cleonte/tflings/internal/engine"
 	"github.com/cleonte/tflings/internal/exercises"
 	"github.com/spf13/cobra"
 )
 
 const infoFile = "info.toml"
 
-// newEnv is what running exercises needs. Terraform and Floci support are
-// plugged in as they get built; until then only quiz exercises can run.
+// newEnv is what running exercises needs. The Terraform engine is looked up
+// once: $TFLINGS_TERRAFORM, else the tflings-managed copy, else the first
+// terraform on PATH. Floci support is plugged in when the manager is built; until
+// then only exercises that need no Floci can run.
 func newEnv() *exercises.Env {
-	return &exercises.Env{Embedded: tflings.FS, Solutions: tflings.Solutions}
+	env := &exercises.Env{Embedded: tflings.FS, Solutions: tflings.Solutions}
+	managed := os.Getenv("TFLINGS_TERRAFORM")
+	if managed == "" {
+		managed = filepath.Join(env.HomeDir(), "bin", "terraform")
+	}
+	if eng, err := engine.Find(context.Background(), managed); err == nil {
+		env.Engine = eng
+	}
+	return env
 }
 
 func NewRootCmd(version string) *cobra.Command {

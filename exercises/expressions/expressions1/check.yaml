@@ -1,0 +1,8 @@
+plan:
+  - expr: plan.planned_values.outputs.replicas.value == 3
+    message: "In prod, replicas should be 3."
+variants:
+  - vars: { environment: "dev" }
+    plan:
+      - expr: plan.planned_values.outputs.replicas.value == 1
+        message: "In any other environment, replicas should be 1."

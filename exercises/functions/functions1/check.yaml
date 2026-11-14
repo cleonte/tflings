@@ -1,0 +1,8 @@
+plan:
+  - expr: plan.planned_values.outputs.shout.value == "TFLINGS"
+    message: "shout should be \"TFLINGS\"."
+variants:
+  - vars: { name: "terraform" }
+    plan:
+      - expr: plan.planned_values.outputs.shout.value == "TERRAFORM"
+        message: "shout should follow the variable."

@@ -6,9 +6,11 @@ import (
 	"fmt"
 	"io/fs"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/cleonte/tflings/internal/check"
+	"github.com/cleonte/tflings/internal/engine"
 	"github.com/pelletier/go-toml/v2"
 )
 
@@ -22,6 +24,36 @@ type Env struct {
 	TerraformFound func() bool
 	FlociUp        func(ctx context.Context) bool
 	HCPToken       func() bool
+
+	// Engine runs Terraform. Nil means there is none, and plan, apply, fix and
+	// cli exercises are skipped.
+	Engine engine.Engine
+	// Home is tflings's own folder (scratch runs, plugin cache, CLI config).
+	// Empty means a folder under the user's cache directory.
+	Home string
+	// Workspace is the learner's folder, where info.toml and .tflings.json are.
+	// Empty means the current directory.
+	Workspace string
+}
+
+func (e *Env) workspace() string {
+	if e == nil || e.Workspace == "" {
+		return "."
+	}
+	return e.Workspace
+}
+
+func (e *Env) home() string {
+	if e != nil && e.Home != "" {
+		return e.Home
+	}
+	if h := os.Getenv("TFLINGS_HOME"); h != "" {
+		return h
+	}
+	if d, err := os.UserCacheDir(); err == nil {
+		return filepath.Join(d, "tflings")
+	}
+	return filepath.Join(os.TempDir(), "tflings")
 }
 
 // Availability looks at what this machine can run right now.
@@ -30,6 +62,7 @@ func (e *Env) Availability(ctx context.Context) Availability {
 	if e == nil {
 		return av
 	}
+	av.Terraform = e.Engine != nil
 	if e.TerraformFound != nil {
 		av.Terraform = e.TerraformFound()
 	}
@@ -82,14 +115,24 @@ func (e Exercise) Run(ctx context.Context, env *Env) (Result, error) {
 	if reason := e.SkipReason(env.Availability(ctx)); reason != "" {
 		return Result{}, &SkippedError{fmt.Sprintf("%s %s", e.Name, reason)}
 	}
-	var src []byte
-	if e.Mode != ModeFix {
-		var err error
-		if src, err = os.ReadFile(e.File()); err != nil {
-			return Result{}, fmt.Errorf("cannot read %s: %w", e.File(), err)
+	var res Result
+	var err error
+	switch e.Mode {
+	case ModePlan:
+		files, ferr := WorkspaceFiles(os.DirFS(env.workspace()), filepath.ToSlash(e.Path))
+		if ferr != nil {
+			return Result{}, fmt.Errorf("cannot read %s: %w", e.Path, ferr)
 		}
+		res, err = e.RunFiles(ctx, env, files)
+	default:
+		var src []byte
+		if e.Mode != ModeFix {
+			if src, err = os.ReadFile(e.File()); err != nil {
+				return Result{}, fmt.Errorf("cannot read %s: %w", e.File(), err)
+			}
+		}
+		res, err = e.RunSource(ctx, env, src)
 	}
-	res, err := e.RunSource(ctx, env, src)
 	if err == nil {
 		if err := markPassed(e.Name); err != nil {
 			return Result{}, fmt.Errorf("it passes, but cannot save your progress in %s: %w", ProgressFile, err)
@@ -111,12 +154,34 @@ func (e Exercise) RunSource(ctx context.Context, env *Env, src []byte) (Result, 
 	switch e.Mode {
 	case ModeQuiz:
 		return e.runQuiz(c, src)
+	case ModePlan:
+		return e.runPlan(ctx, env, c, map[string][]byte{ExerciseFile: src})
 	}
 	return Result{}, fmt.Errorf("%s: %w (%s)", e.Name, ErrNotBuilt, e.Mode)
 }
 
+// RunFiles checks an exercise that has several files (plan mode): files are
+// keyed by path relative to the exercise folder.
+func (e Exercise) RunFiles(ctx context.Context, env *Env, files map[string][]byte) (Result, error) {
+	if reason := e.SkipReason(env.Availability(ctx)); reason != "" {
+		return Result{}, &SkippedError{fmt.Sprintf("%s %s", e.Name, reason)}
+	}
+	raw, err := fs.ReadFile(env.Embedded, e.CheckPath())
+	if err != nil {
+		return Result{}, fmt.Errorf("%s has no check.yaml: %w", e.Name, err)
+	}
+	c, err := check.Load(raw)
+	if err != nil {
+		return Result{}, fmt.Errorf("%s: %w", e.Name, err)
+	}
+	if e.Mode != ModePlan {
+		return Result{}, fmt.Errorf("%s: RunFiles is for plan exercises, not %s", e.Name, e.Mode)
+	}
+	return e.runPlan(ctx, env, c, files)
+}
+
 // runQuiz compares the answer in quiz.toml with the key.
-func (e Exercise) runQuiz(c *check.Check, src []byte) (Result, error) {
+func (e Exercise) runQuiz(c *check.Compiled, src []byte) (Result, error) {
 	var q struct {
 		Answer any `toml:"answer"`
 	}
@@ -144,3 +209,7 @@ func (e Exercise) runQuiz(c *check.Check, src []byte) (Result, error) {
 	}
 	return Result{Exercise: e, Checked: 1, Explanation: c.Explanation}, nil
 }
+
+// HomeDir is tflings's own folder (see Env.Home), for callers that need to
+// look inside it, such as the lookup of a managed Terraform.
+func (e *Env) HomeDir() string { return e.home() }

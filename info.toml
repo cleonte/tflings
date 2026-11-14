@@ -8,3 +8,75 @@ mode      = "quiz"
 objective = "1a"
 hint      = "Think about what the code in the name stands for: a description of the infrastructure you want, kept in files."
 docs      = "https://developer.hashicorp.com/terraform/tutorials/certification-004/associate-review-004"
+
+[[exercises]]
+name      = "hcl1"
+path      = "exercises/hcl/hcl1"
+topic     = "hcl"
+mode      = "plan"
+objective = "4a"
+hint      = "Read the line number in Terraform's error. A string that is opened has to be closed on the same line."
+docs      = "https://developer.hashicorp.com/terraform/language/syntax/configuration"
+
+[[exercises]]
+name      = "fmt1"
+path      = "exercises/fmt/fmt1"
+topic     = "fmt"
+mode      = "plan"
+objective = "3g"
+hint      = "Two-space indentation, one space on each side of =, and the = signs of neighbouring arguments line up."
+docs      = "https://developer.hashicorp.com/terraform/cli/commands/fmt"
+
+[[exercises]]
+name      = "variables1"
+path      = "exercises/variables/variables1"
+topic     = "variables"
+mode      = "plan"
+objective = "4c"
+hint      = "A variable that has a default never needs to be asked for."
+docs      = "https://developer.hashicorp.com/terraform/language/values/variables"
+
+[[exercises]]
+name      = "variables2"
+path      = "exercises/variables/variables2"
+topic     = "variables"
+mode      = "plan"
+objective = "4c"
+hint      = "The type says number, so the default has to be a number, not text that looks like one."
+docs      = "https://developer.hashicorp.com/terraform/language/values/variables#type-constraints"
+
+[[exercises]]
+name      = "outputs1"
+path      = "exercises/outputs/outputs1"
+topic     = "outputs"
+mode      = "plan"
+objective = "4c"
+hint      = "length() works on a map, and on a resource that has for_each."
+docs      = "https://developer.hashicorp.com/terraform/language/values/outputs"
+
+[[exercises]]
+name      = "types1"
+path      = "exercises/types/types1"
+topic     = "types"
+mode      = "plan"
+objective = "4d"
+hint      = "A list is written with square brackets, with its elements separated by commas."
+docs      = "https://developer.hashicorp.com/terraform/language/expressions/type-constraints"
+
+[[exercises]]
+name      = "expressions1"
+path      = "exercises/expressions/expressions1"
+topic     = "expressions"
+mode      = "plan"
+objective = "4e"
+hint      = "condition ? value_if_true : value_if_false, with a comparison using == as the condition."
+docs      = "https://developer.hashicorp.com/terraform/language/expressions/conditionals"
+
+[[exercises]]
+name      = "functions1"
+path      = "exercises/functions/functions1"
+topic     = "functions"
+mode      = "plan"
+objective = "4e"
+hint      = "The function is called upper."
+docs      = "https://developer.hashicorp.com/terraform/language/functions"
