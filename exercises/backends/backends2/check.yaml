@@ -1,0 +1,14 @@
+state:
+  - expr: state.values.root_module.resources.filter(r, r.address == "terraform_data.app").all(r, r.values.id == seed.values.root_module.resources.filter(s, s.address == "terraform_data.app")[0].values.id)
+    message: "terraform_data.app was built again. The existing state has to move to the new key."
+aws:
+  - call: s3.object
+    args: { bucket: tflings-state, key: orders/terraform.tfstate }
+    expr: result.exists && result.size > 0
+    message: "There is no state at orders/terraform.tfstate yet."
+empty_plan_after: true
+explanation: >-
+  When a backend setting changes, `terraform init` must be run again. With
+  `-migrate-state` Terraform copies the state from the old place to the new one.
+  With `-reconfigure` it forgets the old backend and starts from whatever the new
+  place holds, here nothing, so the next apply would build everything again.

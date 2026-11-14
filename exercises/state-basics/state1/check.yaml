@@ -1,0 +1,23 @@
+state:
+  - expr: state.values.root_module.resources.exists(r, r.address == "aws_ssm_parameter.keep")
+    message: "aws_ssm_parameter.keep should still be managed by Terraform."
+  - expr: "!state.values.root_module.resources.exists(r, r.address == \"aws_ssm_parameter.legacy\")"
+    message: "aws_ssm_parameter.legacy should no longer be in the state."
+config:
+  - expr: "!config.root_module.resources.exists(r, r.address == \"aws_ssm_parameter.legacy\")"
+    message: "main.tf should no longer describe aws_ssm_parameter.legacy, or the next apply would build it again."
+aws:
+  - call: ssm.parameter
+    args: { name: /tflings/legacy/flag }
+    expr: result.exists && result.value == "on"
+    message: "The legacy parameter must still exist: it has to be left alone, not destroyed."
+  - call: ssm.parameter
+    args: { name: /tflings/app/name }
+    expr: result.exists && result.value == "orders"
+    message: "The other parameter should be untouched."
+empty_plan_after: true
+explanation: >-
+  `terraform state rm` makes Terraform forget an object without touching the
+  real thing. Delete the resource block as well, or the next plan wants to build
+  it again. A `removed` block with `lifecycle { destroy = false }` does both in
+  the configuration.

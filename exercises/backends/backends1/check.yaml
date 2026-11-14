@@ -1,0 +1,21 @@
+files:
+  - expr: files["main.tf"].matches("backend\\s+\"s3\"")
+    message: "main.tf should configure a backend \"s3\"."
+  - expr: files["main.tf"].matches("use_lockfile\\s*=\\s*true")
+    message: "Turn on locking with use_lockfile = true."
+state:
+  - expr: state.values.root_module.resources.exists(r, r.address == "terraform_data.app")
+    message: "The state should still have terraform_data.app: the state has to be moved, not recreated."
+  - expr: state.values.root_module.resources.filter(r, r.address == "terraform_data.app").all(r, r.values.id == seed.values.root_module.resources.filter(s, s.address == "terraform_data.app")[0].values.id)
+    message: "terraform_data.app was built again. Move the existing state instead."
+aws:
+  - call: s3.object
+    args: { bucket: tflings-state, key: app/terraform.tfstate }
+    expr: result.exists && result.size > 0
+    message: "There is no state at app/terraform.tfstate in the bucket tflings-state yet."
+empty_plan_after: true
+explanation: >-
+  A backend decides where the state is stored and how it is locked. Changing it
+  needs `terraform init`, and `-migrate-state` copies the existing state to the
+  new place. `use_lockfile = true` locks with a file next to the state, and
+  needs no DynamoDB table.

@@ -460,3 +460,42 @@ objective = "6c"
 requires  = ["floci"]
 hint      = "The error shows the lock ID. terraform force-unlock releases a lock; -lock=false only ignores it."
 docs      = "https://developer.hashicorp.com/terraform/cli/commands/force-unlock"
+
+[[exercises]]
+name      = "state1"
+path      = "exercises/state-basics/state1"
+topic     = "state-basics"
+mode      = "fix"
+objective = "6d"
+requires  = ["floci"]
+hint      = "terraform state rm forgets an object without touching it. Then the configuration must stop describing it."
+docs      = "https://developer.hashicorp.com/terraform/cli/commands/state/rm"
+
+[[exercises]]
+name      = "state2"
+path      = "exercises/state-basics/state2"
+topic     = "state-basics"
+mode      = "fix"
+objective = "6d"
+hint      = "apply -replace=ADDRESS rebuilds one resource although the configuration did not change."
+docs      = "https://developer.hashicorp.com/terraform/cli/commands/plan#replace-address"
+
+[[exercises]]
+name      = "backends1"
+path      = "exercises/backends/backends1"
+topic     = "backends"
+mode      = "fix"
+objective = "6c"
+requires  = ["floci"]
+hint      = "Add a backend \"s3\" block with bucket, key, region and use_lockfile = true, then terraform init -migrate-state."
+docs      = "https://developer.hashicorp.com/terraform/language/backend/s3"
+
+[[exercises]]
+name      = "backends2"
+path      = "exercises/backends/backends2"
+topic     = "backends"
+mode      = "fix"
+objective = "6c"
+requires  = ["floci"]
+hint      = "-migrate-state copies the state to the new place; -reconfigure starts from what the new place holds."
+docs      = "https://developer.hashicorp.com/terraform/cli/commands/init#backend-initialization"

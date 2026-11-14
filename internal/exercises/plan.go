@@ -11,6 +11,7 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/cleonte/tflings/internal/check"
@@ -258,6 +259,9 @@ func lines(s string, max int) []string {
 	return ls
 }
 
+// initMu serialises the inits of one process that share a plugin cache.
+var initMu sync.Mutex
+
 // A run is one exercise's scratch folder and the environment Terraform sees.
 type run struct {
 	env *Env
@@ -338,6 +342,14 @@ func writeSource(src string, files map[string][]byte, keepState bool) error {
 // as that command accepts them, then extra flags, then positional arguments.
 func (r *run) tf(ctx context.Context, command string, flags, positional []string) (runner.Output, error) {
 	report(ctx, "terraform "+command)
+	if command == "init" && r.cfg.PluginCache != "" {
+		// Terraform reinstalls a provider into the shared plugin cache when the
+		// lock file cannot vouch for what is there (ours hold only zip hashes), and
+		// two inits doing that at once fail with "file exists". Inits are about a
+		// second, so they take turns.
+		initMu.Lock()
+		defer initMu.Unlock()
+	}
 	args := append([]string{command}, r.env.Engine.Flags(command)...)
 	args = append(args, flags...)
 	args = append(args, positional...)

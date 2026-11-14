@@ -119,9 +119,31 @@ func rawFiles(fsys fs.FS, dir string) (map[string][]byte, error) {
 	return files, err
 }
 
+// initMode says what a failing init means.
+type initMode int
+
+const (
+	// initStrict: the check wants an initialised working directory.
+	initStrict initMode = iota
+	// initTolerant: a learner running their own commands may be in a situation
+	// where the backend has to be initialised again, by them.
+	initTolerant
+)
+
+// backendProblem says whether a failed init is about the backend.
+func backendProblem(out runner.Output) bool {
+	text := strings.ToLower(string(out.Stderr) + string(out.Stdout))
+	return strings.Contains(text, "backend configuration changed") ||
+		strings.Contains(text, "backend initialization required") ||
+		strings.Contains(text, "initialization required") ||
+		strings.Contains(text, "state migration") ||
+		strings.Contains(text, "-migrate-state") ||
+		strings.Contains(text, "-reconfigure")
+}
+
 // prepareFix makes the run folder ready: it writes the learner's files, builds
 // the situation if that has not been done, and runs init.
-func (e Exercise) prepareFix(ctx context.Context, env *Env, files map[string][]byte) (*run, context.Context, context.CancelFunc, error) {
+func (e Exercise) prepareFix(ctx context.Context, env *Env, files map[string][]byte, init initMode) (*run, context.Context, context.CancelFunc, error) {
 	if env.Engine == nil {
 		return nil, ctx, nil, &SkippedError{fmt.Sprintf("%s needs Terraform: run `tflings doctor`", e.Name)}
 	}
@@ -153,10 +175,17 @@ func (e Exercise) prepareFix(ctx context.Context, env *Env, files map[string][]b
 			return nil, ctx, nil, err
 		}
 	}
-	if out, err := r.tf(ctx, "init", nil, nil); err != nil {
+	// Init is run for the learner every time: the lock file is rewritten with the
+	// learner's files, and the installed providers have to be checked against it
+	// again. When the exercise is about the backend itself, init says that the
+	// backend changed and refuses; for `tflings tf` that is the situation to
+	// repair, not an error to stop at, so it is let through.
+	out, err := r.tf(ctx, "init", nil, nil)
+	if err != nil {
 		cancel()
 		return nil, ctx, nil, err
-	} else if out.ExitCode != 0 {
+	}
+	if out.ExitCode != 0 && !(init == initTolerant && backendProblem(out)) {
 		cancel()
 		return nil, ctx, nil, terraformFailed("terraform init could not finish:", out)
 	}
@@ -231,7 +260,7 @@ func (r *run) seedState() map[string]any {
 // repairing is the learner's job. It reads the state, the real thing in Floci,
 // and wants a plan with nothing left to do.
 func (e Exercise) runFix(ctx context.Context, env *Env, c *check.Compiled, files map[string][]byte) (Result, error) {
-	r, ctx, cancel, err := e.prepareFix(ctx, env, files)
+	r, ctx, cancel, err := e.prepareFix(ctx, env, files, initStrict)
 	if err != nil {
 		return Result{}, err
 	}
@@ -290,7 +319,7 @@ func (e Exercise) Terraform(ctx context.Context, env *Env, args []string, stdin 
 	if err != nil {
 		return -1, fmt.Errorf("cannot read %s: %w", e.Path, err)
 	}
-	r, _, cancel, err := e.prepareFix(ctx, env, files)
+	r, _, cancel, err := e.prepareFix(ctx, env, files, initTolerant)
 	if err != nil {
 		return -1, err
 	}
@@ -330,7 +359,7 @@ func (e Exercise) RunSolution(ctx context.Context, env *Env) (Result, error) {
 	if err != nil {
 		return Result{}, err
 	}
-	r, ctx2, cancel, err := e.prepareFix(ctx, env, files)
+	r, ctx2, cancel, err := e.prepareFix(ctx, env, files, initTolerant)
 	if err != nil {
 		return Result{}, err
 	}
