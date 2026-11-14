@@ -235,7 +235,7 @@ func TestMutationAllowlist(t *testing.T) {
 	}
 	for name, args := range map[string]map[string]any{
 		"ssm.delete_everything": {"name": "/a"},
-		"ssm.put_parameter":    {"name": "/a"},
+		"ssm.put_parameter":     {"name": "/a"},
 	} {
 		if ValidateMutation(name, args) == nil {
 			t.Errorf("%s %v should be refused", name, args)
