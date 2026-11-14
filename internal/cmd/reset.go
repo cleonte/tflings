@@ -30,6 +30,9 @@ AWS account.`,
 			if err != nil {
 				return err
 			}
+			if err := (&exercises.Env{}).ForgetRun(args[0]); err != nil {
+				color.Yellow("Restored %s, but could not delete its saved state: %s", p, err)
+			}
 			if err := exercises.RecordReset(root, args[0]); err != nil {
 				color.Yellow("Restored %s, but could not save the reset in %s: %s", p, exercises.ProgressFile, err)
 				return err

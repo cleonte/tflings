@@ -31,6 +31,10 @@ type Env struct {
 	// Home is tflings's own folder (scratch runs, plugin cache, CLI config).
 	// Empty means a folder under the user's cache directory.
 	Home string
+	// AccountSalt is mixed into the name an exercise's fake AWS account is
+	// derived from. Empty for learners; tests set it so that a run never meets
+	// what an earlier run left in Floci.
+	AccountSalt string
 	// Workspace is the learner's folder, where info.toml and .tflings.json are.
 	// Empty means the current directory.
 	Workspace string
@@ -118,7 +122,7 @@ func (e Exercise) Run(ctx context.Context, env *Env) (Result, error) {
 	var res Result
 	var err error
 	switch e.Mode {
-	case ModePlan:
+	case ModePlan, ModeApply:
 		files, ferr := WorkspaceFiles(os.DirFS(env.workspace()), filepath.ToSlash(e.Path))
 		if ferr != nil {
 			return Result{}, fmt.Errorf("cannot read %s: %w", e.Path, ferr)
@@ -156,6 +160,8 @@ func (e Exercise) RunSource(ctx context.Context, env *Env, src []byte) (Result, 
 		return e.runQuiz(c, src)
 	case ModePlan:
 		return e.runPlan(ctx, env, c, map[string][]byte{ExerciseFile: src})
+	case ModeApply:
+		return e.runApply(ctx, env, c, map[string][]byte{ExerciseFile: src})
 	}
 	return Result{}, fmt.Errorf("%s: %w (%s)", e.Name, ErrNotBuilt, e.Mode)
 }
@@ -174,10 +180,13 @@ func (e Exercise) RunFiles(ctx context.Context, env *Env, files map[string][]byt
 	if err != nil {
 		return Result{}, fmt.Errorf("%s: %w", e.Name, err)
 	}
-	if e.Mode != ModePlan {
-		return Result{}, fmt.Errorf("%s: RunFiles is for plan exercises, not %s", e.Name, e.Mode)
+	switch e.Mode {
+	case ModePlan:
+		return e.runPlan(ctx, env, c, files)
+	case ModeApply:
+		return e.runApply(ctx, env, c, files)
 	}
-	return e.runPlan(ctx, env, c, files)
+	return Result{}, fmt.Errorf("%s: RunFiles is for plan and apply exercises, not %s", e.Name, e.Mode)
 }
 
 // runQuiz compares the answer in quiz.toml with the key.
@@ -213,3 +222,11 @@ func (e Exercise) runQuiz(c *check.Compiled, src []byte) (Result, error) {
 // HomeDir is tflings's own folder (see Env.Home), for callers that need to
 // look inside it, such as the lookup of a managed Terraform.
 func (e *Env) HomeDir() string { return e.home() }
+
+// ForgetRun deletes what tflings keeps for the exercise between runs: its
+// scratch folder, with the Terraform state. A reset calls it, because the
+// exercise then gets a fresh AWS account and the old state would describe
+// resources that are not there.
+func (e *Env) ForgetRun(name string) error {
+	return os.RemoveAll(filepath.Join(e.home(), "runs", name))
+}

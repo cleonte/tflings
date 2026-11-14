@@ -90,3 +90,12 @@ objective = "4a"
 requires  = ["floci"]
 hint      = "Look in the documentation of aws_s3_bucket for the name of the argument that sets the bucket's name."
 docs      = "https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket"
+
+[[exercises]]
+name      = "references1"
+path      = "exercises/references/references1"
+topic     = "references"
+mode      = "apply"
+objective = "4b"
+hint      = "The object's bucket can be the id of the bucket resource: look at how a resource's attributes are written, TYPE.NAME.ATTRIBUTE."
+docs      = "https://developer.hashicorp.com/terraform/language/expressions/references"

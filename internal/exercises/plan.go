@@ -68,46 +68,11 @@ func (e Exercise) ProofFiles(env *Env) (map[string][]byte, error) {
 // assertions of check.yaml look at the plan and at the configuration inside it.
 // Nothing is created anywhere.
 func (e Exercise) runPlan(ctx context.Context, env *Env, c *check.Compiled, files map[string][]byte) (Result, error) {
-	if env.Engine == nil {
-		return Result{}, &SkippedError{fmt.Sprintf("%s needs Terraform: run `tflings doctor`", e.Name)}
-	}
-	if len(files) == 0 {
-		return Result{}, &FailedError{Lines: []string{"There are no Terraform files in " + e.Path + "."}}
-	}
-
-	if problems := runner.CheckProviders(files); len(problems) > 0 {
-		var lines []string
-		for _, p := range problems {
-			lines = append(lines, p.String())
-		}
-		return Result{}, &FailedError{Lines: append([]string{"tflings will not run this configuration:"}, lines...)}
-	}
-
-	run, err := env.newRun(e, files)
+	run, ctx, cancel, err := e.prepare(ctx, env, c, files)
 	if err != nil {
 		return Result{}, err
 	}
-	ctx, cancel := context.WithTimeout(ctx, e.RunTimeout())
 	defer cancel()
-
-	if c.Fmt {
-		out, err := run.tf(ctx, "fmt", []string{"-check", "-diff", "-recursive"}, nil)
-		if err != nil {
-			return Result{}, err
-		}
-		if out.ExitCode != 0 {
-			return Result{}, &FailedError{
-				Lines:   []string{"Your files are not formatted the way `terraform fmt` writes them."},
-				Details: lines(string(out.Stdout), 40),
-			}
-		}
-	}
-
-	if out, err := run.tf(ctx, "init", nil, nil); err != nil {
-		return Result{}, err
-	} else if out.ExitCode != 0 {
-		return Result{}, terraformFailed("terraform init could not finish:", out)
-	}
 
 	plan, err := run.plan(ctx, nil)
 	if err != nil {
@@ -144,10 +109,26 @@ func describeVars(vars map[string]string) string {
 	return strings.Join(parts, ", ")
 }
 
-// plan runs `plan -out` and `show -json` and returns the plan as JSON.
+// plan runs `plan -out` and `show -json` for plan mode: nothing exists yet, so
+// there is nothing to refresh.
 func (r *run) plan(ctx context.Context, vars map[string]string) (map[string]any, error) {
+	plan, _, err := r.planFor(ctx, vars, false, false)
+	return plan, err
+}
+
+// planFor runs `plan -out` and `show -json` and returns the plan as JSON. With
+// detailed it also says whether the plan has changes (exit code 2). With
+// refresh Terraform first reads the real state of what the state file knows,
+// which apply mode needs and plan mode does not.
+func (r *run) planFor(ctx context.Context, vars map[string]string, refresh, detailed bool) (plan map[string]any, changed bool, err error) {
 	planFile := filepath.Join(r.dir, "tflings.plan")
-	flags := []string{"-out=" + planFile, "-refresh=false"}
+	flags := []string{"-out=" + planFile}
+	if !refresh {
+		flags = append(flags, "-refresh=false")
+	}
+	if detailed {
+		flags = append(flags, "-detailed-exitcode")
+	}
 	names := make([]string, 0, len(vars))
 	for n := range vars {
 		names = append(names, n)
@@ -156,23 +137,27 @@ func (r *run) plan(ctx context.Context, vars map[string]string) (map[string]any,
 	for _, n := range names {
 		flags = append(flags, "-var", n+"="+vars[n])
 	}
-	if out, err := r.tf(ctx, "plan", flags, nil); err != nil {
-		return nil, err
-	} else if out.ExitCode != 0 {
-		return nil, terraformFailed("Terraform could not plan your configuration:", out)
-	}
-	out, err := r.tf(ctx, "show", []string{"-json"}, []string{planFile})
+	out, err := r.tf(ctx, "plan", flags, nil)
 	if err != nil {
-		return nil, err
+		return nil, false, err
+	}
+	switch {
+	case out.ExitCode == 2 && detailed:
+		changed = true
+	case out.ExitCode != 0:
+		return nil, false, terraformFailed("Terraform could not plan your configuration:", out)
+	}
+	out, err = r.tf(ctx, "show", []string{"-json"}, []string{planFile})
+	if err != nil {
+		return nil, false, err
 	}
 	if out.ExitCode != 0 {
-		return nil, terraformFailed("terraform show could not read the plan:", out)
+		return nil, false, terraformFailed("terraform show could not read the plan:", out)
 	}
-	var plan map[string]any
 	if err := json.Unmarshal(out.Stdout, &plan); err != nil {
-		return nil, fmt.Errorf("%s: the plan is not valid JSON: %w", r.ex.Name, err)
+		return nil, false, fmt.Errorf("%s: the plan is not valid JSON: %w", r.ex.Name, err)
 	}
-	return plan, nil
+	return plan, changed, nil
 }
 
 // terraformFailed turns a failed Terraform run into something a learner can
@@ -227,7 +212,7 @@ func (e *Env) newRun(ex Exercise, files map[string][]byte) (*run, error) {
 	home := e.home()
 	dir := filepath.Join(home, "runs", ex.Name)
 	src := filepath.Join(dir, "src")
-	if err := os.RemoveAll(src); err != nil {
+	if err := cleanSource(src); err != nil {
 		return nil, err
 	}
 	names := make([]string, 0, len(files))
@@ -249,7 +234,7 @@ func (e *Env) newRun(ex Exercise, files map[string][]byte) (*run, error) {
 		return nil, err
 	}
 	if ex.NeedsFloci() {
-		cfg.Account = runner.Account(ex.Name, ResetCount(e.workspace(), ex.Name))
+		cfg.Account = runner.Account(ex.Name+e.AccountSalt, ResetCount(e.workspace(), ex.Name))
 		// The AWS provider is installed from the prefetched cache by a filesystem
 		// mirror. The mirror folder must not also be TF_PLUGIN_CACHE_DIR: Terraform
 		// refuses to install a provider "to itself". Other providers use a second
@@ -286,4 +271,52 @@ func (r *run) tf(ctx context.Context, command string, flags, positional []string
 		return out, fmt.Errorf("%s: %w. If this machine has no network, run `tflings doctor`", r.ex.Name, err)
 	}
 	return out, err
+}
+
+// prepare is what plan and apply mode do first: refuse a configuration that
+// could leave the fake AWS, write the files into the scratch folder, check the
+// formatting if the exercise asks for it, and run `terraform init`. The
+// returned context carries the run's timeout; call cancel when done.
+func (e Exercise) prepare(ctx context.Context, env *Env, c *check.Compiled, files map[string][]byte) (*run, context.Context, context.CancelFunc, error) {
+	if env.Engine == nil {
+		return nil, ctx, nil, &SkippedError{fmt.Sprintf("%s needs Terraform: run `tflings doctor`", e.Name)}
+	}
+	if len(files) == 0 {
+		return nil, ctx, nil, &FailedError{Lines: []string{"There are no Terraform files in " + e.Path + "."}}
+	}
+	if problems := runner.CheckProviders(files); len(problems) > 0 {
+		var lines []string
+		for _, p := range problems {
+			lines = append(lines, p.String())
+		}
+		return nil, ctx, nil, &FailedError{Lines: append([]string{"tflings will not run this configuration:"}, lines...)}
+	}
+	run, err := env.newRun(e, files)
+	if err != nil {
+		return nil, ctx, nil, err
+	}
+	ctx, cancel := context.WithTimeout(ctx, e.RunTimeout())
+
+	if c.Fmt {
+		out, err := run.tf(ctx, "fmt", []string{"-check", "-diff", "-recursive"}, nil)
+		if err != nil {
+			cancel()
+			return nil, ctx, nil, err
+		}
+		if out.ExitCode != 0 {
+			cancel()
+			return nil, ctx, nil, &FailedError{
+				Lines:   []string{"Your files are not formatted the way `terraform fmt` writes them."},
+				Details: lines(string(out.Stdout), 40),
+			}
+		}
+	}
+	if out, err := run.tf(ctx, "init", nil, nil); err != nil {
+		cancel()
+		return nil, ctx, nil, err
+	} else if out.ExitCode != 0 {
+		cancel()
+		return nil, ctx, nil, terraformFailed("terraform init could not finish:", out)
+	}
+	return run, ctx, cancel, nil
 }

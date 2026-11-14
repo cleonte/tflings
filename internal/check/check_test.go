@@ -83,3 +83,41 @@ func TestLoadRejectsBadAssertions(t *testing.T) {
 		}
 	}
 }
+
+func TestApplyStages(t *testing.T) {
+	c, err := Load([]byte(`
+plan:
+  - expr: plan.resource_changes.size() == 1
+    message: "plan"
+config:
+  - expr: config.root_module.resources.size() == 1
+    message: "config"
+state:
+  - expr: state.values.root_module.resources.exists(r, r.address == "a.b")
+    message: "state"
+empty_plan_after: true
+`))
+	if err != nil {
+		t.Fatal(err)
+	}
+	plan := map[string]any{
+		"resource_changes": []any{map[string]any{}},
+		"configuration":    map[string]any{"root_module": map[string]any{"resources": []any{}}},
+	}
+	if got := c.RunPlanOnly(plan); len(got) != 0 {
+		t.Errorf("plan stage: %v", got)
+	}
+	if got := c.RunConfigOnly(plan); len(got) != 1 || got[0] != "config" {
+		t.Errorf("config stage: %v", got)
+	}
+	state := map[string]any{"values": map[string]any{"root_module": map[string]any{"resources": []any{map[string]any{"address": "a.b"}}}}}
+	if got := c.RunState(state); len(got) != 0 {
+		t.Errorf("state stage: %v", got)
+	}
+	if got := c.RunState(map[string]any{}); len(got) != 1 || got[0] != "state" {
+		t.Errorf("a missing state is a failed assertion, got %v", got)
+	}
+	if c.Count() != 4 {
+		t.Errorf("Count = %d, want 4 (plan, config, state, empty plan)", c.Count())
+	}
+}

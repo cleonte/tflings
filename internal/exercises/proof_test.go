@@ -5,7 +5,9 @@ import (
 	"errors"
 	"io/fs"
 	"os"
+	"strconv"
 	"testing"
+	"time"
 
 	"github.com/cleonte/tflings"
 	"github.com/cleonte/tflings/internal/engine"
@@ -26,6 +28,8 @@ func TestEveryExerciseIsProven(t *testing.T) {
 		t.Fatal(err)
 	}
 	env := &exercises.Env{Embedded: tflings.FS, Solutions: tflings.Solutions, Home: t.TempDir(), Workspace: t.TempDir()}
+	// A run never meets what an earlier test run left in Floci.
+	env.AccountSalt = strconv.FormatInt(time.Now().UnixNano(), 36)
 	if eng, err := engine.Find(context.Background(), os.Getenv("TFLINGS_TEST_TERRAFORM")); err == nil {
 		env.Engine = eng
 	}
@@ -44,7 +48,7 @@ func TestEveryExerciseIsProven(t *testing.T) {
 			if ex.NeedsFloci() && !flociReady {
 				t.Skip("needs Floci running and TFLINGS_TEST_HOME (a home with the AWS provider prefetched)")
 			}
-			if ex.Mode == exercises.ModePlan {
+			if ex.Mode == exercises.ModePlan || ex.Mode == exercises.ModeApply {
 				proveWithFiles(t, env, ex)
 				return
 			}
