@@ -123,6 +123,7 @@ Same as k8slings (`init`, `watch`, `run`, `hint`, `list`, `verify`, `reset`, `so
 7. **Default VPC**: every account starts with one, so the check DSL gets a `non_default` helper.
 8. **`force_destroy = true` on every bucket** in every exercise template, enforced by a lint in the exercise checker.
 9. **Retries**: the runner sets `AWS_MAX_ATTEMPTS` low, `AWS_RETRY_MODE=standard`, a short timeout and a clear error message, so a learner never waits minutes on retries. Spike 04 showed `AWS_MAX_ATTEMPTS=1` does **not** bound the offline failure (apply still running after 90 s; the S3 backend still made 5 attempts), so the runner also needs its own wall-clock timeout around every Terraform call.
+10. **Online-first** (2026-11-14): learners need normal network access and DNS. If `<account>.localhost` does not resolve (minimal Linux, restricted resolver, offline), `doctor` detects it and prints the exact `sudo` `/etc/hosts` lines. No root-free offline fix is planned; the plugin cache can still be prefilled with `doctor --prefetch`.
 
 ## Source material: `learn/tf-associate`
 
@@ -159,7 +160,7 @@ Easier with Floci than with a custom provider: Floci already tests OpenTofu in i
 - [x] Spike 02: one account per exercise via 12-digit key ID — PASS; no single-account reset API (global `/_floci/state/reset` only), so `reset` uses a fresh account ID.
 - [x] Spike 04: `AWS_ENDPOINT_URL_S3_CONTROL` is honoured but the account-ID prefix stays; splitting the endpoints (IP for the rest, `localhost` for S3 Control) leaves one name per account to resolve.
 - [x] Spike 03: S3 backend with `use_lockfile` and with DynamoDB, stuck lock + `force-unlock`, `init -migrate-state` — PASS on 1.12.2 and 1.17.2.
-- [ ] Offline CI job: network disabled during the `apply` step.
+- [ ] CI job with the network disabled during `apply` (expected to need the `/etc/hosts` lines; proves `doctor`'s message).
 - [ ] CI matrix for Windows, macOS offline, Linux amd64 and systemd-resolved.
 - [~] Spike 05 (partial): tflings-managed Floci container on macOS + Lima — PASS (0.07 s to healthy, 29 MiB idle, state survives container removal, hardened run works, named volume must be at `/app/data` to avoid anonymous-volume leaks). Native Linux, Docker Desktop, Colima, OrbStack, Windows untested.
 - [ ] Spike: time of `plan` per save with the AWS provider (target < 5 s); plugin cache and offline `init`.
@@ -203,7 +204,7 @@ Easier with Floci than with a custom provider: Floci already tests OpenTofu in i
 
 ## Risks
 
-- **Offline resolution of `<account>.localhost`**: with the split endpoints above, the only name still needed is `<account-id>.localhost`, for S3 Control (spike 04: works online everywhere tested; offline on Linux it works only with `127.0.0.1 <account>.localhost` in `/etc/hosts`, which needs root and one line per account ID). Not solved for offline learners; `doctor` must detect it and print the exact lines. Windows, macOS offline, amd64 and systemd-resolved are untested.
+- **Offline resolution of `<account>.localhost`** (accepted, decision 10): with the split endpoints above, the only name still needed is `<account-id>.localhost`, for S3 Control (spike 04: works online everywhere tested; offline on Linux it works only with `127.0.0.1 <account>.localhost` in `/etc/hosts`, which needs root). `doctor` must detect it and print the exact lines. Windows, macOS offline, amd64 and systemd-resolved are untested.
 - **Floci moves fast**: a new release can change behaviour. Pin the version, run the full exercise suite before bumping, keep the bump a deliberate PR (version watch opens it).
 - **Emulator gaps**: an AWS feature Floci gets wrong would teach the wrong thing. Use only resource types in Floci's Terraform compatibility suite or proven by our own CI; prefer S3, VPC, IAM, SSM, Secrets Manager, DynamoDB, Route 53, KMS.
 - **Docker is required** for all hands-on exercises. Acceptable (k8slings learners have it already); `doctor` checks it and the Lima/Colima specifics, and companies that cannot use Docker Desktop can use Colima or OrbStack.
