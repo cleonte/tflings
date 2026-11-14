@@ -282,3 +282,41 @@ mode      = "plan"
 objective = "2b"
 hint      = "required_version = \"~> 1.12\" allows 1.12 and newer, below 2.0."
 docs      = "https://developer.hashicorp.com/terraform/language/expressions/version-constraints"
+
+[[exercises]]
+name      = "sensitive1"
+path      = "exercises/sensitive/sensitive1"
+topic     = "sensitive"
+mode      = "plan"
+objective = "4d"
+hint      = "Add sensitive = true to the variable."
+docs      = "https://developer.hashicorp.com/terraform/language/values/variables#suppressing-values-in-cli-output"
+
+[[exercises]]
+name      = "sensitive2"
+path      = "exercises/sensitive/sensitive2"
+topic     = "sensitive"
+mode      = "plan"
+objective = "4d"
+hint      = "The output needs sensitive = true too. Do not remove the sensitivity of the variable."
+docs      = "https://developer.hashicorp.com/terraform/language/values/outputs#sensitive-suppressing-values-in-cli-output"
+
+[[exercises]]
+name      = "sensitive3"
+path      = "exercises/sensitive/sensitive3"
+topic     = "sensitive"
+mode      = "apply"
+objective = "4d"
+requires  = ["floci"]
+hint      = "aws_ssm_parameter has value_wo and value_wo_version instead of value."
+docs      = "https://developer.hashicorp.com/terraform/language/manage-sensitive-data/ephemeral"
+
+[[exercises]]
+name      = "sensitive4"
+path      = "exercises/sensitive/sensitive4"
+topic     = "sensitive"
+mode      = "apply"
+objective = "4d"
+requires  = ["floci"]
+hint      = "aws_secretsmanager_secret_version has secret_string_wo and secret_string_wo_version."
+docs      = "https://developer.hashicorp.com/terraform/language/manage-sensitive-data/ephemeral"

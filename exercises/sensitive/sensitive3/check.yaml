@@ -1,0 +1,13 @@
+state:
+  - expr: state.values.root_module.resources.filter(r, r.address == "aws_ssm_parameter.token").all(r, !has(r.values.value) || r.values.value == null || r.values.value == "")
+    message: "The secret is stored in the state. Use a write-only argument."
+aws:
+  - call: ssm.parameter
+    args: { name: /tflings/token }
+    expr: result.exists && result.type == "SecureString" && result.value == "s3cr3t-not-a-real-token"
+    message: "The parameter /tflings/token should exist, be a SecureString and hold the token."
+empty_plan_after: true
+explanation: >-
+  A write-only argument (value_wo) is sent to the provider but never stored in
+  the plan or state. Terraform cannot compare it later, so it changes only when
+  the version argument (value_wo_version) changes.

@@ -1,0 +1,12 @@
+state:
+  - expr: state.values.root_module.resources.filter(r, r.address == "aws_secretsmanager_secret_version.db").all(r, !has(r.values.secret_string) || r.values.secret_string == null || r.values.secret_string == "")
+    message: "The password is stored in the state. Use a write-only argument."
+aws:
+  - call: secretsmanager.secret
+    args: { name: tflings-db-password }
+    expr: result.exists && result.value == "hunter2-not-a-real-password"
+    message: "The secret tflings-db-password should exist and hold the password."
+empty_plan_after: true
+explanation: >-
+  secret_string_wo is write-only: it is never stored in the state. To rotate the
+  secret, change secret_string_wo_version.
