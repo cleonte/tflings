@@ -1,0 +1,8 @@
+plan:
+  - expr: plan.planned_values.outputs.subnet_b.value == "10.0.1.0/24"
+    message: "subnet_b should be 10.0.1.0/24."
+variants:
+  - vars: { vpc_cidr: "172.16.0.0/16" }
+    plan:
+      - expr: plan.planned_values.outputs.subnet_b.value == "172.16.1.0/24"
+        message: "subnet_b should be computed from the VPC range."

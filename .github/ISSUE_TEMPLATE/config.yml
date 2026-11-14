@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Security problem
+    url: https://github.com/cleonte/tflings/security/advisories/new
+    about: Report a way to reach a real cloud account or escape the sandbox privately, not here.

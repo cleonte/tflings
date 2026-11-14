@@ -1,0 +1,12 @@
+plan:
+  - expr: plan.resource_changes.exists(r, r.address == "terraform_data.user[\"alice\"]" && r.change.after.input == "user-alice")
+    message: "terraform_data.user[\"alice\"] should hold user-alice."
+  - expr: plan.resource_changes.exists(r, r.address == "terraform_data.user[\"bob\"]" && r.change.after.input == "user-bob")
+    message: "terraform_data.user[\"bob\"] should hold user-bob."
+variants:
+  - vars: { users: '["carol"]' }
+    plan:
+      - expr: plan.resource_changes.filter(r, r.type == "terraform_data").size() == 1
+        message: "There should be one resource for every user and no more."
+      - expr: plan.resource_changes.exists(r, r.address == "terraform_data.user[\"carol\"]")
+        message: "The resources should be named by the user."

@@ -1,0 +1,12 @@
+plan:
+  - expr: plan.resource_changes.filter(r, r.type == "terraform_data").size() == 2
+    message: "Both resources should still be there."
+config:
+  - expr: config.root_module.resources.filter(r, r.address == "terraform_data.app").all(r, r.expressions.input.references.exists(x, x.startsWith("terraform_data.database")))
+    message: "terraform_data.app should use an attribute of terraform_data.database, so that the dependency is implicit."
+  - expr: config.root_module.resources.filter(r, r.address == "terraform_data.app").all(r, !has(r.depends_on))
+    message: "Use a reference, not depends_on."
+explanation: >-
+  A reference is an implicit dependency: Terraform reads the configuration,
+  builds a graph and orders the work by it. depends_on is for the cases where
+  there is no value to reference.

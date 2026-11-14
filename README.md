@@ -4,7 +4,7 @@ Learn Terraform by fixing small broken exercises, like [Rustlings](https://githu
 
 You get a folder of Terraform files with a `# I AM NOT DONE` line and a `# TODO:` where something is wrong. You fix them, save, and tflings tells you what Terraform says and what is still not right. Exercises that build things use the real `hashicorp/aws` provider against [Floci](https://github.com/floci-io/floci), a free local AWS emulator that tflings runs in Docker. Nothing ever talks to a real AWS account.
 
-> **Status: pre-release.** The skeleton, plan mode, apply mode, the full-screen view, `doctor` and 43 exercises work, fix mode among them (`tflings tf <exercise> ...` repairs a situation that has gone wrong). Most of the planned ~120 exercises and the releases do not exist yet. See [ROADMAP.md](ROADMAP.md).
+> **Status: pre-release, expect breakage.** The skeleton, plan mode, apply mode, the full-screen view, `doctor` and 51 exercises work, fix mode among them (`tflings tf <exercise> ...` repairs a situation that has gone wrong). Most of the planned ~120 exercises and the releases do not exist yet. See [ROADMAP.md](ROADMAP.md).
 
 ## What you need
 
@@ -47,6 +47,8 @@ tflings doctor --prefetch   # downloads the AWS provider (about 250 MB) so exerc
 | `verify` | Check every exercise in order. |
 | `reset <name>` | Put an exercise back as it was. It gets a fresh, empty fake AWS account. |
 | `solution <name>` | Show the solution (hidden while the exercise is pending, unless you ask). |
+| `tf <name> <terraform args>` | Fix exercises: run Terraform in the exercise's sealed environment (`tflings tf drift1 plan`). |
+| `env <name>` | Print that environment, for a shell of your own. |
 | `update` | Add the exercises your folder does not have yet. |
 | `aws up\|down\|status\|reset` | Manage the local AWS (Floci). |
 | `doctor [--prefetch]` | Check this machine. |
@@ -62,8 +64,12 @@ The design and the experiments behind it are in [CLAUDE.md](CLAUDE.md) and [spik
 ## Known limits
 
 - The `aws` provider needs `<account>.localhost` to resolve (one call of the provider sends to that name). Docker's and most desktop systems' DNS do this; if yours does not, `tflings doctor` prints the exact `/etc/hosts` lines to add.
-- Tested on macOS (Apple silicon) and Linux containers. Windows and Intel are untested.
+- Tested on macOS (Apple silicon), Linux arm64 and Linux x86_64 with native Docker, on Terraform 1.12.2 and 1.17.2. Windows ran the exercises that need no AWS in CI; Windows with Docker, and Intel Macs, are untested.
 - "Bucket name already taken" cannot be taught with Floci (its S3 names are per account), so those are quiz questions.
+
+## Contributing and security
+
+Issues and pull requests are welcome: see [CONTRIBUTING.md](CONTRIBUTING.md). To report a way out of the sandbox, see [SECURITY.md](SECURITY.md).
 
 ## License
 

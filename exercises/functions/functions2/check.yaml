@@ -1,0 +1,8 @@
+plan:
+  - expr: plan.planned_values.outputs.settings.value["size"] == "small" && plan.planned_values.outputs.settings.value["region"] == "eu"
+    message: "Without overrides, the settings are the defaults."
+variants:
+  - vars: { overrides: '{size = "large"}' }
+    plan:
+      - expr: plan.planned_values.outputs.settings.value["size"] == "large" && plan.planned_values.outputs.settings.value["region"] == "eu"
+        message: "An override should replace the default and keep the other keys."
