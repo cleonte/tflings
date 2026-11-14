@@ -4,7 +4,7 @@ Learn Terraform by fixing small broken exercises, like [Rustlings](https://githu
 
 You get a folder of Terraform files with a `# I AM NOT DONE` line and a `# TODO:` where something is wrong. You fix them, save, and tflings tells you what Terraform says and what is still not right. Exercises that build things use the real `hashicorp/aws` provider against [Floci](https://github.com/floci-io/floci), a free local AWS emulator that tflings runs in Docker. Nothing ever talks to a real AWS account.
 
-> **Status: pre-release.** The skeleton, plan mode, the full-screen view, `doctor` and the first ten exercises work. Most of the planned ~120 exercises, apply mode, fix mode and releases do not exist yet. See [ROADMAP.md](ROADMAP.md).
+> **Status: pre-release.** The skeleton, plan mode, apply mode, the full-screen view, `doctor` and 19 exercises work. Most of the planned ~120 exercises, fix mode and releases do not exist yet. See [ROADMAP.md](ROADMAP.md).
 
 ## What you need
 

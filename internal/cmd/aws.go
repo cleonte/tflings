@@ -2,10 +2,12 @@ package cmd
 
 import (
 	"bufio"
+	"context"
 	"errors"
 	"fmt"
 	"strings"
 
+	"github.com/cleonte/tflings/internal/exercises"
 	"github.com/cleonte/tflings/internal/floci"
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
@@ -54,6 +56,7 @@ a Floci or LocalStack you run yourself. Nothing here talks to a real AWS.`,
 				return flociError(err)
 			}
 			color.Green("Floci %s is running on %s", floci.Version, mgr.URL())
+			emptyFlociIfIdle(cmd.Context(), mgr)
 			return nil
 		},
 	})
@@ -143,4 +146,19 @@ func orNone(s string) string {
 		return "no health status"
 	}
 	return s
+}
+
+// emptyFlociIfIdle gives the learner a clean Floci when nothing of theirs is in
+// progress: every apply exercise keeps its Terraform state, and while any of
+// those states holds resources, Floci is left alone. (A reset would not corrupt
+// them, since Terraform notices missing resources, but it would silently undo
+// the learner's work.) It says so when it empties Floci.
+func emptyFlociIfIdle(ctx context.Context, mgr *floci.Manager) {
+	env := &exercises.Env{}
+	if env.HasSavedState() || !mgr.Healthy(ctx) {
+		return
+	}
+	if err := mgr.Reset(ctx); err == nil {
+		color.White("Floci was emptied: none of your exercises had anything built.")
+	}
 }

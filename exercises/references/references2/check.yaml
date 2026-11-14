@@ -1,0 +1,13 @@
+state:
+  - expr: >-
+      state.values.root_module.resources.filter(r, r.address == "aws_subnet.app").all(s,
+        s.values.vpc_id == state.values.root_module.resources.filter(v, v.address == "aws_vpc.main")[0].values.id)
+    message: "The subnet should be in the VPC aws_vpc.main."
+config:
+  - expr: config.root_module.resources.filter(r, r.address == "aws_subnet.app").all(r, r.expressions.vpc_id.references.size() > 0)
+    message: "The subnet should refer to the VPC resource, not repeat an id."
+aws:
+  - call: ec2.subnets
+    expr: result.subnets.exists(s, s.cidr_block == "10.0.1.0/24")
+    message: "There should be a subnet with the range 10.0.1.0/24."
+empty_plan_after: true

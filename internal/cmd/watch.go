@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/cleonte/tflings/internal/exercises"
+	"github.com/cleonte/tflings/internal/floci"
 	"github.com/cleonte/tflings/internal/watcher"
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
@@ -46,6 +47,10 @@ again) or q (quit).`,
 				color.Red("Can't watch %s: %s", root, err)
 				color.Yellow("Run tflings from the folder that holds the exercises, or create one with `tflings init`.")
 				return err
+			}
+
+			if mgr := floci.New(); mgr.Healthy(ctx) {
+				emptyFlociIfIdle(ctx, mgr)
 			}
 
 			if !plain && isTerminal(cmd.InOrStdin()) && isTerminal(cmd.OutOrStdout()) {

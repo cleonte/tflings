@@ -357,6 +357,9 @@ func (m *Model) reset() tea.Cmd {
 		m.notice = "Reset failed: " + err.Error()
 		return nil
 	}
+	if m.cfg.Env != nil {
+		_ = m.cfg.Env.ForgetRun(m.exercise.Name)
+	}
 	if err := exercises.RecordReset(root, m.exercise.Name); err != nil {
 		m.notice = "Restored " + path + ", but could not save the reset: " + err.Error()
 		return nil

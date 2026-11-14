@@ -1,0 +1,10 @@
+state:
+  - expr: state.values.root_module.resources.exists(r, r.address == "aws_s3_object.logo" && r.values.bucket == "tflings-assets")
+    message: "aws_s3_object.logo should be stored in the bucket tflings-assets."
+config:
+  - expr: config.root_module.resources.filter(r, r.address == "aws_s3_object.logo").all(r, r.expressions.bucket.references.size() > 0)
+    message: "The object should refer to the bucket resource, not repeat the bucket's name."
+empty_plan_after: true
+explanation: >-
+  A reference such as aws_s3_bucket.assets.id both gives the value and tells
+  Terraform the order: the bucket is created before the object.

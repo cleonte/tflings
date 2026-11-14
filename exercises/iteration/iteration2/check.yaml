@@ -1,0 +1,12 @@
+plan:
+  - expr: plan.resource_changes.exists(r, r.address == "terraform_data.port[\"http\"]" && r.change.after.input == 80)
+    message: "terraform_data.port[\"http\"] should exist and hold 80."
+  - expr: plan.resource_changes.exists(r, r.address == "terraform_data.port[\"https\"]" && r.change.after.input == 443)
+    message: "terraform_data.port[\"https\"] should exist and hold 443."
+variants:
+  - vars: { ports: '{ssh = 22}' }
+    plan:
+      - expr: plan.resource_changes.exists(r, r.address == "terraform_data.port[\"ssh\"]" && r.change.after.input == 22)
+        message: "There should be one resource for each entry of the map, named by its key."
+      - expr: plan.resource_changes.filter(r, r.type == "terraform_data").size() == 1
+        message: "There should be no other resources."

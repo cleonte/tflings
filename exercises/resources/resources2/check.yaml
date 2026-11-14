@@ -1,0 +1,13 @@
+aws:
+  - call: s3.bucket
+    args: { bucket: tflings-backups }
+    expr: result.exists
+    message: "The bucket tflings-backups should exist."
+  - call: s3.versioning
+    args: { bucket: tflings-backups }
+    expr: result.status == "Enabled"
+    message: "Versioning is not enabled on the bucket tflings-backups."
+empty_plan_after: true
+explanation: >-
+  aws_s3_bucket_versioning is a resource of its own. The provider split many
+  bucket settings out of aws_s3_bucket, so a bucket is often several resources.
