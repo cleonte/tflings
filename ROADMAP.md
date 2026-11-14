@@ -161,9 +161,11 @@ Easier with Floci than with a custom provider: Floci already tests OpenTofu in i
 - [x] Spike 03: S3 backend with `use_lockfile` and with DynamoDB, stuck lock + `force-unlock`, `init -migrate-state` — PASS on 1.12.2 and 1.17.2.
 - [ ] Offline CI job: network disabled during the `apply` step.
 - [ ] CI matrix for Windows, macOS offline, Linux amd64 and systemd-resolved.
-- [ ] Spike: tflings-managed Floci container (pull by digest, port 4577, named volume, health wait, start time) on macOS, Linux, Windows.
+- [~] Spike 05 (partial): tflings-managed Floci container on macOS + Lima — PASS (0.07 s to healthy, 29 MiB idle, state survives container removal, hardened run works, named volume must be at `/app/data` to avoid anonymous-volume leaks). Native Linux, Docker Desktop, Colima, OrbStack, Windows untested.
 - [ ] Spike: time of `plan` per save with the AWS provider (target < 5 s); plugin cache and offline `init`.
-- [ ] Add a LICENSE to `learn/tf-associate`; verify exam format and HCP free tier; write `CLAUDE.md`.
+- [x] Spike 06: exam is 1 h, multiple choice, online proctored, $70.50, Terraform 1.12, credential valid 2 years; question count and pass mark are not published by HashiCorp. HCP Free: 500 managed resources, unlimited users, 1 concurrent run (IBM support page, 2026-06-23; not shown on HashiCorp's pricing page).
+- [x] LICENSE (Apache-2.0) and NOTICE added to `learn/tf-associate`.
+- [ ] Write the architecture `CLAUDE.md` (replaces the Phase 0 one).
 
 ### Phase 1 — Skeleton and plan mode
 - [ ] Copy the CLI shell from k8slings (cobra, Bubble Tea v2, workspace, `update`, markers, progress file), rename, strip Kubernetes.
