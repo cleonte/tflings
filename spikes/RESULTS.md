@@ -1,6 +1,6 @@
 # Phase 0 spikes — summary
 
-2026-11-13. macOS arm64, Floci 2.4.0 in Docker (Lima), Terraform 1.12.2 and 1.17.2, hashicorp/aws 6.73.0. Details and commands are in each spike's `RESULTS.md`. The proposed `ROADMAP.md` edit is `spikes/ROADMAP-proposal.diff` (not applied).
+2026-11-13. macOS arm64, Floci 2.4.0 in Docker (Lima), Terraform 1.12.2 and 1.17.2, hashicorp/aws 6.73.0. Details and commands are in each spike's `RESULTS.md`. The resulting `ROADMAP.md` and `CLAUDE.md` changes were applied in commit `26d44d9`.
 
 | Spike | Result | Decision / consequence |
 |---|---|---|
