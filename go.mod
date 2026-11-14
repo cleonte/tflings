@@ -1,12 +1,12 @@
 module github.com/cleonte/tflings
 
-go 1.26.0
+go 1.26.7
 
 require (
 	cel.dev/cel-go v0.33.2
 	charm.land/bubbles/v2 v2.2.1
 	charm.land/bubbletea/v2 v2.1.1
-	charm.land/lipgloss/v2 v2.0.6
+	charm.land/lipgloss/v2 v2.1.0
 	github.com/aws/aws-sdk-go-v2 v1.48.0
 	github.com/aws/aws-sdk-go-v2/credentials v1.21.0
 	github.com/aws/aws-sdk-go-v2/service/dynamodb v1.74.0
