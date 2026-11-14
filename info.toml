@@ -80,3 +80,13 @@ mode      = "plan"
 objective = "4e"
 hint      = "The function is called upper."
 docs      = "https://developer.hashicorp.com/terraform/language/functions"
+
+[[exercises]]
+name      = "resources1"
+path      = "exercises/resources/resources1"
+topic     = "resources"
+mode      = "plan"
+objective = "4a"
+requires  = ["floci"]
+hint      = "Look in the documentation of aws_s3_bucket for the name of the argument that sets the bucket's name."
+docs      = "https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket"

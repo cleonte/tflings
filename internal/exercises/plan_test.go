@@ -1,9 +1,13 @@
 package exercises
 
 import (
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 	"testing/fstest"
+
+	"github.com/cleonte/tflings/internal/runner"
 )
 
 func TestStripInitPreamble(t *testing.T) {
@@ -41,5 +45,36 @@ func TestWorkspaceFilesSkipsWhatDoesNotBelong(t *testing.T) {
 		if _, ok := got[w]; !ok {
 			t.Errorf("missing %s in %v", w, got)
 		}
+	}
+}
+
+func TestMirrorAndPluginCacheAreDifferentFolders(t *testing.T) {
+	env := &Env{Home: t.TempDir()}
+	ex := Exercise{Name: "resources1", Mode: ModePlan, Requires: []string{RequiresFloci}}
+	r, err := env.newRun(ex, map[string][]byte{"main.tf": []byte("")})
+	if err != nil {
+		t.Fatal(err)
+	}
+	cli, err := os.ReadFile(r.cfg.CLIConfig)
+	if err != nil {
+		t.Fatal(err)
+	}
+	mirror := filepath.Join(env.Home, "plugins")
+	if !strings.Contains(string(cli), filepath.ToSlash(mirror)) {
+		t.Errorf("the mirror should be %s:\n%s", mirror, cli)
+	}
+	if r.cfg.PluginCache == mirror || r.cfg.PluginCache == "" {
+		t.Errorf("TF_PLUGIN_CACHE_DIR %q must differ from the mirror %q", r.cfg.PluginCache, mirror)
+	}
+	if r.cfg.Account != runner.Account("resources1", 0) {
+		t.Errorf("a Floci exercise runs in its own account, got %q", r.cfg.Account)
+	}
+
+	plain, err := env.newRun(Exercise{Name: "variables1", Mode: ModePlan}, map[string][]byte{"main.tf": []byte("")})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if plain.cfg.Account != "" || plain.cfg.CLIConfig != "" {
+		t.Errorf("a provider-free exercise needs no AWS, no mirror: %+v", plain.cfg)
 	}
 }

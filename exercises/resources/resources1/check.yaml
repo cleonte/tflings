@@ -1,0 +1,7 @@
+plan:
+  - expr: plan.resource_changes.exists(r, r.address == "aws_s3_bucket.logs" && "create" in r.change.actions)
+    message: "The plan should create aws_s3_bucket.logs."
+  - expr: plan.resource_changes.filter(r, r.address == "aws_s3_bucket.logs").all(r, r.change.after.bucket == "tflings-logs")
+    message: "The bucket should be named tflings-logs."
+  - expr: plan.resource_changes.filter(r, r.address == "aws_s3_bucket.logs").all(r, r.change.after.force_destroy == true)
+    message: "Keep force_destroy = true on the bucket, so that it can always be deleted."

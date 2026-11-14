@@ -9,6 +9,7 @@ import (
 	"github.com/cleonte/tflings"
 	"github.com/cleonte/tflings/internal/engine"
 	"github.com/cleonte/tflings/internal/exercises"
+	"github.com/cleonte/tflings/internal/floci"
 	"github.com/spf13/cobra"
 )
 
@@ -27,6 +28,8 @@ func newEnv() *exercises.Env {
 	if eng, err := engine.Find(context.Background(), managed); err == nil {
 		env.Engine = eng
 	}
+	mgr := floci.New()
+	env.FlociUp = mgr.Healthy
 	return env
 }
 
@@ -39,6 +42,8 @@ func NewRootCmd(version string) *cobra.Command {
 		Version:       version,
 	}
 
+	rootCmd.AddCommand(AwsCmd())
+	rootCmd.AddCommand(DoctorCmd(infoFile))
 	rootCmd.AddCommand(HintCmd(infoFile))
 	rootCmd.AddCommand(InitCmd(tflings.FS))
 	rootCmd.AddCommand(ListCmd(infoFile))

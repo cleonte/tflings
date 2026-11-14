@@ -11,7 +11,7 @@ import "embed"
 // which stay in the binary) and `tflings reset` restores single exercises
 // from it.
 //
-//go:embed info.toml exercises
+//go:embed info.toml all:exercises
 var FS embed.FS
 
 // Solutions contains a working version of each exercise, laid out like
@@ -19,5 +19,5 @@ var FS embed.FS
 // `tflings solution`; `tflings init` must not write it, which is why it is
 // separate from FS.
 //
-//go:embed solutions
+//go:embed all:solutions
 var Solutions embed.FS

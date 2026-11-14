@@ -10,6 +10,7 @@ import (
 	"github.com/cleonte/tflings"
 	"github.com/cleonte/tflings/internal/engine"
 	"github.com/cleonte/tflings/internal/exercises"
+	"github.com/cleonte/tflings/internal/floci"
 )
 
 // TestEveryExerciseIsProven is the course's core invariant: the file as
@@ -28,8 +29,21 @@ func TestEveryExerciseIsProven(t *testing.T) {
 	if eng, err := engine.Find(context.Background(), os.Getenv("TFLINGS_TEST_TERRAFORM")); err == nil {
 		env.Engine = eng
 	}
+	// Exercises that use the AWS provider need Floci running and a home whose
+	// plugin cache holds the provider (`tflings doctor --prefetch` with
+	// TFLINGS_HOME set to it); CI prepares both.
+	flociHome := os.Getenv("TFLINGS_TEST_HOME")
+	mgr := floci.New()
+	flociReady := flociHome != "" && mgr.Healthy(context.Background())
+	env.FlociUp = func(context.Context) bool { return flociReady }
+	if flociReady {
+		env.Home = flociHome
+	}
 	for _, ex := range all {
 		t.Run(ex.Name, func(t *testing.T) {
+			if ex.NeedsFloci() && !flociReady {
+				t.Skip("needs Floci running and TFLINGS_TEST_HOME (a home with the AWS provider prefetched)")
+			}
 			if ex.Mode == exercises.ModePlan {
 				proveWithFiles(t, env, ex)
 				return

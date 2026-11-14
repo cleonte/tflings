@@ -250,12 +250,17 @@ func (e *Env) newRun(ex Exercise, files map[string][]byte) (*run, error) {
 	}
 	if ex.NeedsFloci() {
 		cfg.Account = runner.Account(ex.Name, ResetCount(e.workspace(), ex.Name))
-		cfg.PluginCache = filepath.Join(home, "plugins")
+		// The AWS provider is installed from the prefetched cache by a filesystem
+		// mirror. The mirror folder must not also be TF_PLUGIN_CACHE_DIR: Terraform
+		// refuses to install a provider "to itself". Other providers use a second
+		// cache.
+		mirror := filepath.Join(home, "plugins")
+		cfg.PluginCache = filepath.Join(home, "plugins-extra")
 		cfg.CLIConfig = filepath.Join(home, "cli.tfrc")
 		if err := os.MkdirAll(cfg.PluginCache, 0o755); err != nil {
 			return nil, err
 		}
-		if err := runner.WriteCLIConfig(cfg.CLIConfig, cfg.PluginCache); err != nil {
+		if err := runner.WriteCLIConfig(cfg.CLIConfig, mirror); err != nil {
 			return nil, err
 		}
 	}

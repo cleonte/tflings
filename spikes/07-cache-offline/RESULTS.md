@@ -66,3 +66,7 @@ Observations:
 ## Addendum (2026-11-14): provider-free configurations need no network at all
 
 `nonet.sh`, run in a Debian container with `--network none`, Terraform 1.12.2 and 1.17.2: a configuration with only `terraform_data` and an output (no `provider` block) runs `init` ("terraform.io/builtin/terraform is built in to Terraform"), then `plan` ("Plan: 1 to add") with an empty environment and `CHECKPOINT_DISABLE=1`. So plan-mode exercises that do not declare the AWS provider need neither Floci, nor the provider download, nor DNS. This is what the first plan-mode topics (`hcl`, `variables`, `outputs`, `types`, `expressions`, `functions`) can use.
+
+## Addendum 2 (2026-11-14): the mirror folder must differ from the plugin cache folder
+
+Found while building tflings: with `TF_PLUGIN_CACHE_DIR=<dir>` **and** `filesystem_mirror { path = "<dir>" }` pointing at the same folder, `init` fails with `Error while installing hashicorp/aws v6.73.0: cannot install existing provider directory <dir>/registry.terraform.io/hashicorp/aws/6.73.0/darwin_arm64 to itself`. The spike's test cases F, G and H all used a different (empty) cache folder, so they did not show it. tflings uses `<home>/plugins` as the mirror and `<home>/plugins-extra` as `TF_PLUGIN_CACHE_DIR`. Verified on macOS: `init` from the mirror, then a plan with the real AWS provider against Floci, 2.9 s per run.
