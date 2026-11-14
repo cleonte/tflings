@@ -1,0 +1,6 @@
+(exit codes: plan -out 0, validate 0, show -json 0)
+== latest config=empty: validate 1.02s | plan 1.08s | plan -refresh=false 1.09s | plan -out 1.11s | show -json plan 1.05s | per-save (validate+plan -out+show -json) 3.12s
+(exit codes: plan -out 0, validate 0, show -json 0)
+== latest config=one: validate 1.24s | plan 1.57s | plan -refresh=false 1.54s | plan -out 1.54s | show -json plan 1.04s | per-save (validate+plan -out+show -json) 3.84s
+(exit codes: plan -out 0, validate 0, show -json 0)
+== latest config=thirteen: validate 1.26s | plan 2.83s | plan -refresh=false 1.54s | plan -out 2.82s | show -json plan 1.03s | per-save (validate+plan -out+show -json) 5.07s

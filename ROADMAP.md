@@ -163,7 +163,7 @@ Easier with Floci than with a custom provider: Floci already tests OpenTofu in i
 - [ ] CI job with the network disabled during `apply` (expected to need the `/etc/hosts` lines; proves `doctor`'s message).
 - [ ] CI matrix for Windows, macOS offline, Linux amd64 and systemd-resolved.
 - [~] Spike 05 (partial): tflings-managed Floci container on macOS + Lima — PASS (0.07 s to healthy, 29 MiB idle, state survives container removal, hardened run works, named volume must be at `/app/data` to avoid anonymous-volume leaks). Native Linux, Docker Desktop, Colima, OrbStack, Windows untested.
-- [ ] Spike: time of `plan` per save with the AWS provider (target < 5 s); plugin cache and offline `init`.
+- [x] Spike 07: plugin cache alone does NOT give offline `init` (Terraform still asks the registry); `filesystem_mirror`/`-plugin-dir` pointed at the cache does (0.4 s, 28 KB `.terraform`, zh-only lock files are enough). Plan per save: 3.1 s (no resources) to 5.1 s (13 resources) with validate + plan + show; `-refresh=false` saves about 1.3 s on 13 resources.
 - [x] Spike 06: exam is 1 h, multiple choice, online proctored, $70.50, Terraform 1.12, credential valid 2 years; question count and pass mark are not published by HashiCorp. HCP Free: 500 managed resources, unlimited users, 1 concurrent run (IBM support page, 2026-06-23; not shown on HashiCorp's pricing page).
 - [x] LICENSE (Apache-2.0) and NOTICE added to `learn/tf-associate`.
 - [ ] Write the architecture `CLAUDE.md` (replaces the Phase 0 one).
