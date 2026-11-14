@@ -228,3 +228,26 @@ func TestTypedCallsAgainstFloci(t *testing.T) {
 		t.Errorf("secretsmanager.secret: %v", r)
 	}
 }
+
+func TestMutationAllowlist(t *testing.T) {
+	if err := ValidateMutation("ssm.put_parameter", map[string]any{"name": "/a", "value": "b"}); err != nil {
+		t.Errorf("a valid seeding call was refused: %v", err)
+	}
+	for name, args := range map[string]map[string]any{
+		"ssm.delete_parameter": {"name": "/a"},
+		"ssm.put_parameter":    {"name": "/a"},
+	} {
+		if ValidateMutation(name, args) == nil {
+			t.Errorf("%s %v should be refused", name, args)
+		}
+	}
+	if ValidateMutation("ssm.put_parameter", map[string]any{"name": "/a", "value": "b", "extra": "c"}) == nil {
+		t.Error("an unknown argument should be refused")
+	}
+	// check.yaml can never name a seeding call.
+	for _, n := range MutationNames() {
+		if Validate(n, map[string]any{}) == nil {
+			t.Errorf("%s must not be usable in a check", n)
+		}
+	}
+}

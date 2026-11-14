@@ -116,6 +116,10 @@ func Load(raw []byte) (*Compiled, error) {
 		cel.Variable("plan", cel.DynType),
 		cel.Variable("config", cel.DynType),
 		cel.Variable("state", cel.DynType),
+		// seed is the state of a fix exercise right after it was seeded, so that
+		// an assertion can tell "this resource was kept" from "this one was
+		// destroyed and built again". Empty in the other modes.
+		cel.Variable("seed", cel.DynType),
 		cel.Variable("result", cel.DynType),
 	)
 	if err != nil {
@@ -235,7 +239,7 @@ func (c *Compiled) RunAWS(ctx context.Context, caller AWSCaller, state map[strin
 			}
 			cache[key] = res
 		}
-		out, _, err := c.aws[i].Eval(map[string]any{"result": res, "state": state, "plan": map[string]any{}, "config": map[string]any{}})
+		out, _, err := c.aws[i].Eval(map[string]any{"result": res, "state": state, "seed": map[string]any{}, "plan": map[string]any{}, "config": map[string]any{}})
 		if err != nil || out.Value() != true {
 			failures = append(failures, a.Message)
 		}
@@ -258,8 +262,17 @@ func (c *Compiled) RunConfigOnly(plan map[string]any) []string {
 // RunState evaluates the state assertions against the JSON of the state after
 // an apply, and returns the messages of those that failed.
 func (c *Compiled) RunState(state map[string]any) []string {
+	return c.RunStateSeeded(state, nil)
+}
+
+// RunStateSeeded is RunState for a fix exercise: assertions can also read the
+// state the exercise was seeded with, as `seed`.
+func (c *Compiled) RunStateSeeded(state, seed map[string]any) []string {
+	if seed == nil {
+		seed = map[string]any{}
+	}
 	var failures []string
-	vars := map[string]any{"state": state, "plan": map[string]any{}, "config": map[string]any{}}
+	vars := map[string]any{"state": state, "seed": seed, "plan": map[string]any{}, "config": map[string]any{}}
 	for i, a := range c.State {
 		out, _, err := c.state[i].Eval(vars)
 		if err != nil || out.Value() != true {
@@ -285,7 +298,7 @@ func evaluate(plan map[string]any, groups ...group) []string {
 	if cfg == nil {
 		cfg = map[string]any{}
 	}
-	vars := map[string]any{"plan": plan, "config": cfg}
+	vars := map[string]any{"plan": plan, "config": cfg, "seed": map[string]any{}}
 	var failures []string
 	for _, group := range groups {
 		for i, a := range group.as {

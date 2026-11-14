@@ -272,26 +272,22 @@ type run struct {
 // own folder is never used as a working directory, so Terraform's lock file and
 // data directory do not appear in it.
 func (e *Env) newRun(ex Exercise, files map[string][]byte) (*run, error) {
+	r, err := e.runFor(ex)
+	if err != nil {
+		return nil, err
+	}
+	if err := writeSource(r.src, files, ex.Mode == ModeApply || ex.Mode == ModeFix); err != nil {
+		return nil, err
+	}
+	return r, nil
+}
+
+// runFor is the run of an exercise without writing any file into its scratch
+// folder: where it is and the environment Terraform sees there.
+func (e *Env) runFor(ex Exercise) (*run, error) {
 	home := e.home()
 	dir := filepath.Join(home, "runs", ex.Name)
 	src := filepath.Join(dir, "src")
-	if err := cleanSource(src, ex.Mode == ModeApply); err != nil {
-		return nil, err
-	}
-	names := make([]string, 0, len(files))
-	for n := range files {
-		names = append(names, n)
-	}
-	sort.Strings(names)
-	for _, n := range names {
-		p := filepath.Join(src, filepath.FromSlash(n))
-		if err := os.MkdirAll(filepath.Dir(p), 0o755); err != nil {
-			return nil, err
-		}
-		if err := os.WriteFile(p, files[n], 0o644); err != nil {
-			return nil, err
-		}
-	}
 	cfg := runner.Config{Home: filepath.Join(home, "home"), DataDir: filepath.Join(dir, "data")}
 	if err := os.MkdirAll(cfg.Home, 0o755); err != nil {
 		return nil, err
@@ -313,6 +309,29 @@ func (e *Env) newRun(ex Exercise, files map[string][]byte) (*run, error) {
 		}
 	}
 	return &run{env: e, ex: ex, dir: dir, src: src, cfg: cfg}, nil
+}
+
+// writeSource replaces the .tf files and everything else in a scratch folder
+// with files, keeping the Terraform state when keepState says so.
+func writeSource(src string, files map[string][]byte, keepState bool) error {
+	if err := cleanSource(src, keepState); err != nil {
+		return err
+	}
+	names := make([]string, 0, len(files))
+	for n := range files {
+		names = append(names, n)
+	}
+	sort.Strings(names)
+	for _, n := range names {
+		p := filepath.Join(src, filepath.FromSlash(n))
+		if err := os.MkdirAll(filepath.Dir(p), 0o755); err != nil {
+			return err
+		}
+		if err := os.WriteFile(p, files[n], 0o644); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 // tf runs one Terraform command: the command, then its non-interactive flags

@@ -181,7 +181,7 @@ func (e Exercise) RunTimeout() time.Duration {
 
 // NeedsFloci says whether the exercise talks to Floci.
 func (e Exercise) NeedsFloci() bool {
-	return e.Mode == ModeApply || e.Mode == ModeFix || slices.Contains(e.Requires, RequiresFloci)
+	return e.Mode == ModeApply || slices.Contains(e.Requires, RequiresFloci)
 }
 
 // NeedsTerraform says whether the exercise runs the terraform binary.

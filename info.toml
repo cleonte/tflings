@@ -320,3 +320,32 @@ objective = "4d"
 requires  = ["floci"]
 hint      = "aws_secretsmanager_secret_version has secret_string_wo and secret_string_wo_version."
 docs      = "https://developer.hashicorp.com/terraform/language/manage-sensitive-data/ephemeral"
+
+[[exercises]]
+name      = "refactoring1"
+path      = "exercises/refactoring/refactoring1"
+topic     = "refactoring"
+mode      = "fix"
+objective = "6d"
+hint      = "terraform state mv OLD NEW changes the name of an object in the state without touching the real thing."
+docs      = "https://developer.hashicorp.com/terraform/cli/commands/state/mv"
+
+[[exercises]]
+name      = "drift1"
+path      = "exercises/drift/drift1"
+topic     = "drift"
+mode      = "fix"
+objective = "7a"
+requires  = ["floci"]
+hint      = "A normal apply refreshes first, then changes the real thing to match the configuration."
+docs      = "https://developer.hashicorp.com/terraform/tutorials/state/resource-drift"
+
+[[exercises]]
+name      = "drift2"
+path      = "exercises/drift/drift2"
+topic     = "drift"
+mode      = "fix"
+objective = "7a"
+requires  = ["floci"]
+hint      = "apply -refresh-only updates the state from the real thing without changing anything real. Then make main.tf agree."
+docs      = "https://developer.hashicorp.com/terraform/tutorials/state/resource-drift"

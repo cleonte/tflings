@@ -65,6 +65,10 @@ func write(src fs.FS, dest string) error {
 		// Names inside an fs.FS always use forward slashes.
 		target := filepath.Join(dest, filepath.FromSlash(name))
 		if d.IsDir() {
+			// A setup folder stays in the binary whole, not even as empty folders.
+			if exercises.EmbeddedOnly(path.Join(name, "x")) {
+				return fs.SkipDir
+			}
 			return os.MkdirAll(target, 0o755)
 		}
 		// check.yaml and the setup steps stay in the binary: they would give the answer away.

@@ -1,0 +1,13 @@
+config:
+  - expr: config.root_module.resources.filter(r, r.address == "aws_ssm_parameter.motd").all(r, r.expressions.value.constant_value == "Maintenance in progress")
+    message: "main.tf should say the value that is really there now."
+aws:
+  - call: ssm.parameter
+    args: { name: /tflings/motd }
+    expr: result.exists && result.value == "Maintenance in progress"
+    message: "The parameter /tflings/motd should keep the value the on-call engineer set."
+empty_plan_after: true
+explanation: >-
+  When the manual change is the one to keep, the configuration has to follow it.
+  `terraform apply -refresh-only` writes what really exists into the state
+  without changing anything real; editing the configuration makes the two agree.

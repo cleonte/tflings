@@ -1,0 +1,5 @@
+steps:
+  - apply: initial
+  - mutate:
+      call: ssm.put_parameter
+      args: { name: /tflings/motd, value: "HACKED by hand" }
