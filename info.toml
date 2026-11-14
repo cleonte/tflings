@@ -92,6 +92,24 @@ hint      = "Look in the documentation of aws_s3_bucket for the name of the argu
 docs      = "https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket"
 
 [[exercises]]
+name      = "resources2"
+path      = "exercises/resources/resources2"
+topic     = "resources"
+mode      = "apply"
+objective = "4a"
+hint      = "Look for a resource called aws_s3_bucket_versioning in the provider documentation. It points at the bucket by reference."
+docs      = "https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_versioning"
+
+[[exercises]]
+name      = "resources3"
+path      = "exercises/resources/resources3"
+topic     = "resources"
+mode      = "apply"
+objective = "4a"
+hint      = "Tags are a map: each entry is NAME = \"value\". The map is an argument of the VPC."
+docs      = "https://developer.hashicorp.com/terraform/language/resources/syntax"
+
+[[exercises]]
 name      = "references1"
 path      = "exercises/references/references1"
 topic     = "references"
@@ -101,10 +119,56 @@ hint      = "The object's bucket can be the id of the bucket resource: look at h
 docs      = "https://developer.hashicorp.com/terraform/language/expressions/references"
 
 [[exercises]]
-name      = "resources2"
-path      = "exercises/resources/resources2"
-topic     = "resources"
+name      = "references2"
+path      = "exercises/references/references2"
+topic     = "references"
+mode      = "apply"
+objective = "4b"
+hint      = "The VPC resource has an id attribute, and a subnet takes a vpc_id."
+docs      = "https://developer.hashicorp.com/terraform/language/expressions/references"
+
+[[exercises]]
+name      = "references3"
+path      = "exercises/references/references3"
+topic     = "references"
+mode      = "plan"
+objective = "4b"
+hint      = "terraform_data keeps the value you gave it in an attribute named after the argument. Check the docs of the resource."
+docs      = "https://developer.hashicorp.com/terraform/language/resources/terraform-data"
+
+[[exercises]]
+name      = "iteration1"
+path      = "exercises/iteration/iteration1"
+topic     = "iteration"
+mode      = "plan"
+objective = "4e"
+hint      = "count = length(...) gives one copy per element; count.index is the position in the list."
+docs      = "https://developer.hashicorp.com/terraform/language/meta-arguments/count"
+
+[[exercises]]
+name      = "iteration2"
+path      = "exercises/iteration/iteration2"
+topic     = "iteration"
+mode      = "plan"
+objective = "4e"
+hint      = "for_each takes a map or a set; each.key and each.value are the current entry."
+docs      = "https://developer.hashicorp.com/terraform/language/meta-arguments/for_each"
+
+[[exercises]]
+name      = "iteration3"
+path      = "exercises/iteration/iteration3"
+topic     = "iteration"
+mode      = "plan"
+objective = "4e"
+requires  = ["floci"]
+hint      = "A dynamic block has a for_each and a content block; inside, the iterator is named after the block (ingress.value)."
+docs      = "https://developer.hashicorp.com/terraform/language/expressions/dynamic-blocks"
+
+[[exercises]]
+name      = "data-sources1"
+path      = "exercises/data-sources/data-sources1"
+topic     = "data-sources"
 mode      = "apply"
 objective = "4a"
-hint      = "Look for a resource called aws_s3_bucket_versioning in the provider documentation. It points at the bucket by reference."
-docs      = "https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_versioning"
+hint      = "The data source aws_caller_identity has an attribute called account_id. A data block is referred to as data.TYPE.NAME.ATTRIBUTE."
+docs      = "https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/caller_identity"

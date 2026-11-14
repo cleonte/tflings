@@ -1,0 +1,8 @@
+aws:
+  - call: ec2.vpcs
+    expr: result.vpcs.exists(v, !v.is_default && v.tags.Environment == "dev" && v.tags.Owner == "tflings")
+    message: "The VPC should be tagged Environment = dev and Owner = tflings."
+  - call: ec2.vpcs
+    expr: result.vpcs.exists(v, !v.is_default && v.tags.Name == "main")
+    message: "Keep the Name tag of the VPC."
+empty_plan_after: true

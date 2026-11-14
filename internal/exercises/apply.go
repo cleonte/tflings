@@ -63,7 +63,7 @@ func (e Exercise) runApply(ctx context.Context, env *Env, c *check.Compiled, fil
 
 	// Saving a file that changes nothing should be quick: with nothing to apply,
 	// skip the apply and the second plan, which would only repeat this one.
-	needsApply := len(pendingChanges(plan)) > 0
+	needsApply := planNeedsApply(plan)
 	if needsApply {
 		out, err := run.tf(ctx, "apply", nil, []string{filepath.Join(run.dir, "tflings.plan")})
 		if err != nil {
@@ -169,4 +169,24 @@ func preflightHosts(ctx context.Context, account string, files map[string][]byte
 			"`tflings doctor` explains it and lists the lines for every exercise.",
 		},
 	}
+}
+
+// planNeedsApply says whether applying the plan would do anything: a resource
+// to change, or an output whose value changes (a configuration of outputs and
+// data sources has no resources, and its state still has to be written).
+func planNeedsApply(plan map[string]any) bool {
+	if len(pendingChanges(plan)) > 0 {
+		return true
+	}
+	ocs, _ := plan["output_changes"].(map[string]any)
+	for _, oc := range ocs {
+		m, _ := oc.(map[string]any)
+		actions, _ := m["actions"].([]any)
+		for _, a := range actions {
+			if s, _ := a.(string); s != "no-op" {
+				return true
+			}
+		}
+	}
+	return false
 }

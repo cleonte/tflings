@@ -1,0 +1,6 @@
+plan:
+  - expr: plan.planned_values.outputs.web_name.value == "web-server"
+    message: "The output web_name should be \"web-server\"."
+config:
+  - expr: config.root_module.outputs.web_name.expression.references.size() > 0
+    message: "web_name should refer to the resource, not repeat its value."

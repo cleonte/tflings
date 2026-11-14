@@ -15,6 +15,7 @@ import (
 	"strings"
 
 	"cel.dev/cel-go/cel"
+	"cel.dev/cel-go/ext"
 	"github.com/cleonte/tflings/internal/awscheck"
 	"sigs.k8s.io/yaml"
 )
@@ -98,6 +99,10 @@ func Load(raw []byte) (*Compiled, error) {
 		f.Answer[i] = strings.ToLower(strings.TrimSpace(a))
 	}
 	env, err := cel.NewEnv(
+		// Lists (sort, ...), strings (lowerAscii, split, ...) and sets (contains,
+		// equivalent): what an assertion over a plan needs and the base language
+		// lacks.
+		ext.Lists(), ext.Strings(), ext.Sets(),
 		cel.Variable("plan", cel.DynType),
 		cel.Variable("config", cel.DynType),
 		cel.Variable("state", cel.DynType),

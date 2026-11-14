@@ -94,3 +94,20 @@ func TestHasSavedState(t *testing.T) {
 		t.Error("reset forgets the state")
 	}
 }
+
+func TestPlanNeedsApply(t *testing.T) {
+	outputsOnly := map[string]any{"output_changes": map[string]any{"id": map[string]any{"actions": []any{"create"}}}}
+	if !planNeedsApply(outputsOnly) {
+		t.Error("a new output has to be written to the state")
+	}
+	settled := map[string]any{
+		"resource_changes": []any{map[string]any{"address": "a.b", "change": map[string]any{"actions": []any{"no-op"}}}},
+		"output_changes":   map[string]any{"id": map[string]any{"actions": []any{"no-op"}}},
+	}
+	if planNeedsApply(settled) {
+		t.Error("nothing to do")
+	}
+	if planNeedsApply(map[string]any{}) {
+		t.Error("an empty plan has nothing to apply")
+	}
+}

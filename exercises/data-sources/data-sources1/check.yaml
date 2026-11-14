@@ -1,0 +1,6 @@
+config:
+  - expr: config.root_module.resources.exists(r, r.mode == "data" && r.type == "aws_caller_identity")
+    message: "Use the data source aws_caller_identity."
+state:
+  - expr: state.values.outputs.account_id.value.matches("^[0-9]{12}$") && state.values.outputs.account_id.value != "123456789012"
+    message: "The output account_id should be the real account the configuration runs in."

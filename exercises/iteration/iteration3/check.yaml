@@ -1,0 +1,11 @@
+plan:
+  - expr: plan.resource_changes.filter(r, r.address == "aws_security_group.web").all(r, r.change.after.ingress.size() == 3)
+    message: "The security group should have three ingress rules, one for each port."
+  - expr: >-
+      plan.resource_changes.filter(r, r.address == "aws_security_group.web")[0].change.after.ingress.map(i, i.from_port).sort() == [80, 443, 8080]
+    message: "The rules should open the ports 80, 443 and 8080."
+variants:
+  - vars: { ports: "[22]" }
+    plan:
+      - expr: plan.resource_changes.filter(r, r.address == "aws_security_group.web").all(r, r.change.after.ingress.map(i, i.from_port) == [22])
+        message: "The rules should follow the list of ports."

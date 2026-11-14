@@ -1,0 +1,10 @@
+plan:
+  - expr: plan.resource_changes.filter(r, r.type == "terraform_data").size() == 3
+    message: "There should be three terraform_data resources, one for each name."
+  - expr: plan.resource_changes.filter(r, r.type == "terraform_data").map(r, r.change.after.input).sort() == ["api", "db", "web"]
+    message: "The resources should hold the names web, api and db, one each."
+variants:
+  - vars: { names: '["a","b"]' }
+    plan:
+      - expr: plan.resource_changes.filter(r, r.type == "terraform_data").map(r, r.change.after.input).sort() == ["a", "b"]
+        message: "The number of resources should follow the list."
