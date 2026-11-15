@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/cleonte/tflings"
@@ -15,7 +16,7 @@ import (
 func ExamCmd(infoFile string) *cobra.Command {
 	var count, minutes int
 	var objective string
-	var practice bool
+	var practice, weak bool
 	var seed int64
 	cmd := &cobra.Command{
 		Use:   "exam",
@@ -36,7 +37,14 @@ ours, and the score is only a guide.`,
 			if err != nil {
 				return err
 			}
+			home := (&exercises.Env{}).HomeDir()
 			qs := exam.Filter(all, objective)
+			if weak {
+				hist, _ := exam.LoadHistory(home)
+				ids := exam.Weakest(hist, qs, 3)
+				qs = exam.FilterSet(qs, ids)
+				fmt.Fprintf(cmd.OutOrStdout(), "Weakest objectives (never asked first): %s\n", strings.Join(ids, ", "))
+			}
 			if len(qs) == 0 {
 				return fmt.Errorf("no questions for objective %q", objective)
 			}
@@ -55,6 +63,9 @@ ours, and the score is only a guide.`,
 			fmt.Fprintln(cmd.OutOrStdout(), ".")
 			res := exam.Sit(os.Stdin, cmd.OutOrStdout(), qs, o)
 			exam.Report(cmd.OutOrStdout(), res, o)
+			if err := exam.Append(home, exam.RecordOf(res, practice, time.Now())); err != nil {
+				fmt.Fprintf(cmd.ErrOrStderr(), "could not save the result: %v\n", err)
+			}
 			return nil
 		},
 	}
@@ -62,6 +73,7 @@ ours, and the score is only a guide.`,
 	cmd.Flags().IntVar(&minutes, "minutes", 60, "time limit in minutes (0: none; not used with --practice)")
 	cmd.Flags().StringVar(&objective, "objective", "", "only questions of one objective (4) or sub-objective (4g)")
 	cmd.Flags().BoolVar(&practice, "practice", false, "show the answer and the explanation after each question")
+	cmd.Flags().BoolVar(&weak, "weak", false, "ask about the three objectives you score lowest on (see tflings progress)")
 	cmd.Flags().Int64Var(&seed, "seed", 0, "random seed, to ask the same questions again")
 	return cmd
 }

@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
+- `tflings progress`: for each of the 37 objectives of the 004 content list, the exercises done and the score on the mock exam questions, with a `!` for what needs work. `tflings exam` now keeps its results (`exam-history.jsonl` in tflings's home folder), and `exam --weak` asks about the three objectives you score lowest on, those never asked first.
+- 31 more exam questions (66 in all): conditions, secrets, local and remote backends, locking, drift, import, state commands and logging.
 - `tflings exam`: a mock exam from an embedded bank of multiple choice questions (35 so far), including pick-two questions. It asks in random order, can be timed, limited to an objective (`--objective 4g`) or run as practice with the answer after each question, and reports the score per objective with the exercises to redo. HashiCorp does not publish the real exam's question count or pass mark, so the defaults (30 questions, 60 minutes) are ours.
 
 ## [0.4.0] - 2026-11-15

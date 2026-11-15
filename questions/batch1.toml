@@ -1,0 +1,399 @@
+# Mock exam questions, batch 1. correct = 0-based indexes into options.
+
+[[question]]
+id = "b1-4g-1"
+objective = "4g"
+text = "Which construct checks a value that is only known after a resource has been created, and stops the run when it fails?"
+options = [
+  "A `precondition`",
+  "A `postcondition`",
+  "A variable `validation` block",
+  "A `check` block",
+]
+correct = [1]
+explanation = "A `postcondition` in the `lifecycle` block is evaluated after the object exists, so it can look at its real attributes. A `precondition` is evaluated before."
+
+[[question]]
+id = "b1-4g-2"
+objective = "4g"
+text = "Where can a `precondition` be written?"
+options = [
+  "In the `lifecycle` block of a resource or data source, and in an `output` block",
+  "In a `provider` block",
+  "In a `variable` block, instead of `validation`",
+  "In the `terraform` block",
+]
+correct = [0]
+explanation = "Preconditions go in `lifecycle` (resources and data sources) and in `output` blocks. Variables use `validation`."
+
+[[question]]
+id = "b1-4g-3"
+objective = "4g"
+text = "True or false: a failing assertion in a `check` block stops `terraform apply` from completing."
+options = [
+  "True",
+  "False",
+]
+correct = [1]
+explanation = "Checks report a warning and the run goes on. That is what separates them from validation, preconditions and postconditions."
+
+[[question]]
+id = "b1-4g-4"
+objective = "4g"
+text = "Which is true of a `check` block?"
+options = [
+  "It can contain a data source that is used only by its assertions.",
+  "It must be inside a resource.",
+  "It runs only during `terraform destroy`.",
+  "A failure aborts the plan.",
+]
+correct = [0]
+explanation = "A `check` block can have a scoped `data` block, so a check can query something (an HTTP endpoint, an API) without adding it to the rest of the configuration."
+
+[[question]]
+id = "b1-4g-5"
+objective = "4g"
+text = "Which TWO stop Terraform with an error when their condition is false?"
+options = [
+  "A variable `validation` block",
+  "A `precondition`",
+  "An assertion in a `check` block",
+  "An `output` description",
+]
+correct = [0, 1]
+explanation = "Validation and conditions are errors. A check's assertion only warns, and a description is just text."
+
+[[question]]
+id = "b1-4h-1"
+objective = "4h"
+text = "What is the best way to give Terraform a database password that a resource needs?"
+options = [
+  "Write it in the `.tf` file.",
+  "Read it from a secrets manager such as Vault when Terraform runs, and keep it out of version control.",
+  "Put it in a `terraform.tfvars` file that is committed.",
+  "Make it an output.",
+]
+correct = [1]
+explanation = "Never commit secrets. Fetch them at run time from a secrets manager, or pass them with environment variables or a secure variable store, and prefer ephemeral or write-only values so they stay out of the state."
+
+[[question]]
+id = "b1-4h-2"
+objective = "4h"
+text = "True or false: marking a variable `sensitive = true` keeps its value out of the state file."
+options = [
+  "True",
+  "False",
+]
+correct = [1]
+explanation = "`sensitive` only hides the value in plan and apply output. It is still written to the state."
+
+[[question]]
+id = "b1-4h-3"
+objective = "4h"
+text = "A secret that is read with a regular `data` block ends up:"
+options = [
+  "Stored in the state, so the state must be protected",
+  "Never stored anywhere",
+  "Only in the plan file",
+  "In the lock file",
+]
+correct = [0]
+explanation = "Data source results are saved in the state like any other attribute. Ephemeral resources are the way to read a secret without storing it."
+
+[[question]]
+id = "b1-4h-4"
+objective = "4h"
+text = "Which TWO help keep a secret out of the state?"
+options = [
+  "An ephemeral variable or ephemeral resource",
+  "A write-only argument",
+  "Marking the value `sensitive = true`",
+  "Putting the value in a `local-exec` command line",
+]
+correct = [0, 1]
+explanation = "Ephemeral values and write-only arguments are not persisted. `sensitive` only redacts the output, and a command line can end up in logs."
+
+[[question]]
+id = "b1-4h-5"
+objective = "4h"
+text = "The output `db_password` is marked `sensitive = true`. What does `terraform output -raw db_password` print?"
+options = [
+  "The value; asking for one output by name shows it.",
+  "<sensitive>",
+  "Nothing; the command is refused.",
+  "An encrypted copy.",
+]
+correct = [0]
+explanation = "A list of outputs hides sensitive values, but `terraform output NAME` and `-raw`/`-json` print them. The state holds them in clear text."
+
+[[question]]
+id = "b1-6a-1"
+objective = "6a"
+text = "Where does the local backend keep the state by default?"
+options = [
+  "In `terraform.tfstate` in the working directory",
+  "In `~/.terraform`",
+  "Inside the `.terraform` folder",
+  "In a cloud bucket",
+]
+correct = [0]
+explanation = "With no `backend` block, Terraform uses the local backend and writes `terraform.tfstate` next to the configuration. The `path` setting moves it."
+
+[[question]]
+id = "b1-6b-1"
+objective = "6b"
+text = "What is state locking for?"
+options = [
+  "To stop two runs from writing the same state at the same time",
+  "To encrypt the state",
+  "To make a backup of the state",
+  "To make plans faster",
+]
+correct = [0]
+explanation = "A lock is taken before an operation that can write the state and released afterwards, so concurrent runs do not corrupt it."
+
+[[question]]
+id = "b1-6b-2"
+objective = "6b"
+text = "Which command removes a lock that a dead run left behind?"
+options = [
+  "terraform force-unlock LOCK_ID",
+  "terraform unlock",
+  "terraform state unlock",
+  "terraform init -unlock",
+]
+correct = [0]
+explanation = "`terraform force-unlock` takes the lock ID shown in the error message. Use it only when you are sure nobody is running Terraform."
+
+[[question]]
+id = "b1-6b-3"
+objective = "6b"
+text = "True or false: every backend supports state locking."
+options = [
+  "True",
+  "False",
+]
+correct = [1]
+explanation = "Locking depends on the backend. Local (file lock), S3, azurerm, GCS, and HCP Terraform do; some others do not."
+
+[[question]]
+id = "b1-6c-1"
+objective = "6c"
+text = "In which block is a backend configured?"
+options = [
+  "terraform",
+  "provider",
+  "resource",
+  "locals",
+]
+correct = [0]
+explanation = "`terraform { backend \"s3\" { ... } }`. HCP Terraform uses a `cloud` block, also inside `terraform`."
+
+[[question]]
+id = "b1-6c-2"
+objective = "6c"
+text = "What does `terraform init -reconfigure` do?"
+options = [
+  "Copies the existing state to the new backend",
+  "Starts the backend configuration afresh, ignoring the saved one, without copying state",
+  "Deletes the state",
+  "Upgrades the providers",
+]
+correct = [1]
+explanation = "`-reconfigure` ignores the previous backend settings. To copy the state to the new backend, use `-migrate-state`."
+
+[[question]]
+id = "b1-6c-3"
+objective = "6c"
+text = "How can you keep a bucket name out of the `backend` block, since variables cannot be used there?"
+options = [
+  "Partial configuration: leave the setting out and pass it with `terraform init -backend-config=...`",
+  "Use a `local` value in the backend block",
+  "Use a variable and a `.tfvars` file",
+  "Set an environment variable TF_BUCKET",
+]
+correct = [0]
+explanation = "The backend block can be partial. The rest is given with `-backend-config` (a file or key=value) at init."
+
+[[question]]
+id = "b1-6c-4"
+objective = "6c"
+text = "Which TWO of these store state remotely?"
+options = [
+  "The `s3` backend",
+  "The `azurerm` backend",
+  "The `local` backend",
+  "The `terraform_data` resource",
+]
+correct = [0, 1]
+explanation = "`s3` and `azurerm` keep the state in a bucket or storage account. `local` is a file on disk, and `terraform_data` is a resource, not a backend."
+
+[[question]]
+id = "b1-6d-1"
+objective = "6d"
+text = "What does `terraform plan -refresh-only` show?"
+options = [
+  "How the state would change to match the real infrastructure, without changing the infrastructure",
+  "The resources that will be created",
+  "Everything that will be destroyed",
+  "Nothing",
+]
+correct = [0]
+explanation = "A refresh-only plan compares the state with reality. Applying it (`apply -refresh-only`) updates the state and leaves the configuration and infrastructure alone."
+
+[[question]]
+id = "b1-6d-2"
+objective = "6d"
+text = "Which situation is drift?"
+options = [
+  "The real infrastructure was changed outside Terraform",
+  "The configuration was edited",
+  "A provider was upgraded",
+  "The state is locked",
+]
+correct = [0]
+explanation = "Drift is a difference between the real infrastructure and what the state records, for example a tag changed in the console."
+
+[[question]]
+id = "b1-6d-3"
+objective = "6d"
+text = "A normal `terraform plan` finds drift on a resource that the configuration describes. What does it propose?"
+options = [
+  "Changes that bring the infrastructure back to the configuration",
+  "To ignore the drift",
+  "To delete the state",
+  "To fail",
+]
+correct = [0]
+explanation = "Plan refreshes the state first, then compares it with the configuration, so drifted settings show up as changes back to what is written."
+
+[[question]]
+id = "b1-6d-4"
+objective = "6d"
+text = "What does a `removed` block with `lifecycle { destroy = false }` do?"
+options = [
+  "Stops managing the resource without destroying the real object",
+  "Destroys the resource",
+  "Imports the resource",
+  "Moves the resource to another address",
+]
+correct = [0]
+explanation = "It is the configuration-driven form of `terraform state rm`: the object stays, Terraform forgets it."
+
+[[question]]
+id = "b1-7a-1"
+objective = "7a"
+text = "Which command imports an existing object by address and ID?"
+options = [
+  "terraform import ADDRESS ID",
+  "terraform adopt ADDRESS ID",
+  "terraform state add ADDRESS ID",
+  "terraform get ADDRESS ID",
+]
+correct = [0]
+explanation = "`terraform import` is the command form. The `import` block is the configuration form, and works with `plan`."
+
+[[question]]
+id = "b1-7a-2"
+objective = "7a"
+text = "For the command `terraform import aws_s3_bucket.logs my-bucket`, what has to exist first?"
+options = [
+  "A `resource \"aws_s3_bucket\" \"logs\"` block in the configuration",
+  "Nothing",
+  "A module",
+  "A data source",
+]
+correct = [0]
+explanation = "The command attaches the real object to a resource address, so the address must be in the configuration. It does not write the block for you."
+
+[[question]]
+id = "b1-7a-3"
+objective = "7a"
+text = "What does `terraform plan -generate-config-out=generated.tf` do with `import` blocks?"
+options = [
+  "Writes configuration for the imported resources that have no resource block yet",
+  "Applies the import",
+  "Formats the files",
+  "Destroys the objects",
+]
+correct = [0]
+explanation = "It drafts the `resource` blocks for imported objects. Review and edit the file before you keep it."
+
+[[question]]
+id = "b1-7b-1"
+objective = "7b"
+text = "Which command shows the attributes of one resource in the state?"
+options = [
+  "terraform state show ADDRESS",
+  "terraform show ADDRESS",
+  "terraform get ADDRESS",
+  "terraform state read ADDRESS",
+]
+correct = [0]
+explanation = "`terraform state list` gives the addresses and `terraform state show ADDRESS` the attributes of one."
+
+[[question]]
+id = "b1-7b-2"
+objective = "7b"
+text = "What does `terraform show`, with no arguments, print?"
+options = [
+  "The current state in a readable form",
+  "The configuration",
+  "The installed providers",
+  "The debug log",
+]
+correct = [0]
+explanation = "`terraform show` reads the latest state (or, with a file argument, a saved plan). Add `-json` for machine-readable output."
+
+[[question]]
+id = "b1-7b-3"
+objective = "7b"
+text = "Which command moves a resource to a new address in the state?"
+options = [
+  "terraform state mv",
+  "terraform state move",
+  "terraform mv",
+  "terraform rename",
+]
+correct = [0]
+explanation = "`terraform state mv SOURCE DESTINATION` changes the address in the state. A `moved` block does the same from the configuration."
+
+[[question]]
+id = "b1-7c-1"
+objective = "7c"
+text = "What does `TF_LOG_PATH` do?"
+options = [
+  "Writes the log to a file",
+  "Sets the log level",
+  "Turns logging off",
+  "Moves the state file",
+]
+correct = [0]
+explanation = "`TF_LOG` sets the level and `TF_LOG_PATH` the file. Without the path, the log goes to stderr."
+
+[[question]]
+id = "b1-7c-2"
+objective = "7c"
+text = "Which is true of Terraform's debug logs?"
+options = [
+  "They can contain sensitive values, so handle them with care",
+  "They never contain secrets",
+  "They are always encrypted",
+  "They are written by default",
+]
+correct = [0]
+explanation = "At DEBUG and TRACE, logs show API requests and responses, which can include secrets. Do not post them without checking."
+
+[[question]]
+id = "b1-7c-3"
+objective = "7c"
+text = "What do `TF_LOG_CORE` and `TF_LOG_PROVIDER` do?"
+options = [
+  "Set the log level of Terraform core and of the providers separately",
+  "Disable core or provider logs",
+  "Choose the log file",
+  "Print the version",
+]
+correct = [0]
+explanation = "They let you ask for TRACE from one side only, which keeps the log readable."
+

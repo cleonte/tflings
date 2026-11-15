@@ -123,6 +123,7 @@ type Asked struct {
 	Right   []int    // indexes into Shown
 	Given   []int    // what the learner answered (nil: skipped)
 	Correct bool
+	Seen    bool // shown to the learner
 }
 
 // Shuffle puts the options of q in a random order.
