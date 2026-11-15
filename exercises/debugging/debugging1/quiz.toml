@@ -1,0 +1,12 @@
+# I AM NOT DONE
+
+question = "How do you turn on verbose logging and send it to a file?"
+options = [
+  "a) Run `terraform plan -verbose > log.txt`.",
+  "b) Set TF_LOG to a level such as TRACE and TF_LOG_PATH to the file.",
+  "c) Set TF_DEBUG=1 and read the file `debug.log` in the working directory.",
+  "d) Run `terraform logs`.",
+]
+
+# TODO: set your answer, for example answer = "a"
+answer = ""

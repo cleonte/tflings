@@ -1,0 +1,3 @@
+answer: [b]
+explanation: >-
+  `TF_LOG` sets the level (TRACE, DEBUG, INFO, WARN or ERROR) and `TF_LOG_PATH` names the file. Without the path the log goes to stderr. TRACE is the most detailed. Remember that logs can contain sensitive values.

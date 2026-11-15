@@ -1,0 +1,3 @@
+answer: [c]
+explanation: >-
+  `init` downloads providers (and records them in the dependency lock file), downloads modules, and initializes the backend. It is safe to run again, and it is the first command after cloning a project or changing providers, modules or the backend.

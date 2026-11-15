@@ -1,0 +1,12 @@
+# I AM NOT DONE
+
+question = "What is a project in HCP Terraform?"
+options = [
+  "a) A VCS repository connected to a workspace.",
+  "b) A group of workspaces, used to organize them and manage access to them together.",
+  "c) A replacement for workspaces in newer versions.",
+  "d) A separate organization with its own billing.",
+]
+
+# TODO: set your answer, for example answer = "a"
+answer = ""

@@ -1,0 +1,12 @@
+# I AM NOT DONE
+
+question = "How does Terraform manage multi-cloud and hybrid-cloud infrastructure with one workflow?"
+options = [
+  "a) Terraform has a single built-in driver that translates one universal configuration to every cloud.",
+  "b) Providers are plugins that talk to each platform's API, so the same workflow and language work for many platforms.",
+  "c) Terraform converts a configuration written for one cloud so that it runs unchanged on another cloud.",
+  "d) Terraform runs a separate tool per cloud and the user has to switch between them.",
+]
+
+# TODO: set your answer, for example answer = "a"
+answer = ""

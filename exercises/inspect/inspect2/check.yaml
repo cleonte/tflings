@@ -1,0 +1,7 @@
+config:
+  - expr: config.root_module.outputs.answer.expression.constant_value == "ak-90-zz"
+    message: "The output answer should hold the value of the api_key output in the state."
+explanation: >-
+  `terraform output` lists the root outputs of the state (sensitive ones hidden),
+  and `terraform output -raw NAME` prints one value, also a sensitive one. The
+  state itself holds it in clear text, which is why the state must be protected.

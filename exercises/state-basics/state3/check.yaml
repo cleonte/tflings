@@ -1,0 +1,3 @@
+answer: [d]
+explanation: >-
+  The state binds each resource address to a real object (its id) and stores its attributes. Without it Terraform would not know which objects it manages, and a plan would want to create everything again. It can contain secrets, so it must be protected.

@@ -1,0 +1,3 @@
+answer: [b]
+explanation: >-
+  Code can be reviewed in a pull request, kept in version control and applied repeatedly, which gives repeatable, consistent environments and a history of every change. It does not remove outages, credentials or cost.

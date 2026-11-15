@@ -1,0 +1,8 @@
+state:
+  - expr: state.values.root_module.resources.exists(r, r.address == "terraform_data.app" && r.values.input == "v2")
+    message: "terraform_data.app should hold v2: the approved change is not applied yet."
+empty_plan_after: true
+explanation: >-
+  `terraform plan -out=FILE` saves the plan, `terraform show FILE` reads it, and
+  `terraform apply FILE` applies exactly that plan without asking again. A saved
+  plan is also the usual hand-over between a plan job and an apply job in a pipeline.

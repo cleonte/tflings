@@ -1,0 +1,3 @@
+answer: [c]
+explanation: >-
+  Policy as code (Sentinel or OPA) is evaluated between the plan and the apply and can stop a run. Run triggers chain workspaces, variable sets share variables, and `validate` only checks syntax.

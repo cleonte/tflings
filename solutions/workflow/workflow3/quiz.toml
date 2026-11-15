@@ -1,0 +1,10 @@
+question = "Which sequence is the core Terraform workflow?"
+options = [
+  "a) Build, test, deploy.",
+  "b) Write, plan, apply.",
+  "c) Init, destroy, apply.",
+  "d) Plan, write, apply.",
+]
+
+
+answer = "b"

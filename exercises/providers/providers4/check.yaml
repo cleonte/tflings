@@ -1,0 +1,3 @@
+answer: [b]
+explanation: >-
+  Terraform core reads the configuration, builds the graph and decides what to do. Provider plugins (separate executables, installed by `init`) define the resource types and data sources and make the API calls. The state is kept by Terraform in the backend, not by the provider.

@@ -1,0 +1,9 @@
+state:
+  - expr: state.values.root_module.resources.exists(r, r.address == "terraform_data.app" && r.values.input == "large")
+    message: "terraform_data.app should have input large."
+  - expr: state.values.root_module.resources.filter(r, r.address == "terraform_data.app").all(r, r.values.id == seed.values.root_module.resources.filter(s, s.address == "terraform_data.app")[0].values.id)
+    message: "The server should be changed, not built again."
+explanation: >-
+  `-var name=value` sets a variable for one command and has the highest priority
+  next to `-var-file`. The change is applied in place; the default in the
+  configuration is untouched.
