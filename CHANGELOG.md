@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Fixed
+
+- `tflings update` now also replaces the `info.toml` entry (objective, hint, link) of exercises you already have when the binary's is newer. Before, only new exercises were added, so a folder made by an older version kept old objective ids and `tflings progress` counted exercises under the wrong objective. `info.toml` holds no progress (that is in `.tflings.json`), and the earlier file is kept as `info.toml.bak`.
+
 ## [0.9.1] - 2026-11-15
 
 ### Added
