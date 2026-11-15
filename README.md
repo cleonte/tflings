@@ -55,6 +55,7 @@ tflings doctor --prefetch   # downloads the AWS provider (about 250 MB) so exerc
 | `reset <name>` | Put an exercise back as it was. It gets a fresh, empty fake AWS account. |
 | `solution <name>` | Show the solution (hidden while the exercise is pending, unless you ask). |
 | `progress` | Readiness per exam objective: exercises done (inside your exercises folder) and mock exam score. `exam --weak` then asks about the lowest ones. |
+| `doctor --install-terraform` | Downloads Terraform (the newest 1.12.x by default) into tflings's own folder, checking its checksums and signature. For machines that have none. |
 | `exam` | Mock exam: multiple choice questions, scored per objective, with the exercises to redo (`--objective 4g`, `--practice`, `--review` for the questions you missed, `-n 30`, `--minutes 60`). Works anywhere, needs no Terraform or Docker. |
 | `tf <name> <terraform args>` | Fix exercises: run Terraform in the exercise's sealed environment (`tflings tf drift1 plan`). |
 | `env <name>` | Print that environment, for a shell of your own. |
