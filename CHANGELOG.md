@@ -6,9 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-11-15
+
 ### Added
 
 - `tflings version` (it only worked as `tflings --version`).
+- `tflings exam --review`: asks again, with the answer after each, the questions you missed in your last sitting.
+- Exam questions can show a code snippet. 12 new questions use one (what a `for_each` plans, what a failing `validation` does, what `-/+` in a plan will do, variable precedence, an `import` block, provider aliases, a version constraint, and more).
+- 12 more questions for the objectives that had one (2b, 3a, 5a, 6a): 167 questions in all.
 
 ### Fixed
 
@@ -65,7 +70,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - First tagged version: the CLI (`init`, `list`, `run`, `hint`, `reset`, `solution`, `update`, `verify`, `watch`, `doctor`, `aws up|down|status|reset`, `tf`, `env`), plan, apply, fix and quiz exercises (54), proven on Terraform 1.12 and the latest, against the Floci AWS emulator.
 
-[Unreleased]: https://github.com/cleonte/tflings/compare/v0.6.0...HEAD
+[Unreleased]: https://github.com/cleonte/tflings/compare/v0.7.0...HEAD
+[0.7.0]: https://github.com/cleonte/tflings/compare/v0.6.0...v0.7.0
 [0.6.0]: https://github.com/cleonte/tflings/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/cleonte/tflings/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/cleonte/tflings/compare/v0.3.0...v0.4.0
