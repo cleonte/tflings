@@ -61,6 +61,13 @@ func Sit(in io.Reader, out io.Writer, qs []Question, o Options) Result {
 		a.Seen = true
 		fmt.Fprintln(out, head)
 		fmt.Fprintln(out, q.Text)
+		if strings.TrimSpace(q.Code) != "" {
+			fmt.Fprintln(out)
+			for _, l := range strings.Split(strings.TrimRight(q.Code, "\n"), "\n") {
+				fmt.Fprintf(out, "    %s\n", l)
+			}
+			fmt.Fprintln(out)
+		}
 		for j, opt := range a.Shown {
 			fmt.Fprintf(out, "  %c) %s\n", 'a'+j, opt)
 		}

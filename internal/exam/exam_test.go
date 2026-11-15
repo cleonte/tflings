@@ -234,3 +234,38 @@ func TestObjectivesListIsComplete(t *testing.T) {
 		t.Errorf("the 004 list has 37 sub-objectives, got %d", len(exam.Objectives))
 	}
 }
+
+func TestCodeIsShownUnderTheQuestion(t *testing.T) {
+	q := exam.Question{ID: "c", Objective: "4e", Text: "What?", Code: "resource \"x\" \"y\" {}\n", Options: []string{"a1", "b1"}, Correct: []int{0}, Explanation: "e"}
+	var out bytes.Buffer
+	exam.Sit(strings.NewReader("\n"), &out, []exam.Question{q}, exam.Options{Count: 1, Seed: 1})
+	if !strings.Contains(out.String(), "What?\n\n    resource \"x\" \"y\" {}\n\n  a)") {
+		t.Errorf("the snippet should be indented under the question:\n%s", out.String())
+	}
+}
+
+func TestReviewUsesTheLastSittingWithMisses(t *testing.T) {
+	miss := func(ids ...string) exam.Record {
+		return exam.Record{Objectives: map[string]exam.Tally{"4e": {N: 1}}, Missed: ids}
+	}
+	h := []exam.Record{miss("a", "b"), miss("c"), {Objectives: map[string]exam.Tally{"4e": {Right: 1, N: 1}}}}
+	got := exam.LastMissed(h)
+	if len(got) != 1 || got[0] != "c" {
+		t.Errorf("the latest sitting that missed something: got %v", got)
+	}
+	if exam.LastMissed(nil) != nil {
+		t.Error("no history, nothing to review")
+	}
+	qs := []exam.Question{{ID: "a"}, {ID: "c"}, {ID: "z"}}
+	if f := exam.FilterIDs(qs, got); len(f) != 1 || f[0].ID != "c" {
+		t.Errorf("filter ids: %v", f)
+	}
+	res := exam.Result{Asked: []exam.Asked{
+		{Question: exam.Question{ID: "q1", Objective: "4e"}, Seen: true},
+		{Question: exam.Question{ID: "q2", Objective: "4e"}, Seen: true, Correct: true},
+		{Question: exam.Question{ID: "q3", Objective: "4e"}},
+	}}
+	if m := exam.RecordOf(res, false, time.Now()).Missed; len(m) != 1 || m[0] != "q1" {
+		t.Errorf("only shown and missed questions are recorded: %v", m)
+	}
+}

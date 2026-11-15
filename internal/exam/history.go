@@ -21,6 +21,9 @@ type Record struct {
 	Time       time.Time        `json:"time"`
 	Practice   bool             `json:"practice,omitempty"`
 	Objectives map[string]Tally `json:"objectives"`
+	// Missed holds the ids of the questions that were shown and answered wrongly
+	// (or skipped), for `exam --review`.
+	Missed []string `json:"missed,omitempty"`
 }
 
 // HistoryFile is the name of the history inside tflings's home folder.
@@ -37,6 +40,8 @@ func RecordOf(res Result, practice bool, now time.Time) Record {
 		t.N++
 		if a.Correct {
 			t.Right++
+		} else if a.ID != "" {
+			rec.Missed = append(rec.Missed, a.ID)
 		}
 		rec.Objectives[a.Objective] = t
 	}
@@ -138,6 +143,31 @@ func FilterSet(qs []Question, ids []string) []Question {
 	for _, q := range qs {
 		for _, id := range ids {
 			if q.Objective == id {
+				out = append(out, q)
+				break
+			}
+		}
+	}
+	return out
+}
+
+// LastMissed returns the ids of the questions missed in the latest sitting that
+// missed any.
+func LastMissed(h []Record) []string {
+	for i := len(h) - 1; i >= 0; i-- {
+		if len(h[i].Missed) > 0 {
+			return h[i].Missed
+		}
+	}
+	return nil
+}
+
+// FilterIDs keeps the questions with one of the ids.
+func FilterIDs(qs []Question, ids []string) []Question {
+	var out []Question
+	for _, q := range qs {
+		for _, id := range ids {
+			if q.ID == id {
 				out = append(out, q)
 				break
 			}
