@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### Fixed
 
 - `tflings update` now also replaces the `info.toml` entry (objective, hint, link) of exercises you already have when the binary's is newer. Before, only new exercises were added, so a folder made by an older version kept old objective ids and `tflings progress` counted exercises under the wrong objective. `info.toml` holds no progress (that is in `.tflings.json`), and the earlier file is kept as `info.toml.bak`.
+- When the setup of a fix exercise fails (for example because an earlier setup of the same exercise, in another folder that shares the Floci container, left a lock or an object behind), the message now says to run `tflings reset <exercise>`, which starts it again in a fresh account. A failed setup also removes its "built" marker.
 
 ## [0.9.1] - 2026-11-15
 

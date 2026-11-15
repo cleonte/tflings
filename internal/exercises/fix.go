@@ -198,7 +198,8 @@ func (r *run) seed(ctx context.Context, steps setupSteps, learnerFiles map[strin
 	report(ctx, "building the exercise")
 	fail := func(what string, err error) error {
 		_ = os.RemoveAll(r.src)
-		return fmt.Errorf("could not build %s (%s): %w", r.ex.Name, what, err)
+		_ = os.Remove(filepath.Join(r.dir, seededMarker))
+		return fmt.Errorf("could not build %s (%s): %w\n\nIf it keeps failing, run `tflings reset %s`: it builds the exercise again in a fresh account.", r.ex.Name, what, err, r.ex.Name)
 	}
 	for i, st := range steps.Steps {
 		switch {
