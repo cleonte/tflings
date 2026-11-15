@@ -6,9 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-11-15
+
 ### Added
 
-- 38 more exam questions (104 in all), for the objectives that had few: IaC and providers (1, 2), the core workflow (3), resources, data, variables, types, expressions and dependencies (4a to 4f) and modules (5).
+- 77 more exam questions, 143 in all, for every objective of the 004 content list. Batch 2 (38) covers IaC and providers (1, 2), the core workflow (3), resources, data, variables, types, expressions and dependencies (4a to 4f) and modules (5). Batch 3 (39) covers HCP Terraform (8a to 8d: execution modes, agents, run tasks, policy levels, dynamic credentials, speculative plans), drift (6d), the state commands (7b) and more of 2d, 3d, 3e, 4b, 4d, 4e and 5d.
 
 ## [0.5.0] - 2026-11-15
 
@@ -55,7 +57,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - First tagged version: the CLI (`init`, `list`, `run`, `hint`, `reset`, `solution`, `update`, `verify`, `watch`, `doctor`, `aws up|down|status|reset`, `tf`, `env`), plan, apply, fix and quiz exercises (54), proven on Terraform 1.12 and the latest, against the Floci AWS emulator.
 
-[Unreleased]: https://github.com/cleonte/tflings/compare/v0.5.0...HEAD
+[Unreleased]: https://github.com/cleonte/tflings/compare/v0.6.0...HEAD
+[0.6.0]: https://github.com/cleonte/tflings/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/cleonte/tflings/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/cleonte/tflings/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/cleonte/tflings/compare/v0.2.0...v0.3.0
