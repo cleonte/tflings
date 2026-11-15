@@ -190,7 +190,7 @@ Easier with Floci than with a custom provider: Floci already tests OpenTofu in i
 
 ### Phase 5 — Exam practice and HCP
 - [ ] Quiz mode, question bank (target ~150, all objectives, explanation + docs link each).
-- [ ] `tflings exam`, `tflings progress`.
+- [x] `tflings exam` (first slice: 35 questions). [ ] `tflings progress`, a bigger bank.
 - [ ] Optional `hcp` track (`requires = ["hcp"]`, skipped without `TF_TOKEN_app_terraform_io`).
 
 ### Phase 6 — Playground

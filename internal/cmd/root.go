@@ -44,6 +44,7 @@ func NewRootCmd(version string) *cobra.Command {
 
 	rootCmd.AddCommand(AwsCmd())
 	rootCmd.AddCommand(DoctorCmd(infoFile))
+	rootCmd.AddCommand(ExamCmd(infoFile))
 	rootCmd.AddCommand(HintCmd(infoFile))
 	rootCmd.AddCommand(InitCmd(tflings.FS))
 	rootCmd.AddCommand(ListCmd(infoFile))
