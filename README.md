@@ -4,11 +4,32 @@ Learn Terraform by fixing small broken exercises, like [Rustlings](https://githu
 
 You get a folder of Terraform files with a `# I AM NOT DONE` line and a `# TODO:` where something is wrong. You fix them, save, and tflings tells you what Terraform says and what is still not right. Exercises that build things use the real `hashicorp/aws` provider against [Floci](https://github.com/floci-io/floci), a free local AWS emulator that tflings runs in Docker. Nothing ever talks to a real AWS account.
 
-> **Status: pre-release, expect breakage.** The skeleton, plan mode, apply mode, the full-screen view, `doctor` and 95 exercises work, fix mode among them (`tflings tf <exercise> ...` repairs a situation that has gone wrong). Most of the planned ~120 exercises and the releases do not exist yet. See [ROADMAP.md](ROADMAP.md).
+![tflings watch](misc/demo-tui.gif)
+
+> **Status: early releases, expect rough edges.** 95 exercises in five modes (quiz, plan, apply, fix, and `cli`, where you write one command), every objective of the Terraform Associate 004 content list covered, a mock exam with 167 questions, and `tflings progress`. Tested on macOS and Linux; Windows with Docker is untested. See [ROADMAP.md](ROADMAP.md) and the [changelog](CHANGELOG.md).
+
+## The first five minutes
+
+```bash
+brew install cleonte/tap/tflings        # or: go install github.com/cleonte/tflings/cmd/tflings@latest
+tflings doctor --install-terraform      # only if you have no Terraform 1.12 or newer
+mkdir ~/tflings-play && cd ~/tflings-play
+tflings init && cd tflings-exercises
+tflings watch                           # fix the exercise, save, see the result
+```
+
+The mock exam needs nothing else, not even a folder:
+
+```bash
+tflings exam --practice -n 10     # the answer and why, after each question
+tflings progress                  # exercises done and exam score, per objective
+```
+
+![tflings exam](misc/demo-exam.gif)
 
 ## What you need
 
-- **Terraform 1.12 or newer** (the exam tests 1.12). tflings uses the one on your `PATH`, or the one in `TFLINGS_TERRAFORM`.
+- **Terraform 1.12 or newer** (the exam tests 1.12). tflings uses the one on your `PATH`, or the one in `TFLINGS_TERRAFORM`, or one it downloads for you into its own folder with `tflings doctor --install-terraform`.
 - **Docker** (Docker Desktop, OrbStack, Colima, Lima or Docker Engine) for exercises that use the AWS provider. Quizzes and exercises that need no cloud run without it.
 - Go 1.26 or newer to build it for now.
 
@@ -16,7 +37,7 @@ You get a folder of Terraform files with a `# I AM NOT DONE` line and a `# TODO:
 
 ## Try it
 
-On macOS with Homebrew (once the first release is out):
+On macOS with Homebrew:
 
 ```bash
 brew install cleonte/tap/tflings

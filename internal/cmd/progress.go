@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/cleonte/tflings"
 	"github.com/cleonte/tflings/internal/exam"
@@ -66,7 +65,7 @@ no exercise done yet, or under 70% on the questions you have been asked.`,
 				fmt.Printf("%s%-4s%-48s %-10s %s\n", mark, o.ID, trunc(o.Title, 47), ex, q)
 			}
 			if !local {
-				fmt.Fprintln(os.Stderr, "\nRun this inside your exercises folder to see the exercises you have done.")
+				fmt.Println("\nRun this inside your exercises folder to see the exercises you have done.")
 			}
 			if needs > 0 {
 				fmt.Printf("\n%d objectives need work. `tflings exam --weak` asks about the lowest ones.\n", needs)

@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	tea "charm.land/bubbletea/v2"
+	"charm.land/lipgloss/v2"
 	"github.com/cleonte/tflings"
 	"github.com/cleonte/tflings/internal/exercises"
 	"github.com/cleonte/tflings/internal/workspace"
@@ -254,5 +255,24 @@ func TestRunsReportProgress(t *testing.T) {
 	ctx := exercises.WithProgress(context.Background(), func(string) {})
 	if ctx == nil {
 		t.Fatal("no context")
+	}
+}
+
+func TestLongLinesAreWrappedNotCut(t *testing.T) {
+	m := &Model{width: 40}
+	got := m.wrap("This is a long explanation that does not fit in forty columns at all.", 4)
+	if len(got) < 2 {
+		t.Fatalf("it should wrap onto several lines, got %q", got)
+	}
+	for _, l := range got {
+		if lipgloss.Width(l) > 36 {
+			t.Errorf("line %q is wider than the space left", l)
+		}
+	}
+	if joined := strings.Join(strings.Fields(strings.Join(got, " ")), " "); !strings.HasSuffix(joined, "at all.") {
+		t.Errorf("no words may be lost: %q", joined)
+	}
+	if one := (&Model{}).wrap("no width known", 0); len(one) != 1 || one[0] != "no width known" {
+		t.Errorf("without a width the text is left alone: %q", one)
 	}
 }

@@ -137,7 +137,14 @@ func (m *Model) resultLines() []string {
 	case errors.As(m.runErr, &failed):
 		lines := []string{errStyle.Render("✘ " + m.exercise.Name + " is not solved yet:"), ""}
 		for _, l := range failed.Lines {
-			lines = append(lines, errStyle.Render("  • ")+l)
+			for i, w := range m.wrap(l, 4) {
+				if i == 0 {
+					w = errStyle.Render("  • ") + w
+				} else {
+					w = "    " + w
+				}
+				lines = append(lines, w)
+			}
 		}
 		if len(failed.Details) > 0 {
 			lines = append(lines, "")
@@ -153,12 +160,23 @@ func (m *Model) resultLines() []string {
 
 	lines := []string{okStyle.Render("✔ " + m.exercise.Name + " works!"), ""}
 	if m.result.Explanation != "" {
-		lines = append(lines, m.result.Explanation, "")
+		lines = append(lines, m.wrap(m.result.Explanation, 0)...)
+		lines = append(lines, "")
 	}
 	if m.exercise.State() == exercises.Pending {
 		lines = append(lines, warnStyle.Render("Remove the `# I AM NOT DONE` line from the file, or press n, to move on to the next exercise."))
 	}
 	return lines
+}
+
+// wrap breaks text into lines that fit the terminal, leaving indent columns
+// free at the left. Without a known width the text is left as it is.
+func (m *Model) wrap(text string, indent int) []string {
+	w := m.width - indent
+	if m.width <= 0 || w < 20 {
+		return strings.Split(text, "\n")
+	}
+	return strings.Split(lipgloss.NewStyle().Width(w).Render(text), "\n")
 }
 
 func (m *Model) body() string {

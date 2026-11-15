@@ -6,6 +6,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Added
+
+- Two demo recordings in the README (`misc/demo-tui.gif` and `misc/demo-exam.gif`), made with [vhs](https://github.com/charmbracelet/vhs) from `demo-tui.tape` and `demo-exam.tape`, and a "first five minutes" section.
+
+### Fixed
+
+- In the full-screen view, a long explanation or failure message is wrapped to the width of the terminal instead of being cut off.
+- `tflings progress` printed its "run this inside your exercises folder" note to stderr, so it could appear above the table; it is now printed after it.
+
 ## [0.9.0] - 2026-11-15
 
 ### Added
