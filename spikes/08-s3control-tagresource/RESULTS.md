@@ -21,15 +21,27 @@ debug log). Floci's `TagResource` **replaces** the whole tag set with the tags i
 == tag b=2 and c=3              -> ListTagsForResource: b=2 c=3      (a is lost)
 ```
 
+## Floci 2.5.0 (released 2026-11-15)
+
+Same result: `repro.sh 4578` against a `floci/floci:2.5.0` container (hardened flags, port 4578)
+printed `a=1` and then `b=2 c=3`. The container and the image were removed afterwards.
+
+## In Floci's source
+
+`S3ControlController.tagResource` (floci-io/floci, read 2026-11-15, main branch) documents "replaces all
+tags on the specified S3 bucket" and passes only the tags of the request to `putBucketTaggingForAccount`.
+`untagResource` in the same class reads the existing tags with `getBucketTaggingForAccount`, removes the
+keys, and writes the rest back. So the replace is intended there, and a fix is to merge the request's
+tags into the existing ones.
+
 ## What AWS does (not run here)
 
-The AWS documentation describes S3 Control `TagResource` as creating new tags or updating existing
-ones, so the tags that are not in the request stay. I did not call real AWS (tflings never does),
-so this comes from the documentation, not from a test.
+The AWS documentation (API_control_TagResource, read 2026-11-15) says: "Creates a new user-defined tag or
+updates an existing tag." That reads as add-or-update, but it does not say in so many words that other
+tags stay. I did not call real AWS (tflings never does), so this is from the documentation, not a test.
 
 ## Not checked
 
-- Floci 2.5.0 (released 2026-11-15): not tried; the container here is 2.4.0.
 - No existing issue was found in floci-io/floci with the searches "TagResource s3control tags merge"
   and "s3 bucket tags" (2026-11-15).
 
@@ -42,7 +54,7 @@ exercises that add tags use `aws_vpc`, so nothing in the course depends on this.
 
 > **S3 Control TagResource replaces all tags instead of adding to them**
 >
-> Floci 2.4.0. `POST /v20180820/tags/{arn}` (S3 Control `TagResource`) with tags `b`, `c` on a bucket
+> Floci 2.4.0 and 2.5.0. `POST /v20180820/tags/{arn}` (S3 Control `TagResource`) with tags `b`, `c` on a bucket
 > that already has tag `a` leaves only `b` and `c`. `TagResource` should add or update the given tags
 > and leave the others (`PutBucketTagging` on the S3 API is the call that replaces the set).
 > The AWS Terraform provider (6.x) uses `TagResource` for the tags it adds, so a change from
