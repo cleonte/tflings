@@ -1,0 +1,9 @@
+state:
+  - expr: state.values.root_module.resources.exists(r, r.address == "terraform_data.app")
+    message: "terraform_data.app must still exist: only the scratch environment should go."
+  - expr: "!state.values.root_module.resources.exists(r, r.address == \"terraform_data.scratch\")"
+    message: "terraform_data.scratch is still in the state."
+explanation: >-
+  `terraform destroy -target=ADDRESS` destroys one resource (and what depends on
+  it). Removing the block and running `apply` gets the same result and also
+  leaves the configuration true, which is the usual way.

@@ -1,0 +1,12 @@
+# I AM NOT DONE
+
+question = "How does a configuration connect the CLI to an HCP Terraform workspace?"
+options = [
+  "a) With a `cloud` block inside the `terraform` block (organization and workspace), after `terraform login`.",
+  "b) With `backend \"s3\"` pointed at app.terraform.io.",
+  "c) With `provider \"hcp\"` and an API token in the configuration.",
+  "d) With `terraform workspace new` only; no configuration is needed.",
+]
+
+# TODO: set your answer, for example answer = "a"
+answer = ""

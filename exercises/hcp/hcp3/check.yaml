@@ -1,0 +1,3 @@
+answer: [b]
+explanation: >-
+  Projects group workspaces (and, for example, variable sets) inside an organization, and permissions can be given to a team for the whole project. An HCP Terraform workspace is also not the same as a CLI workspace: it holds its own configuration, variables, state and run history.

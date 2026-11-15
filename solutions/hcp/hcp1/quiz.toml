@@ -1,0 +1,10 @@
+question = "In a workspace that uses remote execution, where do `plan` and `apply` run, and where do the cloud credentials come from?"
+options = [
+  "a) On the laptop of the person who started the run; credentials come from their shell.",
+  "b) On HCP Terraform's own run environment; credentials are set as variables in the workspace (or a variable set).",
+  "c) On the provider's servers; credentials are not needed.",
+  "d) On the VCS server; credentials come from the repository's files.",
+]
+
+
+answer = "b"

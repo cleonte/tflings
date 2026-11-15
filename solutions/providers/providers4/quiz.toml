@@ -1,0 +1,10 @@
+question = "How does Terraform use providers?"
+options = [
+  "a) Providers are compiled into the terraform binary, so every release knows every platform.",
+  "b) Terraform core talks to provider plugins, which implement the resource types and call the platform's API.",
+  "c) Providers store the state of the resources they manage.",
+  "d) Providers are modules that are downloaded again on every plan.",
+]
+
+
+answer = "b"

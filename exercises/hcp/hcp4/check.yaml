@@ -1,0 +1,3 @@
+answer: [a]
+explanation: >-
+  The `cloud` block in the `terraform` block names the organization and the workspace (or tags); `terraform login` stores an API token. After `terraform init`, plan and apply run in HCP Terraform and the state is kept there.

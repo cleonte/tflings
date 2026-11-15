@@ -1,0 +1,3 @@
+answer: [b]
+explanation: >-
+  Write the configuration, plan to preview the changes, apply to make them. Init prepares the working directory and comes before the first plan; it is not one of the three steps of the loop.

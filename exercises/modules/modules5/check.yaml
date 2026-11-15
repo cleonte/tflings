@@ -1,0 +1,3 @@
+plan:
+  - expr: plan.resource_changes.exists(r, r.address == "module.app.terraform_data.this")
+    message: "module.app.terraform_data.this should be planned."

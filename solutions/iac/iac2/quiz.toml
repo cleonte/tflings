@@ -1,0 +1,10 @@
+question = "Which is an advantage of managing infrastructure as code, compared with changing it by hand?"
+options = [
+  "a) Cloud providers never have outages when infrastructure is defined in code.",
+  "b) The same configuration can be reviewed, versioned and applied again to build identical environments.",
+  "c) Credentials are no longer needed, because the code authenticates by itself.",
+  "d) Resources defined in code are free of charge.",
+]
+
+
+answer = "b"

@@ -1,0 +1,5 @@
+plan:
+  - expr: plan.resource_changes.filter(r, r.address == "module.backup.aws_s3_bucket.this").all(r, r.change.after.region == "us-west-2")
+    message: "The backup bucket should be planned in us-west-2: pass the aliased provider to the module with providers = { aws = aws.west }."
+  - expr: plan.resource_changes.filter(r, r.address == "module.main.aws_s3_bucket.this").all(r, r.change.after.region == "us-east-1")
+    message: "The main bucket should stay in us-east-1."

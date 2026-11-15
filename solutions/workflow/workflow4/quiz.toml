@@ -1,0 +1,10 @@
+question = "What does `terraform init` do?"
+options = [
+  "a) It creates the resources described in the configuration.",
+  "b) It reformats the configuration files to the canonical style.",
+  "c) It installs the providers and modules the configuration needs and sets up the backend in the working directory.",
+  "d) It writes a saved plan file that `apply` can run later.",
+]
+
+
+answer = "c"

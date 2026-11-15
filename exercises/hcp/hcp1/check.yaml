@@ -1,0 +1,3 @@
+answer: [b]
+explanation: >-
+  With remote execution the run happens on HCP Terraform infrastructure, so the credentials and variables must be stored in the workspace or in a variable set (mark secrets as sensitive). The state is stored in the workspace too.

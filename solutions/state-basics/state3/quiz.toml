@@ -1,0 +1,10 @@
+question = "What is the main purpose of the Terraform state?"
+options = [
+  "a) It is a log of every command that was run, for auditing.",
+  "b) It is a cache that can be deleted at any time without any consequence.",
+  "c) It is a copy of the configuration files, kept as a backup.",
+  "d) It maps the resources in the configuration to the real objects and records their attributes, so Terraform can plan changes.",
+]
+
+
+answer = "d"

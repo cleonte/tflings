@@ -1,0 +1,3 @@
+answer: [b]
+explanation: >-
+  Providers are plugins that know the API of one platform. The workflow (write, plan, apply) and the language stay the same, but the resources are specific to each provider: a configuration is not portable between clouds without changing it.

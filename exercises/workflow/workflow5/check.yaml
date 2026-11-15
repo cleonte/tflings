@@ -1,0 +1,3 @@
+answer: [a]
+explanation: >-
+  `validate` looks only at the configuration: syntax, references, argument names and types. It does not read state or contact any service, so it cannot find a name that is taken or a credential that is wrong; `plan` finds those. It needs `init` to have run first, because it reads the provider schemas.

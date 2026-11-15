@@ -1,0 +1,8 @@
+files:
+  - expr: files["main.tf"].matches("(?m)^\\s*backend\\s+\"local\"")
+    message: "Keep the backend \"local\" block."
+  - expr: files["main.tf"].matches("(?m)^\\s*path\\s*=\\s*\"state/app\\.tfstate\"")
+    message: "Set path = \"state/app.tfstate\" in the backend block."
+plan:
+  - expr: plan.resource_changes.exists(r, r.address == "terraform_data.app")
+    message: "terraform_data.app should be planned."

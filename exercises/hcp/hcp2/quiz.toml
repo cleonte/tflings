@@ -1,0 +1,12 @@
+# I AM NOT DONE
+
+question = "Which HCP Terraform feature checks a plan against rules, such as \"no public buckets\", before it can be applied?"
+options = [
+  "a) terraform validate",
+  "b) Run triggers",
+  "c) Policy enforcement with Sentinel or OPA policies",
+  "d) Variable sets",
+]
+
+# TODO: set your answer, for example answer = "a"
+answer = ""

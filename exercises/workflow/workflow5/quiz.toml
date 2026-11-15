@@ -1,0 +1,12 @@
+# I AM NOT DONE
+
+question = "What does `terraform validate` check?"
+options = [
+  "a) That the configuration is syntactically valid and internally consistent, without reading remote state or calling provider APIs.",
+  "b) That the real infrastructure matches the state file.",
+  "c) That the credentials of every provider are valid.",
+  "d) That the names of the resources are still free in the cloud.",
+]
+
+# TODO: set your answer, for example answer = "a"
+answer = ""

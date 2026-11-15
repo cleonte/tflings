@@ -1,0 +1,6 @@
+config:
+  - expr: config.root_module.outputs.answer.expression.constant_value == "blue-42"
+    message: "The output answer should hold the input of the resource that is only in the state."
+explanation: >-
+  `terraform state list` shows the resource addresses in the state and
+  `terraform state show ADDRESS` its attributes. Both only read the state.
