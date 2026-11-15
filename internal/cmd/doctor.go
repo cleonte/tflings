@@ -6,13 +6,15 @@ import (
 
 	"github.com/cleonte/tflings/internal/doctor"
 	"github.com/cleonte/tflings/internal/floci"
+	"github.com/cleonte/tflings/internal/install"
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 )
 
 // DoctorCmd checks the machine and says how to fix what is missing.
 func DoctorCmd(infoFile string) *cobra.Command {
-	var prefetch bool
+	var prefetch, installTF bool
+	var tfVersion string
 	c := &cobra.Command{
 		Use:   "doctor",
 		Short: "Check that this machine can run the course, and say how to fix what cannot",
@@ -21,12 +23,28 @@ func DoctorCmd(infoFile string) *cobra.Command {
 Terraform; exercises that build things need Docker and Floci too.
 
 With --prefetch it downloads the AWS provider (about 250 MB) into tflings's
-cache, once, so that exercises can start with no network afterwards.`,
+cache, once, so that exercises can start with no network afterwards.
+
+With --install-terraform it downloads Terraform from releases.hashicorp.com into
+tflings's own folder (nothing system-wide), checking the release's checksums and
+their signature. The default is the newest 1.12.x, the version the exam tests;
+--terraform-version 1.12.3 or a constraint such as "~> 1.12.0" chooses another.
+It is used before any terraform on your PATH.`,
 		Args:          cobra.NoArgs,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			env := newEnv()
+			if installTF {
+				color.White("Downloading Terraform from releases.hashicorp.com…")
+				path, ver, err := install.Terraform(cmd.Context(), env.HomeDir(), tfVersion, install.Download)
+				if err != nil {
+					color.Red("%s", err)
+					return reported(err)
+				}
+				color.Green("Installed Terraform %s at %s\n", ver, path)
+				env = newEnv() // so that the checks below see it
+			}
 			if prefetch {
 				if err := doctor.Prefetch(cmd.Context(), env, func(s string) { color.White("%s…", s) }); err != nil {
 					color.Red("%s", err)
@@ -56,6 +74,8 @@ cache, once, so that exercises can start with no network afterwards.`,
 			return nil
 		},
 	}
+	c.Flags().BoolVar(&installTF, "install-terraform", false, "download Terraform into tflings's folder (needs the network)")
+	c.Flags().StringVar(&tfVersion, "terraform-version", "", "with --install-terraform: a version (1.12.3) or a constraint (\"~> 1.12.0\"); default the newest 1.12.x")
 	c.Flags().BoolVar(&prefetch, "prefetch", false, "download the AWS provider into the cache (needs the network, once)")
 	return c
 }

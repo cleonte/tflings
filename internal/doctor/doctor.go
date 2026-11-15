@@ -87,7 +87,7 @@ func checkTerraform(o Options) Result {
 	}
 	r.Level = Fail
 	r.Detail = "no Terraform " + engine.MinTerraform.String() + " or newer was found"
-	r.Fix = "install Terraform from https://developer.hashicorp.com/terraform/install (the exam tests 1.12), or set TFLINGS_TERRAFORM to its path"
+	r.Fix = "run `tflings doctor --install-terraform` (downloads Terraform into tflings's own folder), or install it from https://developer.hashicorp.com/terraform/install (the exam tests 1.12), or set TFLINGS_TERRAFORM to its path"
 	return r
 }
 

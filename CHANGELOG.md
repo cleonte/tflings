@@ -6,8 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.8.0] - 2026-11-15
+
 ### Added
 
+- `tflings doctor --install-terraform`: downloads Terraform from releases.hashicorp.com into tflings's own folder (nothing system-wide), with HashiCorp's `hc-install`, which checks the release's SHA256 sums and the signature on them. The default is the newest 1.12.x, the version the exam tests (`--terraform-version 1.12.3` or a constraint chooses another), and tflings uses it before any `terraform` on PATH. `doctor` now says to run it when no Terraform is found. Tried on macOS arm64 and on Ubuntu 26.04 arm64 with no Terraform on PATH.
 - Three exercises for topics the exam asks about: `workspaces1` (CLI workspaces: a second state for the same configuration), `iteration7` (`count` against `for_each`: removing an item must not shift the others) and `conditions5` (`can(regex(...))` in a validation): 85 exercises.
 
 ### Fixed
@@ -78,7 +81,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - First tagged version: the CLI (`init`, `list`, `run`, `hint`, `reset`, `solution`, `update`, `verify`, `watch`, `doctor`, `aws up|down|status|reset`, `tf`, `env`), plan, apply, fix and quiz exercises (54), proven on Terraform 1.12 and the latest, against the Floci AWS emulator.
 
-[Unreleased]: https://github.com/cleonte/tflings/compare/v0.7.0...HEAD
+[Unreleased]: https://github.com/cleonte/tflings/compare/v0.8.0...HEAD
+[0.8.0]: https://github.com/cleonte/tflings/compare/v0.7.0...v0.8.0
 [0.7.0]: https://github.com/cleonte/tflings/compare/v0.6.0...v0.7.0
 [0.6.0]: https://github.com/cleonte/tflings/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/cleonte/tflings/compare/v0.4.0...v0.5.0
