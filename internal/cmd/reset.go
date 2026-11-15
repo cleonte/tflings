@@ -25,7 +25,7 @@ AWS account.`,
 			p, err := workspace.Reset(src, root, args[0])
 			if errors.Is(err, exercises.ErrExerciseNotFound) {
 				color.White("No exercise found for '%s'", args[0])
-				return err
+				return reported(err)
 			}
 			if err != nil {
 				return err
@@ -35,7 +35,7 @@ AWS account.`,
 			}
 			if err := exercises.RecordReset(root, args[0]); err != nil {
 				color.Yellow("Restored %s, but could not save the reset in %s: %s", p, exercises.ProgressFile, err)
-				return err
+				return reported(err)
 			}
 			color.Green("Restored %s", p)
 			return nil

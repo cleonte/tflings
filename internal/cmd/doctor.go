@@ -30,7 +30,7 @@ cache, once, so that exercises can start with no network afterwards.`,
 			if prefetch {
 				if err := doctor.Prefetch(cmd.Context(), env, func(s string) { color.White("%s…", s) }); err != nil {
 					color.Red("%s", err)
-					return err
+					return reported(err)
 				}
 				color.Green("The AWS provider is in the cache.\n")
 			}

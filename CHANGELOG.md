@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Added
+
+- `tflings version` (it only worked as `tflings --version`).
+
+### Fixed
+
+- A command or flag that does not exist, or any error a command did not report itself, made tflings exit with status 1 and print nothing. It now prints `Error: ...`, and for an unknown command or flag points to `tflings --help` (cobra's "Did you mean" suggestion is kept).
+
 ## [0.6.0] - 2026-11-15
 
 ### Added

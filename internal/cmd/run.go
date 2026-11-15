@@ -30,7 +30,7 @@ example specific exercise : tflings run pods1`,
 			}
 			if errors.Is(err, exercises.ErrExerciseNotFound) {
 				color.White("No exercise found for '%s'", args[0])
-				return err
+				return reported(err)
 			}
 			if errors.Is(err, exercises.ErrNoPending) {
 				color.Green("🎉 Every exercise is done.")
@@ -52,7 +52,7 @@ func runExercise(ctx context.Context, env *exercises.Env, ex exercises.Exercise)
 	result, err := ex.Run(ctx, env)
 	if exercises.IsSkipped(err) {
 		color.Yellow(err.Error())
-		return err
+		return reported(err)
 	}
 	if err != nil {
 		printFailure(ex, err)
@@ -83,7 +83,7 @@ func runNext(ctx context.Context, infoFile string) error {
 	}
 	if err != nil {
 		color.Red("%s", err)
-		return err
+		return reported(err)
 	}
 	return runExercise(ctx, env, ex)
 }
