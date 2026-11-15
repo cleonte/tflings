@@ -24,7 +24,7 @@ pending, so try first; use --reveal to look anyway.`,
 			ex, err := exercises.Find(args[0], infoFile)
 			if errors.Is(err, exercises.ErrExerciseNotFound) {
 				color.White("No exercise found for '%s'", args[0])
-				return err
+				return reported(err)
 			}
 			if err != nil {
 				return err

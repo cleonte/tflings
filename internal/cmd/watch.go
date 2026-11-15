@@ -46,7 +46,7 @@ again) or q (quit).`,
 			if err != nil {
 				color.Red("Can't watch %s: %s", root, err)
 				color.Yellow("Run tflings from the folder that holds the exercises, or create one with `tflings init`.")
-				return err
+				return reported(err)
 			}
 
 			if mgr := floci.New(); mgr.Healthy(ctx) {

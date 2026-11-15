@@ -31,7 +31,7 @@ func flociError(err error) error {
 	default:
 		color.Red("%s", err)
 	}
-	return err
+	return reported(err)
 }
 
 // AwsCmd manages the local AWS (Floci) that apply exercises use.

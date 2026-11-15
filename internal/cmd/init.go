@@ -32,7 +32,7 @@ the info.toml that tflings needs. Use it after installing tflings.`,
 			}
 			if err := workspace.Init(src, dest); err != nil {
 				color.Red("Failed to create %s: %s", dest, err)
-				return err
+				return reported(err)
 			}
 			color.Green("Created %s with all the exercises.", dest)
 			color.White("\nNext steps:\n  cd %s\n  tflings watch\n", dest)
