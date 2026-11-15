@@ -1,0 +1,490 @@
+# Mock exam questions, batch 2. correct = 0-based indexes into options.
+
+[[question]]
+id = "b2-1a-1"
+objective = "1a"
+text = "Which statement best describes Infrastructure as Code?"
+options = [
+  "Describing infrastructure in files that can be reviewed, versioned and applied by a tool",
+  "Clicking through a cloud console and writing down the steps",
+  "Running servers on the same machine as the application",
+  "A spreadsheet of existing servers",
+]
+correct = [0]
+explanation = "IaC manages infrastructure through machine-readable definition files, so changes can be reviewed, versioned and repeated."
+
+[[question]]
+id = "b2-1a-2"
+objective = "1a"
+text = "Terraform's configuration language is declarative. What does that mean?"
+options = [
+  "You describe the end state you want, and Terraform works out the steps",
+  "You write each step in the order it must run",
+  "You must write loops for every resource",
+  "The configuration can only be read, never changed",
+]
+correct = [0]
+explanation = "You say what should exist. Terraform compares it with the state and plans the changes needed."
+
+[[question]]
+id = "b2-1b-1"
+objective = "1b"
+text = "Which TWO are advantages of IaC over making changes by hand?"
+options = [
+  "Changes can be reviewed before they are made",
+  "The same definition builds the same environment again",
+  "It removes the need for credentials",
+  "It makes every cloud provider identical",
+]
+correct = [0, 1]
+explanation = "Review and repeatability are the point. Credentials are still needed and providers stay different."
+
+[[question]]
+id = "b2-1c-1"
+objective = "1c"
+text = "Which Terraform component lets one workflow manage AWS, Azure and Kubernetes?"
+options = [
+  "Providers",
+  "Backends",
+  "Workspaces",
+  "Outputs",
+]
+correct = [0]
+explanation = "Providers are plugins for a platform's API. The workflow and language stay the same across them."
+
+[[question]]
+id = "b2-1c-2"
+objective = "1c"
+text = "True or false: a configuration written for AWS resources runs unchanged on Azure."
+options = [
+  "True",
+  "False",
+]
+correct = [1]
+explanation = "Resource types are provider-specific (`aws_instance` is not `azurerm_virtual_machine`). Terraform gives one workflow, not portable resources."
+
+[[question]]
+id = "b2-2a-1"
+objective = "2a"
+text = "Where do you declare which providers a configuration needs and where to get them?"
+options = [
+  "In the `required_providers` block inside `terraform`",
+  "In a `provider` block only",
+  "In `.terraform.lock.hcl` by hand",
+  "In the backend block",
+]
+correct = [0]
+explanation = "`required_providers` names each provider's `source` and `version` constraint. The `provider` block configures it."
+
+[[question]]
+id = "b2-2a-2"
+objective = "2a"
+text = "What is the default registry that Terraform installs providers from?"
+options = [
+  "registry.terraform.io",
+  "github.com",
+  "hub.docker.com",
+  "app.terraform.io only",
+]
+correct = [0]
+explanation = "Short names like `hashicorp/aws` mean `registry.terraform.io/hashicorp/aws`."
+
+[[question]]
+id = "b2-2a-3"
+objective = "2a"
+text = "What should you do with the `.terraform.lock.hcl` file?"
+options = [
+  "Commit it, so everyone installs the same provider versions",
+  "Add it to .gitignore",
+  "Delete it before every apply",
+  "Edit the hashes by hand after each upgrade",
+]
+correct = [0]
+explanation = "The lock file records exact provider versions and checksums. Commit it, and upgrade deliberately with `terraform init -upgrade`."
+
+[[question]]
+id = "b2-2b-1"
+objective = "2b"
+text = "Which statement about providers is correct?"
+options = [
+  "Providers are plugins that Terraform core calls to manage resources of one platform",
+  "Providers are compiled into the terraform binary",
+  "Providers store the state",
+  "Providers are modules",
+]
+correct = [0]
+explanation = "Core builds the graph and decides what to do. A provider plugin knows the API and implements the resource types."
+
+[[question]]
+id = "b2-2c-1"
+objective = "2c"
+text = "How do you make a resource use a non-default configuration of a provider?"
+options = [
+  "Set `provider = aws.west` in the resource",
+  "Add a `region` variable",
+  "Use a workspace",
+  "Copy the resource to another folder",
+]
+correct = [0]
+explanation = "The `provider` meta-argument selects an aliased configuration, written `<provider>.<alias>`."
+
+[[question]]
+id = "b2-2d-1"
+objective = "2d"
+text = "What happens to the state when you run `terraform apply`?"
+options = [
+  "It is updated to record the objects that were created, changed or destroyed",
+  "It is deleted",
+  "It is only read, never written",
+  "It is sent to the provider",
+]
+correct = [0]
+explanation = "After a successful apply the state records the new attributes, so the next plan starts from what is real."
+
+[[question]]
+id = "b2-3a-1"
+objective = "3a"
+text = "In which order do the core commands usually run for a change?"
+options = [
+  "init, plan, apply",
+  "apply, init, plan",
+  "plan, init, destroy",
+  "validate, destroy, init",
+]
+correct = [0]
+explanation = "Initialize once (and when providers, modules or the backend change), then plan to preview and apply to make the change."
+
+[[question]]
+id = "b2-3b-1"
+objective = "3b"
+text = "When must you run `terraform init` again?"
+options = [
+  "After adding a provider, a module, or changing the backend",
+  "Before every plan, always",
+  "Only on the first day of a project",
+  "Never; apply does it",
+]
+correct = [0]
+explanation = "`init` is safe to repeat and is needed whenever those things change. Plan and apply fail if the directory is not initialized."
+
+[[question]]
+id = "b2-3b-2"
+objective = "3b"
+text = "What is the `.terraform` directory?"
+options = [
+  "Where init downloads providers and modules; it should not be committed",
+  "The folder with the state backup",
+  "Where the plan files are kept",
+  "A folder for secrets",
+]
+correct = [0]
+explanation = "It is a local cache created by `init`. Add it to `.gitignore`."
+
+[[question]]
+id = "b2-3c-1"
+objective = "3c"
+text = "True or false: `terraform validate` needs the providers to be installed (init has run)."
+options = [
+  "True",
+  "False",
+]
+correct = [0]
+explanation = "`validate` checks attribute names and types against the provider schemas, so it needs `init` first (it can run with `init -backend=false`)."
+
+[[question]]
+id = "b2-3d-1"
+objective = "3d"
+text = "What does `terraform plan` do?"
+options = [
+  "Shows the changes that apply would make, without making them",
+  "Applies the changes after confirmation",
+  "Formats the files",
+  "Deletes unused resources",
+]
+correct = [0]
+explanation = "It refreshes the state, compares it with the configuration and prints the proposed actions: create, update, replace or destroy."
+
+[[question]]
+id = "b2-3d-2"
+objective = "3d"
+text = "Which TWO plan symbols show a change to a resource that already exists?"
+options = [
+  "~ (update in place)",
+  "-/+ (replace: destroy and create again)",
+  "+ (create a new resource)",
+  "# (introduces the resource name)",
+]
+correct = [0, 1]
+explanation = "`~` is an in-place update, `-/+` a replacement. `+` is create and `-` destroy; `#` introduces a resource name in the text."
+
+[[question]]
+id = "b2-3e-1"
+objective = "3e"
+text = "What does `terraform apply -auto-approve` do?"
+options = [
+  "Applies without asking for confirmation",
+  "Applies only the first resource",
+  "Skips the plan",
+  "Approves the plan in HCP Terraform",
+]
+correct = [0]
+explanation = "It skips the interactive prompt. It still plans first (unless a saved plan is given), so use it only in automation you trust."
+
+[[question]]
+id = "b2-3f-1"
+objective = "3f"
+text = "What does `terraform destroy` destroy?"
+options = [
+  "The objects in the state of this configuration",
+  "Everything in the cloud account",
+  "Only the state file",
+  "Only resources with prevent_destroy",
+]
+correct = [0]
+explanation = "It acts on what Terraform manages. A resource with `prevent_destroy = true` makes the run fail."
+
+[[question]]
+id = "b2-3g-1"
+objective = "3g"
+text = "Which command makes `terraform fmt` fail in a pipeline if a file is not formatted, without changing files?"
+options = [
+  "terraform fmt -check",
+  "terraform fmt -dry-run",
+  "terraform validate -fmt",
+  "terraform fmt -diff -apply",
+]
+correct = [0]
+explanation = "`-check` exits non-zero when a file needs formatting. `-diff` shows changes and `-recursive` includes subfolders."
+
+[[question]]
+id = "b2-4a-1"
+objective = "4a"
+text = "What is the difference between a `resource` and a `data` block?"
+options = [
+  "A resource is created and managed by Terraform; a data source only reads existing information",
+  "A data source creates resources faster",
+  "A resource is read-only",
+  "They are the same",
+]
+correct = [0]
+explanation = "Resources have a lifecycle in Terraform. Data sources read something that already exists, such as an AMI or another account's VPC."
+
+[[question]]
+id = "b2-4a-2"
+objective = "4a"
+text = "How do you refer to an attribute of a data source called `ami` of type `aws_ami`?"
+options = [
+  "data.aws_ami.ami.id",
+  "aws_ami.ami.id",
+  "resource.aws_ami.ami.id",
+  "aws_ami.data.ami.id",
+]
+correct = [0]
+explanation = "Data source references start with `data.`, then type and name. Resources are referenced without a prefix."
+
+[[question]]
+id = "b2-4b-1"
+objective = "4b"
+text = "How does a resource refer to the id of `aws_vpc.main`?"
+options = [
+  "aws_vpc.main.id",
+  "vpc.main.id",
+  "aws.vpc.main.id",
+  "resource.aws_vpc.main.id",
+]
+correct = [0]
+explanation = "References are `<type>.<name>.<attribute>`. It also tells Terraform that the resource depends on the VPC."
+
+[[question]]
+id = "b2-4c-1"
+objective = "4c"
+text = "How do you read the value of an input variable called `region`?"
+options = [
+  "var.region",
+  "variable.region",
+  "input.region",
+  "$region",
+]
+correct = [0]
+explanation = "Input variables are read as `var.<name>`. Locals are `local.<name>`, with no s."
+
+[[question]]
+id = "b2-4c-2"
+objective = "4c"
+text = "What is the purpose of an `output` block in the root module?"
+options = [
+  "To print values after apply and make them readable with `terraform output`",
+  "To read input from the user",
+  "To change the backend",
+  "To import resources",
+]
+correct = [0]
+explanation = "Outputs are saved in the state and shown after apply. Modules use them to hand values to their caller."
+
+[[question]]
+id = "b2-4c-3"
+objective = "4c"
+text = "True or false: a variable without a `default` and not set another way makes Terraform ask for a value (in an interactive run)."
+options = [
+  "True",
+  "False",
+]
+correct = [0]
+explanation = "An unset required variable is prompted for. In automation, set it with `-var`, a tfvars file or `TF_VAR_name`."
+
+[[question]]
+id = "b2-4d-1"
+objective = "4d"
+text = "Which type holds a collection of values of the same type with no duplicates and no order?"
+options = [
+  "set",
+  "list",
+  "tuple",
+  "object",
+]
+correct = [0]
+explanation = "A `set` has unique elements and no order. A `list` is ordered and may repeat; `tuple` and `object` hold mixed types."
+
+[[question]]
+id = "b2-4d-2"
+objective = "4d"
+text = "Which type describes a structure with named attributes of different types?"
+options = [
+  "object",
+  "map",
+  "list",
+  "set",
+]
+correct = [0]
+explanation = "An `object` has named attributes, each with its own type. A `map` has keys with values that all share one type."
+
+[[question]]
+id = "b2-4e-1"
+objective = "4e"
+text = "What does `count.index` give inside a resource that uses `count`?"
+options = [
+  "The zero-based index of the current instance",
+  "The total number of instances",
+  "The id of the resource",
+  "The name of the resource",
+]
+correct = [0]
+explanation = "The first instance has index 0. Use `count = length(var.list)` to match a list."
+
+[[question]]
+id = "b2-4e-2"
+objective = "4e"
+text = "Which function joins a list of strings into one string with a separator?"
+options = [
+  "join",
+  "concat",
+  "merge",
+  "flatten",
+]
+correct = [0]
+explanation = "`join(\", \", list)` makes a string. `concat` joins lists, `merge` joins maps and `flatten` flattens nested lists."
+
+[[question]]
+id = "b2-4e-3"
+objective = "4e"
+text = "What does the expression `var.enabled ? 1 : 0` do?"
+options = [
+  "It is a conditional: 1 if enabled is true, 0 otherwise",
+  "It assigns 1 to enabled",
+  "It is a syntax error",
+  "It loops once",
+]
+correct = [0]
+explanation = "`condition ? true_value : false_value` is the conditional expression, often used for `count`."
+
+[[question]]
+id = "b2-4f-1"
+objective = "4f"
+text = "When is `depends_on` needed?"
+options = [
+  "When one resource depends on another through something Terraform cannot see in the configuration",
+  "For every resource",
+  "Only for data sources",
+  "When using outputs",
+]
+correct = [0]
+explanation = "References give implicit dependencies. Use `depends_on` for hidden ones, such as an IAM policy that must exist before an instance is used."
+
+[[question]]
+id = "b2-4f-2"
+objective = "4f"
+text = "What does `create_before_destroy = true` do when a resource must be replaced?"
+options = [
+  "Creates the new object first, then destroys the old one",
+  "Prevents replacement",
+  "Destroys without asking",
+  "Creates two copies permanently",
+]
+correct = [0]
+explanation = "It reverses the usual order so there is no gap. Names that must be unique can make it fail, since both exist for a moment."
+
+[[question]]
+id = "b2-5a-1"
+objective = "5a"
+text = "Which TWO are valid values for a module's `source`?"
+options = [
+  "A local path such as ./modules/network",
+  "A registry address such as hashicorp/consul/aws",
+  "A bare file name such as network.tf",
+  "A Terraform workspace name",
+]
+correct = [0, 1]
+explanation = "Sources can be local paths, registries, Git, HTTP URLs, buckets and more. A module is a directory, not a single file."
+
+[[question]]
+id = "b2-5b-1"
+objective = "5b"
+text = "How does a root module give a value to a child module?"
+options = [
+  "By setting an argument in the `module` block that matches a variable of the child",
+  "The child reads the parent's variables directly",
+  "Through the state file",
+  "With an environment variable the child reads automatically",
+]
+correct = [0]
+explanation = "A module cannot see its caller's variables or locals. Everything comes in through its input variables."
+
+[[question]]
+id = "b2-5c-1"
+objective = "5c"
+text = "What does `terraform init` do for a `module` block?"
+options = [
+  "Downloads or links the module into .terraform/modules",
+  "Applies the module",
+  "Deletes the module",
+  "Nothing",
+]
+correct = [0]
+explanation = "Modules are installed at init. After changing a module's source or version, run `terraform init` again (or `-upgrade`)."
+
+[[question]]
+id = "b2-5c-2"
+objective = "5c"
+text = "How do you read an output called `id` of a module instance called `network`?"
+options = [
+  "module.network.id",
+  "network.id",
+  "module.id.network",
+  "output.network.id",
+]
+correct = [0]
+explanation = "Module outputs are read as `module.<name>.<output>`."
+
+[[question]]
+id = "b2-5d-1"
+objective = "5d"
+text = "How do you pin a registry module to a version range?"
+options = [
+  "Add `version = \"~> 5.0\"` to the module block",
+  "Add it to the source of a local module",
+  "Write it in the lock file",
+  "Use a `?ref=` on a registry address",
+]
+correct = [0]
+explanation = "The `version` argument works for registry modules. For Git sources, pin with `?ref=tag` in the source."
+
