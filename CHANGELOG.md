@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Added
+
+- 38 more exam questions (104 in all), for the objectives that had few: IaC and providers (1, 2), the core workflow (3), resources, data, variables, types, expressions and dependencies (4a to 4f) and modules (5).
+
 ## [0.5.0] - 2026-11-15
 
 ### Added
