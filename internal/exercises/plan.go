@@ -230,7 +230,19 @@ func terraformFailed(headline string, out runner.Output) error {
 	if text == "" {
 		text = strings.TrimSpace(string(out.Stdout))
 	}
-	return &FailedError{Lines: []string{headline}, Details: lines(stripInitPreamble(text), 40)}
+	ls := []string{headline}
+	if providerMissing(text) {
+		ls = append(ls, "The AWS provider is not in tflings's cache yet. Run `tflings doctor --prefetch` once while online (about 250 MB), then try again.")
+	}
+	return &FailedError{Lines: ls, Details: lines(stripInitPreamble(text), 40)}
+}
+
+// providerMissing says whether init failed because the offline mirror holds no
+// AWS provider: the learner has not run `doctor --prefetch`.
+func providerMissing(text string) bool {
+	return strings.Contains(text, "Failed to query available provider packages") &&
+		strings.Contains(text, "was not found in any of the") &&
+		strings.Contains(text, "search locations")
 }
 
 // initPreamble is the first error block of a failed `terraform init` whose
