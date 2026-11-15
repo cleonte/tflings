@@ -64,6 +64,8 @@ func TestExerciseLint(t *testing.T) {
 			}
 			if ex.Objective == "" {
 				t.Error("every exercise carries the exam objective it practises")
+			} else if !validObjectives[ex.Objective] {
+				t.Errorf("objective %q is not in the Terraform Associate 004 content list", ex.Objective)
 			}
 			if ex.Docs == "" {
 				t.Error("every exercise links to documentation")
@@ -236,4 +238,18 @@ resource "aws_secretsmanager_secret" "s" {
 	if got := lintTerraform("main.tf", []byte(good)); len(got) != 0 {
 		t.Errorf("unexpected problems: %v", got)
 	}
+}
+
+// validObjectives is the Terraform Associate 004 content list
+// (developer.hashicorp.com/terraform/tutorials/certification-004/associate-review-004,
+// read 2026-11-15).
+var validObjectives = map[string]bool{
+	"1a": true, "1b": true, "1c": true,
+	"2a": true, "2b": true, "2c": true, "2d": true,
+	"3a": true, "3b": true, "3c": true, "3d": true, "3e": true, "3f": true, "3g": true,
+	"4a": true, "4b": true, "4c": true, "4d": true, "4e": true, "4f": true, "4g": true, "4h": true,
+	"5a": true, "5b": true, "5c": true, "5d": true,
+	"6a": true, "6b": true, "6c": true, "6d": true,
+	"7a": true, "7b": true, "7c": true,
+	"8a": true, "8b": true, "8c": true, "8d": true,
 }
