@@ -1,0 +1,322 @@
+# Mock exam questions, batch 4: questions with a code snippet, and more for thin objectives.
+# correct = 0-based indexes into options.
+
+[[question]]
+id = "b4-4e-1"
+objective = "4e"
+text = "How many S3 buckets does this configuration plan to create?"
+code = "resource \"aws_s3_bucket\" \"b\" {\n  for_each = toset([\"a\", \"b\", \"a\"])\n  bucket   = \"demo-${each.key}\"\n}"
+options = [
+  "1",
+  "2",
+  "3",
+  "None: it is an error",
+]
+correct = [1]
+explanation = "`toset` removes the duplicate, so the set has two elements, `a` and `b`, and `for_each` makes one bucket for each."
+
+[[question]]
+id = "b4-4f-1"
+objective = "4f"
+text = "Why does Terraform create the subnet before the instance?"
+code = "resource \"aws_instance\" \"app\" {\n  subnet_id = aws_subnet.main.id\n  # ...\n}"
+options = [
+  "The reference to `aws_subnet.main.id` is an implicit dependency",
+  "Resources are always created in alphabetical order",
+  "The file order decides it",
+  "A `depends_on` is required for this and is missing",
+]
+correct = [0]
+explanation = "Terraform builds a graph from references. The instance uses an attribute of the subnet, so it waits for it."
+
+[[question]]
+id = "b4-4g-1"
+objective = "4g"
+text = "What happens when you run `terraform plan -var port=80`?"
+code = "variable \"port\" {\n  type = number\n\n  validation {\n    condition     = var.port > 1023\n    error_message = \"Use an unprivileged port.\"\n  }\n}"
+options = [
+  "It fails with the error message, before any resource is planned",
+  "It plans normally and shows a warning",
+  "It plans, but apply is refused",
+  "The value is changed to 1024",
+]
+correct = [0]
+explanation = "A failing `validation` is an error. It is checked as soon as the value is known."
+
+[[question]]
+id = "b4-4h-1"
+objective = "4h"
+text = "What does `terraform apply` print for this output?"
+code = "output \"token\" {\n  value     = random_password.t.result\n  sensitive = true\n}"
+options = [
+  "token = <sensitive>",
+  "The value of the password",
+  "Nothing; sensitive outputs are not listed",
+  "An error: outputs cannot be sensitive",
+]
+correct = [0]
+explanation = "Terraform redacts sensitive values in its output. The value is still stored in the state in plain text."
+
+[[question]]
+id = "b4-6c-1"
+objective = "6c"
+text = "What happens on `terraform init` with this backend block?"
+code = "variable \"bucket\" {\n  type    = string\n  default = \"my-state\"\n}\n\nterraform {\n  backend \"s3\" {\n    bucket = var.bucket\n    key    = \"app/terraform.tfstate\"\n    region = \"us-east-1\"\n  }\n}"
+options = [
+  "It fails: variables cannot be used in a backend block",
+  "It works: the default is used",
+  "It works only with a `-var` flag",
+  "It works only with a `.tfvars` file",
+]
+correct = [0]
+explanation = "The backend is initialized before variables are evaluated. Use literals, or pass settings with `-backend-config`."
+
+[[question]]
+id = "b4-5b-1"
+objective = "5b"
+text = "What happens on `terraform validate` or `plan` for this module call, when `./net` does not declare a variable `cidr`?"
+code = "module \"net\" {\n  source = \"./net\"\n  cidr   = \"10.0.0.0/16\"\n}"
+options = [
+  "An error: Unsupported argument `cidr`",
+  "It works; extra arguments are ignored",
+  "A warning only",
+  "The module creates the variable",
+]
+correct = [0]
+explanation = "Arguments of a `module` block must match variables the module declares (plus the meta-arguments)."
+
+[[question]]
+id = "b4-3d-1"
+objective = "3d"
+text = "What will `terraform apply` do for this part of a plan?"
+code = "  # aws_instance.web must be replaced\n-/+ resource \"aws_instance\" \"web\" {\n      ~ ami = \"ami-111\" -> \"ami-222\" # forces replacement\n      # (3 unchanged attributes hidden)\n    }"
+options = [
+  "Destroy the instance and create a new one with the new AMI",
+  "Change the AMI in place",
+  "Only update the state",
+  "Do nothing: the plan is only a warning",
+]
+correct = [0]
+explanation = "`-/+` and the note 'forces replacement' mean the change cannot be done in place. By default the old object is destroyed first, unless `create_before_destroy` is set."
+
+[[question]]
+id = "b4-6d-1"
+objective = "6d"
+text = "Someone changes a tag on the bucket in the cloud console. What does the next plan show for `tags`?"
+code = "resource \"aws_s3_bucket\" \"logs\" {\n  bucket = \"demo-logs\"\n  tags   = { team = \"data\" }\n\n  lifecycle {\n    ignore_changes = [tags]\n  }\n}"
+options = [
+  "No change for tags: they are ignored",
+  "A change that sets the tags back",
+  "A replacement of the bucket",
+  "An error",
+]
+correct = [0]
+explanation = "`ignore_changes` makes Terraform leave the listed attributes as they are in the real object."
+
+[[question]]
+id = "b4-4c-1"
+objective = "4c"
+text = "The variable is declared with `default = \"dev\"`. There is a `terraform.tfvars` with `env = \"staging\"`, and the shell has `TF_VAR_env=qa`. What is `var.env` for `terraform plan`?"
+code = "variable \"env\" {\n  type    = string\n  default = \"dev\"\n}"
+options = [
+  "staging",
+  "qa",
+  "dev",
+  "It asks for a value",
+]
+correct = [0]
+explanation = "`terraform.tfvars` has a higher precedence than environment variables, which have a higher one than the default."
+
+[[question]]
+id = "b4-7a-1"
+objective = "7a"
+text = "What does `terraform plan` show for this configuration, when the bucket already exists in the cloud and is not in the state?"
+code = "import {\n  to = aws_s3_bucket.logs\n  id = \"legacy-logs\"\n}\n\nresource \"aws_s3_bucket\" \"logs\" {\n  bucket = \"legacy-logs\"\n}"
+options = [
+  "That the bucket will be imported",
+  "That a new bucket will be created and fail",
+  "Nothing: import blocks are ignored by plan",
+  "An error: import needs a command",
+]
+correct = [0]
+explanation = "An `import` block makes plan show the import as an action, and apply carries it out."
+
+[[question]]
+id = "b4-2c-1"
+objective = "2c"
+text = "In which region is the bucket `a` created?"
+code = "provider \"aws\" {\n  region = \"us-east-1\"\n}\n\nprovider \"aws\" {\n  alias  = \"dr\"\n  region = \"us-west-2\"\n}\n\nresource \"aws_s3_bucket\" \"a\" {\n  bucket = \"demo-a\"\n}\n\nresource \"aws_s3_bucket\" \"b\" {\n  bucket   = \"demo-b\"\n  provider = aws.dr\n}"
+options = [
+  "us-east-1, the default provider configuration",
+  "us-west-2",
+  "Both regions",
+  "It is an error: two aws providers",
+]
+correct = [0]
+explanation = "A resource without a `provider` argument uses the default configuration (the one without an alias)."
+
+[[question]]
+id = "b4-5d-1"
+objective = "5d"
+text = "Which TWO versions does this constraint accept?"
+code = "module \"vpc\" {\n  source  = \"terraform-aws-modules/vpc/aws\"\n  version = \"~> 2.1\"\n}"
+options = [
+  "2.1.4",
+  "2.9.0",
+  "3.0.0",
+  "2.0.9",
+]
+correct = [0, 1]
+explanation = "`~> 2.1` means 2.1 or newer but below 3.0. So 2.1.4 and 2.9.0 are fine; 2.0.9 is older and 3.0.0 is a new major version."
+
+[[question]]
+id = "b4-5a-1"
+objective = "5a"
+text = "What does this module source do?"
+code = "module \"net\" {\n  source = \"git::https://example.com/net.git?ref=v1.2.0\"\n}"
+options = [
+  "Gets the module from the Git repository at the tag v1.2.0",
+  "Gets the latest version from a registry",
+  "Reads a local folder called git",
+  "It is not a valid source",
+]
+correct = [0]
+explanation = "The git:: prefix forces Git, and ?ref= selects a branch, tag or commit."
+
+[[question]]
+id = "b4-2b-1"
+objective = "2b"
+text = "Which part of Terraform decides which API calls are made to create an `aws_s3_bucket`?"
+options = [
+  "The AWS provider plugin",
+  "Terraform core",
+  "The backend",
+  "The state file",
+]
+correct = [0]
+explanation = "Core builds the plan. The provider plugin implements the resource type and calls the platform's API."
+
+[[question]]
+id = "b4-2b-2"
+objective = "2b"
+text = "What is the `source` of the AWS provider in `required_providers`?"
+options = [
+  "hashicorp/aws",
+  "aws",
+  "registry/aws/aws",
+  "terraform/aws",
+]
+correct = [0]
+explanation = "A provider source is `NAMESPACE/TYPE`, optionally with a hostname in front. The default hostname is registry.terraform.io."
+
+[[question]]
+id = "b4-2b-3"
+objective = "2b"
+text = "True or false: provider plugins are downloaded again every time you run `terraform plan`."
+options = [
+  "True",
+  "False",
+]
+correct = [1]
+explanation = "They are installed by `terraform init` into `.terraform`, and reused until you change the requirements or run `init -upgrade`."
+
+[[question]]
+id = "b4-3a-1"
+objective = "3a"
+text = "What is the first step of the core Terraform workflow?"
+options = [
+  "Write the configuration",
+  "Plan",
+  "Apply",
+  "Destroy",
+]
+correct = [0]
+explanation = "Write, plan, apply. After the first apply you edit the configuration and go around again."
+
+[[question]]
+id = "b4-3a-2"
+objective = "3a"
+text = "True or false: you can run `terraform apply` without running `terraform plan` first."
+options = [
+  "True",
+  "False",
+]
+correct = [0]
+explanation = "`apply` makes a plan itself and shows it for approval. Running `plan` first is for review, or to save a plan file."
+
+[[question]]
+id = "b4-3a-3"
+objective = "3a"
+text = "Which step shows you what will change, without changing anything?"
+options = [
+  "plan",
+  "apply",
+  "init",
+  "fmt",
+]
+correct = [0]
+explanation = "`plan` previews the actions. `apply` makes them."
+
+[[question]]
+id = "b4-5a-2"
+objective = "5a"
+text = "Which is the format of a public registry module address?"
+options = [
+  "NAMESPACE/NAME/PROVIDER",
+  "NAME/PROVIDER",
+  "PROVIDER/NAMESPACE",
+  "./NAME",
+]
+correct = [0]
+explanation = "For example `terraform-aws-modules/vpc/aws`. A private registry adds a hostname in front."
+
+[[question]]
+id = "b4-5a-3"
+objective = "5a"
+text = "Which `source` is a local path?"
+options = [
+  "./modules/app",
+  "modules/app",
+  "app",
+  "hashicorp/app",
+]
+correct = [0]
+explanation = "A local path must start with `./` or `../`. Without it, Terraform reads the text as a registry address."
+
+[[question]]
+id = "b4-6a-1"
+objective = "6a"
+text = "What is the default name of the state file with the local backend?"
+options = [
+  "terraform.tfstate",
+  "state.json",
+  "main.tfstate",
+  "terraform.state",
+]
+correct = [0]
+explanation = "It is written in the working directory, and the previous state is kept as `terraform.tfstate.backup`."
+
+[[question]]
+id = "b4-6a-2"
+objective = "6a"
+text = "True or false: the local backend supports state locking."
+options = [
+  "True",
+  "False",
+]
+correct = [0]
+explanation = "It locks the state file with the operating system while an operation runs."
+
+[[question]]
+id = "b4-6a-3"
+objective = "6a"
+text = "Which file holds the state from before the last change, with the local backend?"
+options = [
+  "terraform.tfstate.backup",
+  "terraform.tfstate.old",
+  "terraform.tfstate.1",
+  "state.bak",
+]
+correct = [0]
+explanation = "Terraform copies the previous state to `terraform.tfstate.backup` when it writes a new one."
+

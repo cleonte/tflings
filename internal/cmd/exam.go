@@ -16,7 +16,7 @@ import (
 func ExamCmd(infoFile string) *cobra.Command {
 	var count, minutes int
 	var objective string
-	var practice, weak bool
+	var practice, weak, review bool
 	var seed int64
 	cmd := &cobra.Command{
 		Use:   "exam",
@@ -39,6 +39,20 @@ ours, and the score is only a guide.`,
 			}
 			home := (&exercises.Env{}).HomeDir()
 			qs := exam.Filter(all, objective)
+			if review {
+				hist, _ := exam.LoadHistory(home)
+				ids := exam.LastMissed(hist)
+				if len(ids) == 0 {
+					return fmt.Errorf("nothing to review: no earlier sitting has a missed question")
+				}
+				qs = exam.FilterIDs(qs, ids)
+				if len(qs) == 0 {
+					return fmt.Errorf("the questions you missed are no longer in the bank")
+				}
+				practice = true
+				count = len(qs)
+				fmt.Fprintf(cmd.OutOrStdout(), "Reviewing the %d questions you missed last time, with the answer after each.\n", len(qs))
+			}
 			if weak {
 				hist, _ := exam.LoadHistory(home)
 				ids := exam.Weakest(hist, qs, 3)
@@ -73,6 +87,7 @@ ours, and the score is only a guide.`,
 	cmd.Flags().IntVar(&minutes, "minutes", 60, "time limit in minutes (0: none; not used with --practice)")
 	cmd.Flags().StringVar(&objective, "objective", "", "only questions of one objective (4) or sub-objective (4g)")
 	cmd.Flags().BoolVar(&practice, "practice", false, "show the answer and the explanation after each question")
+	cmd.Flags().BoolVar(&review, "review", false, "ask again the questions you missed in your last sitting, with the answer after each")
 	cmd.Flags().BoolVar(&weak, "weak", false, "ask about the three objectives you score lowest on (see tflings progress)")
 	cmd.Flags().Int64Var(&seed, "seed", 0, "random seed, to ask the same questions again")
 	return cmd

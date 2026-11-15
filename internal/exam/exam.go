@@ -19,6 +19,7 @@ type Question struct {
 	ID          string   `toml:"id"`
 	Objective   string   `toml:"objective"`
 	Text        string   `toml:"text"`
+	Code        string   `toml:"code"` // optional snippet shown under the text
 	Options     []string `toml:"options"`
 	Correct     []int    `toml:"correct"`
 	Explanation string   `toml:"explanation"`
