@@ -1,0 +1,7 @@
+cli:
+  subcommand: [plan]
+  flags: { refresh-only: "" }
+  hints:
+    refresh: "`terraform refresh` changes the state at once, with no review, and is deprecated. To look first, use a mode of `plan`."
+explanation: >-
+  `plan -refresh-only` shows what would be written to the state to match reality, and `apply -refresh-only` accepts it after you have looked. It replaced `terraform refresh`.

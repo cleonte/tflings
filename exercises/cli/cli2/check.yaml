@@ -1,0 +1,5 @@
+cli:
+  subcommand: [plan]
+  flags: { out: tfplan }
+explanation: >-
+  `terraform plan -out=FILE` saves the plan. Reviewing it with `terraform show FILE` and applying it with `terraform apply FILE` makes sure what is applied is what was reviewed.

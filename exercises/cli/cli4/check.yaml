@@ -1,0 +1,6 @@
+cli:
+  subcommand: [state, list]
+  hints:
+    show: "`terraform show` prints the whole state. To list only the addresses, use a subcommand of `state`."
+explanation: >-
+  `terraform state list` prints the addresses. `terraform state show ADDRESS` prints the attributes of one resource.

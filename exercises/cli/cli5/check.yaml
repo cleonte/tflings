@@ -1,0 +1,5 @@
+cli:
+  subcommand: [init]
+  flags: { migrate-state: "" }
+explanation: >-
+  `init -migrate-state` copies the state to the new backend. `-reconfigure` starts the backend afresh and ignores the old one without copying.

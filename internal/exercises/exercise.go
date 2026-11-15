@@ -185,7 +185,7 @@ func (e Exercise) NeedsFloci() bool {
 }
 
 // NeedsTerraform says whether the exercise runs the terraform binary.
-func (e Exercise) NeedsTerraform() bool { return e.Mode != ModeQuiz }
+func (e Exercise) NeedsTerraform() bool { return e.Mode != ModeQuiz && e.Mode != ModeCLI }
 
 var todoLineRe = regexp.MustCompile(`#\s*TODO:`)
 

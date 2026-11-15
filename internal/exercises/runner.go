@@ -159,6 +159,8 @@ func (e Exercise) RunSource(ctx context.Context, env *Env, src []byte) (Result, 
 	switch e.Mode {
 	case ModeQuiz:
 		return e.runQuiz(c, src)
+	case ModeCLI:
+		return e.runCLI(c, src)
 	case ModePlan:
 		return e.runPlan(ctx, env, c, map[string][]byte{ExerciseFile: src})
 	case ModeApply:
@@ -190,6 +192,24 @@ func (e Exercise) RunFiles(ctx context.Context, env *Env, files map[string][]byt
 		return e.runFix(ctx, env, c, files)
 	}
 	return Result{}, fmt.Errorf("%s: RunFiles is for plan, apply and fix exercises, not %s", e.Name, e.Mode)
+}
+
+// runCLI checks the one command in answer.sh against the spec in check.yaml. The
+// command is split into words and compared; it is never run.
+func (e Exercise) runCLI(c *check.Compiled, src []byte) (Result, error) {
+	var cmds []string
+	for _, l := range strings.Split(string(src), "\n") {
+		if t := strings.TrimSpace(l); t != "" && !strings.HasPrefix(t, "#") {
+			cmds = append(cmds, t)
+		}
+	}
+	if len(cmds) != 1 {
+		return Result{}, &FailedError{Lines: []string{"Write exactly one command in answer.sh (lines that start with # are comments)."}}
+	}
+	if problems := c.CheckCommand(cmds[0]); len(problems) > 0 {
+		return Result{}, &FailedError{Lines: problems}
+	}
+	return Result{Exercise: e, Checked: 1, Explanation: c.Explanation}, nil
 }
 
 // runQuiz compares the answer in quiz.toml with the key.

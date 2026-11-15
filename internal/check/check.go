@@ -67,6 +67,9 @@ type File struct {
 	// Fmt requires `terraform fmt -check` to pass on the learner's files.
 	Fmt bool `json:"fmt,omitempty"`
 
+	// CLI is the one command a cli exercise accepts.
+	CLI *CLISpec `json:"cli,omitempty"`
+
 	// Answer is the right choice of a quiz: one letter, or several for a
 	// multiple-answer question. Case does not matter.
 	Answer []string `json:"answer,omitempty"`
@@ -130,6 +133,11 @@ func Load(raw []byte) (*Compiled, error) {
 	)
 	if err != nil {
 		return nil, err
+	}
+	if f.CLI != nil {
+		if err := f.CLI.validate(); err != nil {
+			return nil, fmt.Errorf("check.yaml: %w", err)
+		}
 	}
 	c := &Compiled{File: f}
 	if c.plan, err = compile(env, f.Plan, "plan"); err != nil {
@@ -204,6 +212,9 @@ func compile(env *cel.Env, as []Assertion, section string) ([]cel.Program, error
 // Count is how many assertions the check has, variants included.
 func (c *Compiled) Count() int {
 	n := len(c.plan) + len(c.config) + len(c.state) + len(c.aws) + len(c.files)
+	if c.CLI != nil {
+		n++
+	}
 	if c.EmptyPlanAfter {
 		n++
 	}
