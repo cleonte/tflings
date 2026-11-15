@@ -1,0 +1,119 @@
+# Questions of the mock exam (tflings exam). correct = 0-based indexes into options.
+
+[[question]]
+id = "q4c-1"
+objective = "4c"
+text = "Which TWO are ways to set the value of an input variable?"
+options = [
+  "The `-var` command line option",
+  "A `terraform.tfvars` file",
+  "A `terraform set` command",
+  "Editing `.terraform.lock.hcl`",
+]
+correct = [0, 1]
+explanation = "Variables can be set with `-var`, `-var-file`, `*.auto.tfvars`, `terraform.tfvars`, `TF_VAR_name` environment variables, or a default. There is no `terraform set` command."
+
+[[question]]
+id = "q4c-2"
+objective = "4c"
+text = "Which way of setting a variable has the highest precedence of these?"
+options = [
+  "The default in the variable block",
+  "The environment variable TF_VAR_name",
+  "terraform.tfvars",
+  "`-var` on the command line",
+]
+correct = [3]
+explanation = "Order, lowest to highest: default, environment variables, terraform.tfvars, *.auto.tfvars, then -var and -var-file in the order given."
+
+[[question]]
+id = "q4e-1"
+objective = "4e"
+text = "Why is `for_each` usually better than `count` for a list of named items?"
+options = [
+  "It is faster.",
+  "The instances have stable keys: removing an item does not shift the others.",
+  "It is required for modules.",
+  "It is required for data sources.",
+]
+correct = [1]
+explanation = "With `count`, instances are numbered, so removing the first item renames and may recreate all the others. `for_each` keys them by name."
+
+[[question]]
+id = "q4f-1"
+objective = "4f"
+text = "Which creates an implicit dependency between two resources?"
+options = [
+  "`depends_on`",
+  "Using an attribute of one resource in the arguments of the other",
+  "`count`",
+  "A provider alias",
+]
+correct = [1]
+explanation = "A reference to another resource's attribute is enough for Terraform to order them. `depends_on` is the explicit way, for dependencies it cannot see."
+
+[[question]]
+id = "q4f-2"
+objective = "4f"
+text = "Which `lifecycle` argument makes a plan fail if it would destroy the resource?"
+options = [
+  "ignore_changes",
+  "create_before_destroy",
+  "prevent_destroy",
+  "replace_triggered_by",
+]
+correct = [2]
+explanation = "`prevent_destroy = true` makes Terraform stop with an error on any plan that would destroy the resource."
+
+[[question]]
+id = "q4g-1"
+objective = "4g"
+text = "Which construct only produces a warning, not an error, when its assertion fails?"
+options = [
+  "A variable `validation` block",
+  "A `precondition`",
+  "A `postcondition`",
+  "An `assert` in a `check` block",
+]
+correct = [3]
+explanation = "Variable validation, preconditions and postconditions stop the run. A `check` block's assertions report warnings and do not stop it."
+
+[[question]]
+id = "q4h-1"
+objective = "4h"
+text = "Which statement about `sensitive = true` on a variable or an output is correct?"
+options = [
+  "The value is encrypted in the state.",
+  "The value is hidden in the CLI output but still stored in the state.",
+  "The value is never stored.",
+  "It blocks `apply`.",
+]
+correct = [1]
+explanation = "`sensitive` only redacts the display. The value is stored in the state in plain text, so the state must be protected."
+
+[[question]]
+id = "q4h-2"
+objective = "4h"
+text = "Ephemeral values are:"
+options = [
+  "Stored in the state, encrypted.",
+  "Not persisted to the state or the plan file.",
+  "Only allowed in outputs.",
+  "The same as sensitive values.",
+]
+correct = [1]
+explanation = "Ephemeral variables and resources exist only during the run. They are meant for secrets that must not end up in the state."
+
+[[question]]
+id = "q4h-3"
+objective = "4h"
+text = "A write-only argument of a resource:"
+options = [
+  "Can be read back from the state.",
+  "Is sent to the provider but never stored in the state or the plan.",
+  "Is deprecated.",
+  "Only works inside modules.",
+]
+correct = [1]
+explanation = "Write-only arguments (for example `value_wo`) accept ephemeral values and are not persisted, so they cannot leak from the state."
+

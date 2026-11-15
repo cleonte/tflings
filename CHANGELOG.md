@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Added
+
+- `tflings exam`: a mock exam from an embedded bank of multiple choice questions (35 so far), including pick-two questions. It asks in random order, can be timed, limited to an objective (`--objective 4g`) or run as practice with the answer after each question, and reports the score per objective with the exercises to redo. HashiCorp does not publish the real exam's question count or pass mark, so the defaults (30 questions, 60 minutes) are ours.
+
 ## [0.4.0] - 2026-11-15
 
 ### Added

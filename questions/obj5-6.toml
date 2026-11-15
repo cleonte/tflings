@@ -1,0 +1,104 @@
+# Questions of the mock exam (tflings exam). correct = 0-based indexes into options.
+
+[[question]]
+id = "q5b-1"
+objective = "5b"
+text = "What can a parent module read from a child module?"
+options = [
+  "Any of its resources",
+  "Its local values",
+  "Its output values",
+  "Its input variables",
+]
+correct = [2]
+explanation = "A child module exposes only what it declares in `output` blocks, read as `module.NAME.OUTPUT`."
+
+[[question]]
+id = "q5d-1"
+objective = "5d"
+text = "Where is the `version` argument allowed in a `module` block?"
+options = [
+  "With any source",
+  "Only with a module from a registry",
+  "Only with local paths",
+  "Only with Git sources",
+]
+correct = [1]
+explanation = "Version constraints work for registry modules. For Git sources pin with `?ref=`; local paths have no versions."
+
+[[question]]
+id = "q6b-1"
+objective = "6b"
+text = "Which setting of the S3 backend turns on native state locking, without DynamoDB (Terraform 1.10 and later)?"
+options = [
+  "use_lockfile = true",
+  "A Lambda function",
+  "Bucket versioning",
+  "Using workspaces",
+]
+correct = [0]
+explanation = "`use_lockfile = true` writes a lock file next to the state in the bucket. The `dynamodb_table` setting is the older way and is deprecated."
+
+[[question]]
+id = "q6c-1"
+objective = "6c"
+text = "True or false: arguments of a `backend` block can use input variables."
+options = [
+  "True",
+  "False",
+]
+correct = [1]
+explanation = "The backend is read before variables exist, so its arguments must be literal. Use partial configuration with `-backend-config` for the changing parts."
+
+[[question]]
+id = "q6c-2"
+objective = "6c"
+text = "You changed the backend configuration and `terraform init` complains. How do you copy the existing state to the new backend?"
+options = [
+  "terraform init -reconfigure",
+  "terraform init -migrate-state",
+  "terraform state push only",
+  "Delete the .terraform folder",
+]
+correct = [1]
+explanation = "`-migrate-state` copies the state to the new backend. `-reconfigure` ignores the old one and does not copy."
+
+[[question]]
+id = "q6c-3"
+objective = "6c"
+text = "The `terraform_remote_state` data source exposes:"
+options = [
+  "All the resources of the other configuration",
+  "The root module outputs of the other configuration",
+  "Its variables",
+  "Its providers",
+]
+correct = [1]
+explanation = "Only root-level outputs are readable, which is why a configuration that is shared needs to export what others need."
+
+[[question]]
+id = "q6d-1"
+objective = "6d"
+text = "Which command accepts changes made outside Terraform into the state, without changing any infrastructure?"
+options = [
+  "terraform taint",
+  "terraform apply -refresh-only",
+  "terraform state rm",
+  "terraform import",
+]
+correct = [1]
+explanation = "`apply -refresh-only` updates the state to match reality after you review it. `plan -refresh-only` shows what would change."
+
+[[question]]
+id = "q6d-2"
+objective = "6d"
+text = "You renamed a resource in the configuration and do not want it recreated. What is the configuration-driven fix?"
+options = [
+  "terraform taint",
+  "A `moved` block",
+  "An `import` block",
+  "A `removed` block",
+]
+correct = [1]
+explanation = "`moved { from = ... to = ... }` tells Terraform the object has a new address, so the next plan keeps it."
+

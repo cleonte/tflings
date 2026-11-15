@@ -1,0 +1,93 @@
+# Questions of the mock exam (tflings exam). correct = 0-based indexes into options.
+
+[[question]]
+id = "q7a-1"
+objective = "7a"
+text = "Which configuration-driven block adopts an existing object into the state?"
+options = [
+  "moved",
+  "import",
+  "data",
+  "lifecycle",
+]
+correct = [1]
+explanation = "An `import` block (Terraform 1.5 and later) names the address and the id; `plan` shows the import and `apply` does it. `-generate-config-out` can write the resource block."
+
+[[question]]
+id = "q7b-1"
+objective = "7b"
+text = "What does `terraform state rm ADDRESS` do?"
+options = [
+  "Destroys the resource.",
+  "Removes it from the state only; the real object is left alone.",
+  "Removes it from the configuration.",
+  "Locks it.",
+]
+correct = [1]
+explanation = "The object keeps living, but Terraform no longer manages it. A `removed` block with `destroy = false` does the same in configuration."
+
+[[question]]
+id = "q7b-2"
+objective = "7b"
+text = "Which command lists the resources in the state?"
+options = [
+  "terraform show -list",
+  "terraform state list",
+  "terraform ls",
+  "terraform output",
+]
+correct = [1]
+explanation = "`terraform state list` prints the addresses; `terraform state show ADDRESS` prints the attributes of one."
+
+[[question]]
+id = "q7c-1"
+objective = "7c"
+text = "Which is the most verbose value of `TF_LOG`?"
+options = [
+  "DEBUG",
+  "INFO",
+  "TRACE",
+  "ALL",
+]
+correct = [2]
+explanation = "The levels, most to least verbose, are TRACE, DEBUG, INFO, WARN and ERROR. Set `TF_LOG_PATH` to write the log to a file."
+
+[[question]]
+id = "q8c-1"
+objective = "8c"
+text = "How does an HCP Terraform workspace differ from a CLI workspace?"
+options = [
+  "They are identical.",
+  "An HCP Terraform workspace has its own configuration, variables, state, run history and permissions.",
+  "CLI workspaces have access control.",
+  "HCP Terraform workspaces exist only for modules.",
+]
+correct = [1]
+explanation = "CLI workspaces are several states of one configuration in one backend. An HCP Terraform workspace is a whole working environment."
+
+[[question]]
+id = "q8c-2"
+objective = "8c"
+text = "Which HCP Terraform feature lets many workspaces share the same variables?"
+options = [
+  "Variable sets",
+  "Data sources",
+  "Outputs",
+  "Tags",
+]
+correct = [0]
+explanation = "A variable set is defined once and applied to chosen workspaces or projects."
+
+[[question]]
+id = "q8b-1"
+objective = "8b"
+text = "Which policy as code frameworks does HCP Terraform support?"
+options = [
+  "Sentinel and OPA",
+  "Rego only",
+  "Checkov",
+  "Ansible",
+]
+correct = [0]
+explanation = "Policies run between plan and apply and can stop a run. HCP Terraform supports Sentinel and Open Policy Agent (OPA)."
+

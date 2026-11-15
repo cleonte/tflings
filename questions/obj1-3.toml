@@ -1,0 +1,143 @@
+# Questions of the mock exam (tflings exam). correct = 0-based indexes into options.
+
+[[question]]
+id = "q1b-1"
+objective = "1b"
+text = "Which TWO are benefits of managing infrastructure as code?"
+options = [
+  "Environments can be built again and again from the same files.",
+  "Changes are kept in version control, so there is a history and a review.",
+  "No state is needed.",
+  "Zero downtime is guaranteed.",
+]
+correct = [0, 1]
+explanation = "Code is repeatable and reviewable. It does not remove the need for state in Terraform, and it cannot guarantee zero downtime."
+
+[[question]]
+id = "q2a-1"
+objective = "2a"
+text = "What does the constraint `version = \"~> 3.6\"` allow?"
+options = [
+  "Only 3.6.x",
+  "3.6 or newer, but below 4.0",
+  "Exactly 3.6",
+  "Any 3.x or 4.x",
+]
+correct = [1]
+explanation = "`~>` allows the right-most part you wrote to increase: `~> 3.6` means >= 3.6 and < 4.0. `~> 3.6.0` would allow only 3.6.x."
+
+[[question]]
+id = "q2a-2"
+objective = "2a"
+text = "Which file records the exact provider versions and checksums that `terraform init` selected?"
+options = [
+  "terraform.tfstate",
+  ".terraform.lock.hcl",
+  "versions.tf",
+  "providers.json",
+]
+correct = [1]
+explanation = "The dependency lock file `.terraform.lock.hcl` pins provider versions and their hashes, and should be committed."
+
+[[question]]
+id = "q2c-1"
+objective = "2c"
+text = "How do you use two regions of the same provider in one configuration?"
+options = [
+  "Two backends",
+  "A second provider block with an alias, selected with `provider = aws.alias`",
+  "Two workspaces",
+  "A variable called region in every resource",
+]
+correct = [1]
+explanation = "Each configuration of a provider is a `provider` block. The one without `alias` is the default; others are selected with the `provider` meta-argument or passed to modules."
+
+[[question]]
+id = "q2d-1"
+objective = "2d"
+text = "Why must state files be protected like secrets?"
+options = [
+  "They contain the provider binaries.",
+  "They can contain sensitive values, such as passwords and keys, in plain text.",
+  "They are executed by Terraform.",
+  "They contain the cloud account's login.",
+]
+correct = [1]
+explanation = "Resource attributes are stored in state, including secrets the provider returns. Protect it: a remote backend with encryption and access control."
+
+[[question]]
+id = "q3b-1"
+objective = "3b"
+text = "Which command downloads providers and modules and configures the backend?"
+options = [
+  "terraform validate",
+  "terraform init",
+  "terraform plan",
+  "terraform get-providers",
+]
+correct = [1]
+explanation = "`terraform init` prepares the working directory: providers, modules and backend."
+
+[[question]]
+id = "q3c-1"
+objective = "3c"
+text = "True or false: `terraform validate` calls the provider's API to check that the resources can be created."
+options = [
+  "True",
+  "False",
+]
+correct = [1]
+explanation = "`validate` checks syntax and internal consistency only. It does not contact remote services or read state; `plan` does."
+
+[[question]]
+id = "q3e-1"
+objective = "3e"
+text = "What does `terraform apply tfplan` do, when `tfplan` is a saved plan file?"
+options = [
+  "It plans again, then asks for confirmation.",
+  "It applies exactly the saved plan, without asking for confirmation.",
+  "It only refreshes the state.",
+  "It fails: plan files cannot be applied.",
+]
+correct = [1]
+explanation = "Applying a saved plan runs that plan and does not prompt. If the state changed since, Terraform refuses the stale plan."
+
+[[question]]
+id = "q3f-1"
+objective = "3f"
+text = "What does `terraform destroy` do?"
+options = [
+  "Deletes the configuration files.",
+  "Plans and, after confirmation, destroys all the resources tracked in the state.",
+  "Deletes only the state file.",
+  "Destroys every resource in the cloud account.",
+]
+correct = [1]
+explanation = "`destroy` is `apply -destroy`: it acts on the objects Terraform manages, not on anything else in the account."
+
+[[question]]
+id = "q3g-1"
+objective = "3g"
+text = "What does `terraform fmt` do?"
+options = [
+  "Checks that credentials are valid.",
+  "Rewrites configuration files to the canonical style.",
+  "Formats the state file.",
+  "Finds errors in the plan.",
+]
+correct = [1]
+explanation = "`fmt` fixes indentation and alignment of `.tf` files. Use `-check` in CI to fail when files are not formatted."
+
+[[question]]
+id = "q3e-2"
+objective = "3e"
+text = "`terraform apply -replace=aws_instance.web` replaces which deprecated command?"
+options = [
+  "terraform taint",
+  "terraform refresh",
+  "terraform get",
+  "terraform fmt",
+]
+correct = [0]
+explanation = "`-replace` forces one object to be replaced in the same plan. `taint` marked it in the state and left the decision for later."
+

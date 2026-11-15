@@ -21,3 +21,9 @@ var FS embed.FS
 //
 //go:embed all:solutions
 var Solutions embed.FS
+
+// Questions is the bank of the mock exam (`tflings exam`): multiple choice
+// questions tagged by exam objective.
+//
+//go:embed questions
+var Questions embed.FS
