@@ -50,7 +50,7 @@ tags stay. I did not call real AWS (tflings never does), so this is from the doc
 No exercise changes the tags of a bucket (checked with grep over `exercises/` and `solutions/`), and
 exercises that add tags use `aws_vpc`, so nothing in the course depends on this.
 
-## Issue text (not posted)
+## Issue text (posted 2026-11-15: https://github.com/floci-io/floci/issues/8440)
 
 > **S3 Control TagResource replaces all tags instead of adding to them**
 >
