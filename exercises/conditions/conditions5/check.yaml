@@ -1,0 +1,17 @@
+plan:
+  - expr: plan.planned_values.outputs.name.value == "tflings-logs"
+    message: "The default name is valid and should plan."
+variants:
+  - vars: { bucket_name: "Bad_Name!" }
+    expect_error: "Invalid value for variable"
+    message: "A name with capitals and symbols should be refused by the validation block."
+  - vars: { bucket_name: "ab" }
+    expect_error: "Invalid value for variable"
+    message: "A name that is too short should be refused by the validation block."
+  - vars: { bucket_name: "good-name-1" }
+    plan:
+      - expr: plan.planned_values.outputs.name.value == "good-name-1"
+        message: "A valid name should plan."
+explanation: >-
+  `regex` returns a string and raises an error when nothing matches, so it cannot
+  be a condition by itself. `can(...)` turns "works or fails" into true or false.

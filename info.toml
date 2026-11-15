@@ -753,3 +753,30 @@ mode      = "fix"
 objective = "3d"
 hint      = "terraform plan -out=FILE, then terraform apply FILE."
 docs      = "https://developer.hashicorp.com/terraform/cli/commands/plan#out-filename"
+
+[[exercises]]
+name      = "iteration7"
+path      = "exercises/iteration/iteration7"
+topic     = "iteration"
+mode      = "plan"
+objective = "4e"
+hint      = "for_each = toset(var.servers), and each.key for the value."
+docs      = "https://developer.hashicorp.com/terraform/language/meta-arguments/for_each"
+
+[[exercises]]
+name      = "conditions5"
+path      = "exercises/conditions/conditions5"
+topic     = "conditions"
+mode      = "plan"
+objective = "4g"
+hint      = "Wrap the regex call in can(...)."
+docs      = "https://developer.hashicorp.com/terraform/language/functions/can"
+
+[[exercises]]
+name      = "workspaces1"
+path      = "exercises/workspaces/workspaces1"
+topic     = "workspaces"
+mode      = "fix"
+objective = "6d"
+hint      = "terraform workspace new staging, then apply."
+docs      = "https://developer.hashicorp.com/terraform/cli/workspaces"
