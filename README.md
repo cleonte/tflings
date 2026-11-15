@@ -16,7 +16,13 @@ You get a folder of Terraform files with a `# I AM NOT DONE` line and a `# TODO:
 
 ## Try it
 
-There are no release binaries yet. With Go 1.26 or newer:
+On macOS with Homebrew (once the first release is out):
+
+```bash
+brew install cleonte/tap/tflings
+```
+
+Or download the archive for your system from the [releases](https://github.com/cleonte/tflings/releases) page. Or, with Go 1.26 or newer:
 
 ```bash
 go install github.com/cleonte/tflings/cmd/tflings@latest   # puts tflings in $(go env GOPATH)/bin
