@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Fixed
+
+- When the setup of a fix exercise fails (for example because an earlier setup of the same exercise, in another folder that shares the Floci container, left a lock or an object behind), the message now says to run `tflings reset <exercise>`, which starts it again in a fresh account. A failed setup also removes its "built" marker.
+
 ## [0.9.1] - 2026-11-15
 
 ### Added
