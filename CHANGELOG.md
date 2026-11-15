@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-11-15
+
 ### Added
 
 - `tflings progress`: for each of the 37 objectives of the 004 content list, the exercises done and the score on the mock exam questions, with a `!` for what needs work. `tflings exam` now keeps its results (`exam-history.jsonl` in tflings's home folder), and `exam --weak` asks about the three objectives you score lowest on, those never asked first.
@@ -49,7 +51,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - First tagged version: the CLI (`init`, `list`, `run`, `hint`, `reset`, `solution`, `update`, `verify`, `watch`, `doctor`, `aws up|down|status|reset`, `tf`, `env`), plan, apply, fix and quiz exercises (54), proven on Terraform 1.12 and the latest, against the Floci AWS emulator.
 
-[Unreleased]: https://github.com/cleonte/tflings/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/cleonte/tflings/compare/v0.5.0...HEAD
+[0.5.0]: https://github.com/cleonte/tflings/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/cleonte/tflings/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/cleonte/tflings/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/cleonte/tflings/compare/v0.1.0...v0.2.0
