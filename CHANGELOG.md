@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Added
+
+- The `cli` exercise mode and ten exercises (`cli1` to `cli10`): you write one Terraform command in `answer.sh` for a short task (apply a saved plan, `plan -refresh-only`, `init -migrate-state`, `force-unlock`, `apply -replace`, `import`, `fmt -check -recursive`, ...). tflings reads it and compares it with the accepted form; it is never run, so these need neither Terraform nor Docker. A wrong but tempting command (`taint`, `refresh`, `destroy`) gets a hint that says why. 95 exercises.
+
 ## [0.8.0] - 2026-11-15
 
 ### Added
