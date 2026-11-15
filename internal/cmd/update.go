@@ -36,7 +36,7 @@ Use --dry-run to see what it would do.`,
 			res, err := workspace.Update(src, root, dryRun)
 			if err != nil {
 				color.Red("Cannot update: %v (run it from the folder with info.toml)", err)
-				return err
+				return reported(err)
 			}
 			printUpdate(res, dryRun)
 			return nil

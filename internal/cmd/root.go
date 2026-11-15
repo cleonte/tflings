@@ -2,9 +2,13 @@ package cmd
 
 import (
 	"context"
+	"errors"
+	"fmt"
+	"io"
 	"os"
 	"os/signal"
 	"path/filepath"
+	"strings"
 
 	"github.com/cleonte/tflings"
 	"github.com/cleonte/tflings/internal/engine"
@@ -56,9 +60,38 @@ func NewRootCmd(version string) *cobra.Command {
 	rootCmd.AddCommand(EnvCmd(infoFile))
 	rootCmd.AddCommand(UpdateCmd(tflings.FS, "."))
 	rootCmd.AddCommand(VerifyCmd(infoFile))
+	rootCmd.AddCommand(VersionCmd())
 	rootCmd.AddCommand(WatchCmd(infoFile))
 
 	return rootCmd
+}
+
+// reportedError marks an error whose message the command has already printed,
+// so Execute does not print it again.
+type reportedError struct{ err error }
+
+func (r *reportedError) Error() string { return r.err.Error() }
+func (r *reportedError) Unwrap() error { return r.err }
+
+// reported wraps err for a command that has already told the user about it.
+func reported(err error) error {
+	if err == nil {
+		return nil
+	}
+	return &reportedError{err}
+}
+
+// printError tells the user about an error that no command has reported: a
+// flag or command that does not exist, or a failure with no message of its own.
+func printError(w io.Writer, err error) {
+	var r *reportedError
+	if errors.As(err, &r) {
+		return
+	}
+	fmt.Fprintf(w, "Error: %v\n", err)
+	if strings.Contains(err.Error(), "unknown") {
+		fmt.Fprintln(w, "Run `tflings --help` to see the commands and flags.")
+	}
 }
 
 func Execute(version string) {
@@ -66,6 +99,7 @@ func Execute(version string) {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer stop()
 	if err := NewRootCmd(version).ExecuteContext(ctx); err != nil {
+		printError(os.Stderr, err)
 		os.Exit(1)
 	}
 }

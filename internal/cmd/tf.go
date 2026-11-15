@@ -40,7 +40,7 @@ The first use builds the situation (a few seconds). Then run the exercise to che
 			ex, err := exercises.Find(args[0], infoFile)
 			if errors.Is(err, exercises.ErrExerciseNotFound) {
 				color.White("No exercise found for '%s'", args[0])
-				return err
+				return reported(err)
 			}
 			if err != nil {
 				return err
@@ -48,7 +48,7 @@ The first use builds the situation (a few seconds). Then run the exercise to che
 			code, err := ex.Terraform(cmd.Context(), newEnv(), args[1:], os.Stdin, os.Stdout, os.Stderr)
 			if exercises.IsSkipped(err) {
 				color.Yellow(err.Error())
-				return err
+				return reported(err)
 			}
 			if err != nil {
 				printFailure(ex, err)
@@ -78,7 +78,7 @@ Terraform. To work in a shell with the same environment:
 			ex, err := exercises.Find(args[0], infoFile)
 			if err != nil {
 				color.White("No exercise found for '%s'", args[0])
-				return err
+				return reported(err)
 			}
 			if ex.Mode != exercises.ModeFix {
 				return fmt.Errorf("%s is a %s exercise: only fix exercises have a sealed environment to print", ex.Name, ex.Mode)
