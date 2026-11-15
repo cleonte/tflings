@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-11-15
+
 ### Added
 
 - Release builds: archives for Linux, macOS and Windows (amd64 and arm64) from GoReleaser, and a Homebrew cask (`brew install cleonte/tap/tflings`).
@@ -41,7 +43,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - First tagged version: the CLI (`init`, `list`, `run`, `hint`, `reset`, `solution`, `update`, `verify`, `watch`, `doctor`, `aws up|down|status|reset`, `tf`, `env`), plan, apply, fix and quiz exercises (54), proven on Terraform 1.12 and the latest, against the Floci AWS emulator.
 
-[Unreleased]: https://github.com/cleonte/tflings/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/cleonte/tflings/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/cleonte/tflings/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/cleonte/tflings/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/cleonte/tflings/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/cleonte/tflings/releases/tag/v0.1.0
