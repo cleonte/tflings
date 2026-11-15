@@ -43,3 +43,15 @@ half-built.
 - Only `internal/engine` may run a `terraform` binary.
 - Say only what you ran: facts go in a `RESULTS.md` with the date and versions.
 - Conventional commit messages (`feat:`, `fix:`, `docs:`, `test:`).
+
+## Releasing
+
+Pushing a tag `vX.Y.Z` runs the release workflow, which builds the archives (Linux, macOS and Windows, on amd64 and arm64) with [GoReleaser](https://goreleaser.com) and publishes the release. The body of the release is the section of `CHANGELOG.md` for that version (`scripts/release-notes.sh vX.Y.Z` prints it, and fails when there is none, in which case GoReleaser writes the notes from the commits).
+
+So before tagging:
+
+1. Move what is under "Unreleased" in `CHANGELOG.md` into a section `## [X.Y.Z] - date`, and update the links at the bottom.
+2. Check the release locally: `goreleaser check`, then `goreleaser release --snapshot --clean --skip=publish` builds every archive into `dist/` without publishing anything.
+3. Tag and push: `git tag -a vX.Y.Z -m "..." && git push origin vX.Y.Z`.
+
+The release also updates the Homebrew cask in the tap [cleonte/homebrew-tap](https://github.com/cleonte/homebrew-tap) (`homebrew_casks` in `.goreleaser.yaml`). That needs the repository secret `HOMEBREW_TAP_TOKEN`: a fine-grained personal access token with **Contents: read and write on the tap repository only** (the `GITHUB_TOKEN` of a workflow cannot push to another repository). Without it the release fails at the publish step, after the archives are built.
