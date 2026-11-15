@@ -29,6 +29,10 @@ type UpdateResult struct {
 	// because the learner has changed the old one: `reset` brings it, and loses
 	// their work.
 	Newer []string
+	// Info are exercises that were already there and whose entry in info.toml
+	// (objective, hint, link, requirements) was replaced by the binary's. The
+	// file holds no learner state: progress is in .tflings.json.
+	Info []string
 }
 
 var (
@@ -171,6 +175,16 @@ func Update(src fs.FS, root string, dryRun bool) (UpdateResult, error) {
 		}
 	}
 
+	// Entries that are already there but say something older than the binary:
+	// a corrected objective, a better hint.
+	_, mineNames, mineBlocks := splitInfo(mineText)
+	_, _, embeddedBlocks := splitInfo(embeddedText)
+	for _, n := range mineNames {
+		if eb, ok := embeddedBlocks[n]; ok && strings.TrimSpace(eb) != strings.TrimSpace(mineBlocks[n]) {
+			res.Info = append(res.Info, n)
+		}
+	}
+
 	// Exercises that are not there yet.
 	for _, e := range embedded {
 		if !have[e.Name] {
@@ -188,8 +202,8 @@ func Update(src fs.FS, root string, dryRun bool) (UpdateResult, error) {
 		}
 	}
 
-	if len(res.Added) > 0 && !dryRun {
-		merged := mergeInfo(embeddedText, mineText, embedded, res.Added)
+	if (len(res.Added) > 0 || len(res.Info) > 0) && !dryRun {
+		merged := mergeInfo(embeddedText, mineText, embedded, res.Added, res.Info)
 		if err := os.WriteFile(filepath.Join(root, "info.toml.bak"), []byte(mineText), 0o644); err != nil {
 			return res, err
 		}
@@ -208,9 +222,12 @@ func Update(src fs.FS, root string, dryRun bool) (UpdateResult, error) {
 // mergeInfo puts the entries of the added exercises into the info.toml of the
 // workspace, each after the exercise that comes before it in the binary's order.
 // Entries of the workspace that the binary does not know are left where they are.
-func mergeInfo(embeddedText, workspaceText string, embedded, added []exercises.Exercise) string {
+func mergeInfo(embeddedText, workspaceText string, embedded, added []exercises.Exercise, changed []string) string {
 	header, names, blocks := splitInfo(workspaceText)
 	_, _, embeddedBlocks := splitInfo(embeddedText)
+	for _, n := range changed {
+		blocks[n] = embeddedBlocks[n]
+	}
 	isAdded := map[string]bool{}
 	for _, e := range added {
 		isAdded[e.Name] = true

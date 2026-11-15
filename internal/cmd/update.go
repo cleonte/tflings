@@ -51,7 +51,7 @@ func printUpdate(res workspace.UpdateResult, dryRun bool) {
 	if dryRun {
 		verb = "Would add"
 	}
-	if len(res.Added) == 0 && res.Readmes == 0 && len(res.Refreshed) == 0 && len(res.Newer) == 0 {
+	if len(res.Added) == 0 && res.Readmes == 0 && len(res.Refreshed) == 0 && len(res.Newer) == 0 && len(res.Info) == 0 {
 		color.Green("Your exercises are up to date with this version of tflings.")
 		return
 	}
@@ -69,6 +69,9 @@ func printUpdate(res workspace.UpdateResult, dryRun bool) {
 		if !dryRun {
 			color.White("They are in the order of the course; `tflings list` marks them \"new\". Your earlier info.toml is info.toml.bak.")
 		}
+	}
+	if len(res.Info) > 0 {
+		fmt.Printf("%s the info.toml entry (objective, hint, link) of %d exercises: %s. Your earlier info.toml is info.toml.bak.\n", map[bool]string{false: "Updated", true: "Would update"}[dryRun], len(res.Info), workspace.Describe(res.Info))
 	}
 	if res.Readmes > 0 {
 		fmt.Printf("%s %d README files with their newer text.\n", map[bool]string{false: "Replaced", true: "Would replace"}[dryRun], res.Readmes)
