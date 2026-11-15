@@ -190,3 +190,47 @@ func TestSitInsistsOnTheNumberOfAnswers(t *testing.T) {
 		t.Errorf("one answer to a pick-two question must be refused: %s", out.String())
 	}
 }
+
+func TestHistoryAndWeakest(t *testing.T) {
+	dir := t.TempDir()
+	if h, err := exam.LoadHistory(dir); err != nil || len(h) != 0 {
+		t.Fatalf("no file is an empty history: %v %v", h, err)
+	}
+	res := exam.Result{Asked: []exam.Asked{
+		{Question: exam.Question{Objective: "4g"}, Seen: true, Correct: true},
+		{Question: exam.Question{Objective: "4g"}, Seen: true},
+		{Question: exam.Question{Objective: "6b"}, Seen: true, Correct: true},
+		{Question: exam.Question{Objective: "7c"}}, // never shown: not counted
+	}}
+	if err := exam.Append(dir, exam.RecordOf(res, false, time.Now())); err != nil {
+		t.Fatal(err)
+	}
+	h, err := exam.LoadHistory(dir)
+	if err != nil || len(h) != 1 {
+		t.Fatalf("history: %v %v", h, err)
+	}
+	tot := exam.Totals(h)
+	if tot["4g"] != (exam.Tally{Right: 1, N: 2}) || tot["6b"] != (exam.Tally{Right: 1, N: 1}) {
+		t.Errorf("totals: %v", tot)
+	}
+	if _, ok := tot["7c"]; ok {
+		t.Error("a question that was not shown must not count")
+	}
+	qs := []exam.Question{{Objective: "4g"}, {Objective: "6b"}, {Objective: "7c"}, {Objective: "8a"}}
+	got := exam.Weakest(h, qs, 3)
+	want := []string{"7c", "8a", "4g"} // never asked first, then the lowest score
+	for i := range want {
+		if got[i] != want[i] {
+			t.Fatalf("weakest = %v, want %v", got, want)
+		}
+	}
+	if n := len(exam.FilterSet(qs, got)); n != 3 {
+		t.Errorf("filter set: %d", n)
+	}
+}
+
+func TestObjectivesListIsComplete(t *testing.T) {
+	if len(exam.Objectives) != 37 {
+		t.Errorf("the 004 list has 37 sub-objectives, got %d", len(exam.Objectives))
+	}
+}

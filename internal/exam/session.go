@@ -58,6 +58,7 @@ func Sit(in io.Reader, out io.Writer, qs []Question, o Options) Result {
 		if o.Duration > 0 {
 			head += fmt.Sprintf("   (%s left)", left.Round(time.Second))
 		}
+		a.Seen = true
 		fmt.Fprintln(out, head)
 		fmt.Fprintln(out, q.Text)
 		for j, opt := range a.Shown {
