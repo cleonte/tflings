@@ -1,0 +1,15 @@
+plan:
+  - expr: plan.resource_changes.filter(r, r.address.startsWith("terraform_data.server[\"")).size() == 3
+    message: "There should be three servers, addressed by name: terraform_data.server[\"web\"] and so on."
+variants:
+  - vars: { servers: '["api", "db"]' }
+    apply_first: { servers: '["web", "api", "db"]' }
+    plan:
+      - expr: plan.resource_changes.filter(r, r.change.actions != ["no-op"]).size() == 1
+        message: "Taking web out of the list should change exactly one thing."
+      - expr: plan.resource_changes.filter(r, r.change.actions != ["no-op"]).all(r, r.address == "terraform_data.server[\"web\"]" && r.change.actions == ["delete"])
+        message: "The only change should be the removal of terraform_data.server[\"web\"]."
+explanation: >-
+  With `count`, instances are identified by their position, so removing an item
+  shifts the others. With `for_each` they are identified by key, so each one keeps
+  its identity. Use `for_each` for items that have a name.

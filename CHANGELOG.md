@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Added
+
+- Three exercises for topics the exam asks about: `workspaces1` (CLI workspaces: a second state for the same configuration), `iteration7` (`count` against `for_each`: removing an item must not shift the others) and `conditions5` (`can(regex(...))` in a validation): 85 exercises.
+
+### Fixed
+
+- The states of CLI workspaces (`terraform.tfstate.d`) are kept between runs of an apply or fix exercise, like the default state.
+
 ## [0.7.0] - 2026-11-15
 
 ### Added

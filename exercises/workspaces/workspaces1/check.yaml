@@ -1,0 +1,9 @@
+state:
+  - expr: state.values.root_module.resources.exists(r, r.address == "terraform_data.app" && r.values.input == "app-staging")
+    message: "The server of the staging workspace should exist: create the workspace staging and apply in it."
+empty_plan_after: true
+explanation: >-
+  `terraform workspace new NAME` creates a separate state for the same configuration
+  and selects it, so an apply builds a second copy and leaves the state of
+  the `default` workspace alone. `terraform.workspace` lets the configuration
+  tell them apart.

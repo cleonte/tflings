@@ -13,7 +13,7 @@ func TestCleanSourceKeepsTheState(t *testing.T) {
 	if err := os.MkdirAll(filepath.Join(src, "modules", "m"), 0o755); err != nil {
 		t.Fatal(err)
 	}
-	for _, f := range []string{"main.tf", "old.tf", ".terraform.lock.hcl", "terraform.tfstate", "terraform.tfstate.backup", "modules/m/main.tf"} {
+	for _, f := range []string{"main.tf", "old.tf", ".terraform.lock.hcl", "terraform.tfstate", "terraform.tfstate.backup", "terraform.tfstate.d", "modules/m/main.tf"} {
 		if err := os.WriteFile(filepath.Join(src, filepath.FromSlash(f)), []byte("x"), 0o644); err != nil {
 			t.Fatal(err)
 		}
@@ -27,7 +27,7 @@ func TestCleanSourceKeepsTheState(t *testing.T) {
 		left = append(left, e.Name())
 	}
 	slices.Sort(left)
-	if !slices.Equal(left, []string{"terraform.tfstate", "terraform.tfstate.backup"}) {
+	if !slices.Equal(left, []string{"terraform.tfstate", "terraform.tfstate.backup", "terraform.tfstate.d"}) {
 		t.Errorf("only the state should survive, got %v", left)
 	}
 	if err := cleanSource(src, false); err != nil {

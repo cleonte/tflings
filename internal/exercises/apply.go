@@ -29,7 +29,7 @@ func cleanSource(src string, keepState bool) error {
 		return err
 	}
 	for _, e := range entries {
-		if n := e.Name(); keepState && (n == "terraform.tfstate" || n == "terraform.tfstate.backup") {
+		if n := e.Name(); keepState && (n == "terraform.tfstate" || n == "terraform.tfstate.backup" || n == "terraform.tfstate.d") {
 			continue
 		}
 		if err := os.RemoveAll(filepath.Join(src, e.Name())); err != nil {
