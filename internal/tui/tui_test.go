@@ -201,7 +201,7 @@ func TestEverythingDone(t *testing.T) {
 	s := newSession(t)
 	all, _ := exercises.List("info.toml")
 	for _, ex := range all {
-		if ex.Mode != exercises.ModeQuiz {
+		if ex.Mode != exercises.ModeQuiz && ex.Mode != exercises.ModeCLI {
 			continue
 		}
 		if err := exercises.RecordPass(ex.Name); err != nil {
@@ -210,7 +210,7 @@ func TestEverythingDone(t *testing.T) {
 		_ = ex.MarkDone()
 	}
 	// Plan exercises need Terraform, which this environment has none of, so they
-	// are skipped and the quizzes are all that is left.
+	// are skipped and the quizzes and cli exercises (which need none) are all that is left.
 	s.send(changesMsg{})
 	s.expect("Congratulations", "skipped (see tflings doctor)")
 }

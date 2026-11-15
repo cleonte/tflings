@@ -1,0 +1,7 @@
+cli:
+  subcommand: [plan]
+  flags: { destroy: "" }
+  hints:
+    destroy: "`terraform destroy` really destroys (after a prompt). To only look, use the command that previews changes, in destroy mode."
+explanation: >-
+  `plan -destroy` is a destroy-mode plan. It can be saved and applied, or just read.

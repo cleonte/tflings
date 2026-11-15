@@ -1,0 +1,5 @@
+cli:
+  subcommand: [import]
+  args: [aws_s3_bucket.logs, legacy-logs]
+explanation: >-
+  `terraform import ADDRESS ID` attaches an existing object to a resource address that is already in the configuration. The address comes first, then the real object's ID.

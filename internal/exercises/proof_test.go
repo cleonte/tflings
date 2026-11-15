@@ -68,7 +68,7 @@ func TestEveryExerciseIsProven(t *testing.T) {
 				proveWithFiles(t, env, ex)
 				return
 			}
-			if ex.Mode != exercises.ModeQuiz {
+			if ex.Mode != exercises.ModeQuiz && ex.Mode != exercises.ModeCLI {
 				t.Skipf("mode %s is proven by its own runner", ex.Mode)
 			}
 			broken, err := fs.ReadFile(tflings.FS, ex.Source())

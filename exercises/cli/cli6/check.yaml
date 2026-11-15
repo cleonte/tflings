@@ -1,0 +1,8 @@
+cli:
+  subcommand: [force-unlock]
+  args: ["4f3a-91c2"]
+  allow: { force: "" }
+  hints:
+    unlock: "There is no `terraform unlock`. The command that releases a lock by force has `force` in its name."
+explanation: >-
+  `terraform force-unlock LOCK_ID` removes a lock. Use it only when you are sure that no run holds it, because two runs writing the state can corrupt it.

@@ -1,0 +1,6 @@
+cli:
+  subcommand: [fmt]
+  flags: { check: "", recursive: "" }
+  allow: { diff: "" }
+explanation: >-
+  `fmt -check` exits non-zero when a file needs formatting and does not rewrite it. `-recursive` includes sub-folders.

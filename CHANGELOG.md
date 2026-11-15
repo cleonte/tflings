@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.9.0] - 2026-11-15
+
+### Added
+
+- The `cli` exercise mode and ten exercises (`cli1` to `cli10`): you write one Terraform command in `answer.sh` for a short task (apply a saved plan, `plan -refresh-only`, `init -migrate-state`, `force-unlock`, `apply -replace`, `import`, `fmt -check -recursive`, ...). tflings reads it and compares it with the accepted form; it is never run, so these need neither Terraform nor Docker. A wrong but tempting command (`taint`, `refresh`, `destroy`) gets a hint that says why. 95 exercises.
+
 ## [0.8.0] - 2026-11-15
 
 ### Added
@@ -81,7 +87,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - First tagged version: the CLI (`init`, `list`, `run`, `hint`, `reset`, `solution`, `update`, `verify`, `watch`, `doctor`, `aws up|down|status|reset`, `tf`, `env`), plan, apply, fix and quiz exercises (54), proven on Terraform 1.12 and the latest, against the Floci AWS emulator.
 
-[Unreleased]: https://github.com/cleonte/tflings/compare/v0.8.0...HEAD
+[Unreleased]: https://github.com/cleonte/tflings/compare/v0.9.0...HEAD
+[0.9.0]: https://github.com/cleonte/tflings/compare/v0.8.0...v0.9.0
 [0.8.0]: https://github.com/cleonte/tflings/compare/v0.7.0...v0.8.0
 [0.7.0]: https://github.com/cleonte/tflings/compare/v0.6.0...v0.7.0
 [0.6.0]: https://github.com/cleonte/tflings/compare/v0.5.0...v0.6.0

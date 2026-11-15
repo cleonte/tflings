@@ -780,3 +780,93 @@ mode      = "fix"
 objective = "6d"
 hint      = "terraform workspace new staging, then apply."
 docs      = "https://developer.hashicorp.com/terraform/cli/workspaces"
+
+[[exercises]]
+name      = "cli1"
+path      = "exercises/cli/cli1"
+topic     = "cli"
+mode      = "cli"
+objective = "3e"
+hint      = "apply takes the plan file as its argument."
+docs      = "https://developer.hashicorp.com/terraform/cli/commands/apply#apply-options"
+
+[[exercises]]
+name      = "cli2"
+path      = "exercises/cli/cli2"
+topic     = "cli"
+mode      = "cli"
+objective = "3d"
+hint      = "plan has a flag that names the file to write."
+docs      = "https://developer.hashicorp.com/terraform/cli/commands/plan#out-filename"
+
+[[exercises]]
+name      = "cli3"
+path      = "exercises/cli/cli3"
+topic     = "cli"
+mode      = "cli"
+objective = "6d"
+hint      = "A flag of plan that looks only at the state."
+docs      = "https://developer.hashicorp.com/terraform/cli/commands/plan#planning-modes"
+
+[[exercises]]
+name      = "cli4"
+path      = "exercises/cli/cli4"
+topic     = "cli"
+mode      = "cli"
+objective = "7b"
+hint      = "A subcommand of state, with a verb that means list."
+docs      = "https://developer.hashicorp.com/terraform/cli/commands/state/list"
+
+[[exercises]]
+name      = "cli5"
+path      = "exercises/cli/cli5"
+topic     = "cli"
+mode      = "cli"
+objective = "6c"
+hint      = "A flag of init that moves the state."
+docs      = "https://developer.hashicorp.com/terraform/cli/commands/init#backend-initialization"
+
+[[exercises]]
+name      = "cli6"
+path      = "exercises/cli/cli6"
+topic     = "cli"
+mode      = "cli"
+objective = "6b"
+hint      = "The command has force in its name and takes the lock ID."
+docs      = "https://developer.hashicorp.com/terraform/cli/commands/force-unlock"
+
+[[exercises]]
+name      = "cli7"
+path      = "exercises/cli/cli7"
+topic     = "cli"
+mode      = "cli"
+objective = "3e"
+hint      = "A flag of apply that takes the address."
+docs      = "https://developer.hashicorp.com/terraform/cli/commands/plan#replace-address"
+
+[[exercises]]
+name      = "cli8"
+path      = "exercises/cli/cli8"
+topic     = "cli"
+mode      = "cli"
+objective = "7a"
+hint      = "import takes the address first, then the id."
+docs      = "https://developer.hashicorp.com/terraform/cli/commands/import"
+
+[[exercises]]
+name      = "cli9"
+path      = "exercises/cli/cli9"
+topic     = "cli"
+mode      = "cli"
+objective = "3f"
+hint      = "The command that previews, in destroy mode."
+docs      = "https://developer.hashicorp.com/terraform/cli/commands/plan#planning-modes"
+
+[[exercises]]
+name      = "cli10"
+path      = "exercises/cli/cli10"
+topic     = "cli"
+mode      = "cli"
+objective = "3g"
+hint      = "Two flags of fmt: one to check, one for sub-folders."
+docs      = "https://developer.hashicorp.com/terraform/cli/commands/fmt"

@@ -1,0 +1,8 @@
+cli:
+  subcommand: [apply]
+  flags: { replace: "aws_instance.web" }
+  allow: { auto-approve: "" }
+  hints:
+    taint: "`terraform taint` is deprecated: it marks the resource and leaves the decision for later. Use a flag of `apply` that names the resource."
+explanation: >-
+  `-replace=ADDRESS` forces one object to be replaced in the same plan. It replaced `terraform taint`.

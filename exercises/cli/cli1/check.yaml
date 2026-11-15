@@ -1,0 +1,5 @@
+cli:
+  subcommand: [apply]
+  args: [tfplan]
+explanation: >-
+  `terraform apply FILE` applies a saved plan without planning again or asking for confirmation. If the state changed since, Terraform refuses the stale plan.
