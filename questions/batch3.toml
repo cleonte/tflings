@@ -1,0 +1,507 @@
+# Mock exam questions, batch 3. correct = 0-based indexes into options.
+
+[[question]]
+id = "b3-8a-1"
+objective = "8a"
+text = "Which TWO are ways to start a run in HCP Terraform?"
+options = [
+  "Pushing a commit to a VCS repository connected to the workspace",
+  "Running `terraform plan` or `apply` in a configuration that has a `cloud` block",
+  "Running `terraform cloud run`",
+  "Editing the dependency lock file",
+]
+correct = [0, 1]
+explanation = "Runs can be VCS-driven, CLI-driven or API-driven. There is no `terraform cloud run` command."
+
+[[question]]
+id = "b3-8a-2"
+objective = "8a"
+text = "Where is the state of an HCP Terraform workspace stored?"
+options = [
+  "In HCP Terraform, with version history and locking",
+  "In the VCS repository",
+  "In a file on the machine that started the run",
+  "Always in an S3 bucket you own",
+]
+correct = [0]
+explanation = "HCP Terraform keeps each workspace's state, its versions, and locks it during runs."
+
+[[question]]
+id = "b3-8a-3"
+objective = "8a"
+text = "What is the default execution mode of a workspace?"
+options = [
+  "Remote: plan and apply run on HCP Terraform",
+  "Local: they run on your machine",
+  "Agent: they run on your own agent",
+  "There is none; you must choose",
+]
+correct = [0]
+explanation = "In remote mode the run happens on HCP Terraform infrastructure. Local mode runs on your machine and still stores the state in the workspace."
+
+[[question]]
+id = "b3-8a-4"
+objective = "8a"
+text = "In local execution mode, what does HCP Terraform do?"
+options = [
+  "It stores the state, while plan and apply run on your own machine",
+  "It runs plan and apply for you",
+  "It disables state storage",
+  "It only shows the configuration",
+]
+correct = [0]
+explanation = "Local mode keeps HCP Terraform as the state backend only. It is the way to run against resources that the cloud cannot reach."
+
+[[question]]
+id = "b3-8a-5"
+objective = "8a"
+text = "How can an HCP Terraform run reach resources in a private network?"
+options = [
+  "Run an HCP Terraform agent inside that network",
+  "Open the network to the internet",
+  "Use local files",
+  "It is not possible",
+]
+correct = [0]
+explanation = "Agents poll HCP Terraform for work and run it inside your network, so no inbound access is needed."
+
+[[question]]
+id = "b3-8b-1"
+objective = "8b"
+text = "Which feature estimates what the changes of a plan will cost before you apply?"
+options = [
+  "Cost estimation",
+  "Run triggers",
+  "Variable sets",
+  "Drift detection",
+]
+correct = [0]
+explanation = "Cost estimation shows the monthly cost change of a plan, and a policy can use it."
+
+[[question]]
+id = "b3-8b-2"
+objective = "8b"
+text = "What are run tasks in HCP Terraform?"
+options = [
+  "Integrations that send a run to a third-party service, for example a security scan, at set stages",
+  "The tasks of a Terraform plan",
+  "Scheduled destroys",
+  "Workspace tags",
+]
+correct = [0]
+explanation = "Run tasks call an external service during a run and can stop it or warn, depending on how they are set."
+
+[[question]]
+id = "b3-8b-3"
+objective = "8b"
+text = "How does HCP Terraform control who may plan, apply or manage settings?"
+options = [
+  "Teams with permissions, on organizations, projects and workspaces",
+  "Only by sharing the API token",
+  "By the cloud provider's IAM",
+  "It does not; everyone can do everything",
+]
+correct = [0]
+explanation = "Users belong to teams, and teams get permissions at the organization, project or workspace level."
+
+[[question]]
+id = "b3-8b-4"
+objective = "8b"
+text = "What does the private registry of HCP Terraform hold?"
+options = [
+  "Modules and providers that you share inside your organization",
+  "Only the state files",
+  "Secrets",
+  "Run logs",
+]
+correct = [0]
+explanation = "It works like the public registry, but it is private, with versioning, and can be used from the `source` of a module."
+
+[[question]]
+id = "b3-8b-5"
+objective = "8b"
+text = "What is a run trigger?"
+options = [
+  "A setting that starts a run in one workspace when another workspace finishes applying",
+  "A button to cancel a run",
+  "A comment on a plan",
+  "A policy",
+]
+correct = [0]
+explanation = "Run triggers chain workspaces, for example a network workspace that triggers an application workspace."
+
+[[question]]
+id = "b3-8b-6"
+objective = "8b"
+text = "What do health assessments in HCP Terraform do?"
+options = [
+  "Check workspaces on a schedule for drift and failed checks",
+  "Check the price of the plan",
+  "Back up the state",
+  "Format the code",
+]
+correct = [0]
+explanation = "Drift detection compares the real infrastructure with the configuration regularly, and continuous validation re-runs checks."
+
+[[question]]
+id = "b3-8b-7"
+objective = "8b"
+text = "A Sentinel policy has the enforcement level `hard-mandatory` and it fails. What happens?"
+options = [
+  "The run stops and nobody can override it",
+  "A warning is shown",
+  "The run stops, but an authorized user can override it",
+  "The policy is ignored",
+]
+correct = [0]
+explanation = "The levels are advisory (warn), soft-mandatory (can be overridden by an authorized user) and hard-mandatory (cannot)."
+
+[[question]]
+id = "b3-8c-1"
+objective = "8c"
+text = "Which TWO does an HCP Terraform workspace have of its own?"
+options = [
+  "Its state and the history of it",
+  "Its variables, plus any variable sets assigned to it",
+  "Your shell environment",
+  "Your local .terraform folder",
+]
+correct = [0, 1]
+explanation = "A workspace is a complete working environment: configuration, variables, state, run history and permissions."
+
+[[question]]
+id = "b3-8c-2"
+objective = "8c"
+text = "How should you give a remote run the cloud credentials it needs?"
+options = [
+  "Set them as sensitive environment variables in the workspace or a variable set",
+  "Commit them to the repository",
+  "Put them in an output",
+  "Type them at every run",
+]
+correct = [0]
+explanation = "Remote runs do not see your laptop's environment. Store credentials as sensitive variables, or use dynamic credentials."
+
+[[question]]
+id = "b3-8d-1"
+objective = "8d"
+text = "Which command logs the CLI in to HCP Terraform?"
+options = [
+  "terraform login",
+  "terraform auth",
+  "terraform cloud login",
+  "terraform connect",
+]
+correct = [0]
+explanation = "`terraform login` opens the browser to create a token and saves it for the CLI."
+
+[[question]]
+id = "b3-8d-2"
+objective = "8d"
+text = "Which block connects a configuration to an HCP Terraform workspace?"
+options = [
+  "`cloud` inside the `terraform` block",
+  "`provider \"hcp\"`",
+  "`backend \"s3\"`",
+  "`workspace`",
+]
+correct = [0]
+explanation = "`terraform { cloud { organization = \"acme\" workspaces { name = \"app\" } } }`."
+
+[[question]]
+id = "b3-8d-3"
+objective = "8d"
+text = "What does `workspaces { tags = [\"app\"] }` in a `cloud` block let you do?"
+options = [
+  "Work with several workspaces that have that tag, choosing one with `terraform workspace select`",
+  "Tag the cloud resources",
+  "Create a project",
+  "Filter the plan",
+]
+correct = [0]
+explanation = "Tags select a group of workspaces. With `name`, the configuration is tied to one workspace."
+
+[[question]]
+id = "b3-8d-4"
+objective = "8d"
+text = "What are dynamic provider credentials?"
+options = [
+  "Short-lived credentials that HCP Terraform obtains for each run by workload identity (OIDC), instead of stored keys",
+  "Credentials that change each plan in the configuration",
+  "Credentials in the state",
+  "Credentials from a variable",
+]
+correct = [0]
+explanation = "They remove long-lived keys from workspaces: the cloud trusts HCP Terraform's identity token for the run."
+
+[[question]]
+id = "b3-8d-5"
+objective = "8d"
+text = "What does a connected VCS repository do when a pull request is opened?"
+options = [
+  "It starts a speculative plan that shows the changes",
+  "It applies the change",
+  "It merges the pull request",
+  "It destroys the workspace",
+]
+correct = [0]
+explanation = "A speculative plan is plan-only and cannot be applied. It lets reviewers see the effect of a change."
+
+[[question]]
+id = "b3-8d-6"
+objective = "8d"
+text = "True or false: a speculative plan can be applied."
+options = [
+  "True",
+  "False",
+]
+correct = [1]
+explanation = "Speculative plans only show what would change. To apply, merge the change so that a normal run is queued."
+
+[[question]]
+id = "b3-6d-1"
+objective = "6d"
+text = "What does `terraform refresh` do, and what replaced it?"
+options = [
+  "It updates the state from the real infrastructure; `terraform apply -refresh-only` replaced it",
+  "It rebuilds all resources; `apply -replace` replaced it",
+  "It deletes the state; `state rm` replaced it",
+  "It formats files; `fmt` replaced it",
+]
+correct = [0]
+explanation = "`refresh` changed the state with no review. `apply -refresh-only` shows the changes first and asks for approval."
+
+[[question]]
+id = "b3-6d-2"
+objective = "6d"
+text = "Which option skips refreshing the state when you run `terraform plan`?"
+options = [
+  "-refresh=false",
+  "-no-refresh",
+  "-skip-state",
+  "-offline",
+]
+correct = [0]
+explanation = "`-refresh=false` plans against the state as it is, which is faster but misses drift."
+
+[[question]]
+id = "b3-6d-3"
+objective = "6d"
+text = "Which `lifecycle` argument tells Terraform to ignore changes made to some attributes outside Terraform?"
+options = [
+  "ignore_changes",
+  "create_before_destroy",
+  "prevent_destroy",
+  "replace_triggered_by",
+]
+correct = [0]
+explanation = "`ignore_changes = [tags]` keeps Terraform from reverting those attributes to the configuration."
+
+[[question]]
+id = "b3-6d-4"
+objective = "6d"
+text = "A resource was deleted by hand in the cloud console. What does the next `terraform plan` show?"
+options = [
+  "That the resource will be created again",
+  "Nothing",
+  "That the state will be deleted",
+  "An error",
+]
+correct = [0]
+explanation = "The refresh finds that the object is gone, so the plan has to create it to match the configuration."
+
+[[question]]
+id = "b3-7a-1"
+objective = "7a"
+text = "What does an `import` block need?"
+options = [
+  "`to` (the resource address) and `id` (the real object's id)",
+  "Only an id",
+  "A module",
+  "A provider alias only",
+]
+correct = [0]
+explanation = "`import { to = aws_s3_bucket.logs  id = \"my-bucket\" }`. The next plan shows the import."
+
+[[question]]
+id = "b3-7b-1"
+objective = "7b"
+text = "Which command shows the outputs of the root module?"
+options = [
+  "terraform output",
+  "terraform show outputs",
+  "terraform state outputs",
+  "terraform print",
+]
+correct = [0]
+explanation = "`terraform output` lists them, `terraform output NAME` prints one, `-json` and `-raw` change the form."
+
+[[question]]
+id = "b3-7b-2"
+objective = "7b"
+text = "Which command prints the versions of Terraform and of the providers in use?"
+options = [
+  "terraform version",
+  "terraform --providers",
+  "terraform show -version",
+  "terraform state version",
+]
+correct = [0]
+explanation = "`terraform version` also tells you when a newer Terraform is available."
+
+[[question]]
+id = "b3-7b-3"
+objective = "7b"
+text = "What does `terraform providers` show?"
+options = [
+  "The providers that the configuration and its modules require",
+  "The state of providers",
+  "The provider logs",
+  "The provider credentials",
+]
+correct = [0]
+explanation = "It prints a tree of the provider requirements, which helps with version conflicts."
+
+[[question]]
+id = "b3-7b-4"
+objective = "7b"
+text = "What does `terraform graph` print?"
+options = [
+  "A dependency graph in DOT format",
+  "A chart of the cost",
+  "The plan as a picture file",
+  "The list of resources in the state",
+]
+correct = [0]
+explanation = "The output is Graphviz DOT text. Render it with the `dot` tool to get an image."
+
+[[question]]
+id = "b3-2d-1"
+objective = "2d"
+text = "Which TWO are reasons to use a remote backend instead of the local one?"
+options = [
+  "The team shares one state",
+  "State locking and access control",
+  "The state is smaller",
+  "Terraform runs faster on remote state",
+]
+correct = [0, 1]
+explanation = "A remote backend makes the state available to the team and usually adds locking, encryption and permissions."
+
+[[question]]
+id = "b3-4d-1"
+objective = "4d"
+text = "Which function turns a list into a set?"
+options = [
+  "toset",
+  "tolist",
+  "tomap",
+  "concat",
+]
+correct = [0]
+explanation = "`toset(list)` removes duplicates and loses order. It is often used with `for_each`."
+
+[[question]]
+id = "b3-4d-2"
+objective = "4d"
+text = "Which type constraint describes a map whose values are all strings?"
+options = [
+  "map(string)",
+  "object({ string })",
+  "list(string)",
+  "set(map)",
+]
+correct = [0]
+explanation = "`map(string)` is keys to strings. An `object` lists its attributes by name."
+
+[[question]]
+id = "b3-4b-1"
+objective = "4b"
+text = "How do you refer to the third element of the list `local.names`?"
+options = [
+  "local.names[2]",
+  "local.names[3]",
+  "local.names.3",
+  "local[names][2]",
+]
+correct = [0]
+explanation = "Indexes start at 0, so the third element is `[2]`."
+
+[[question]]
+id = "b3-4e-1"
+objective = "4e"
+text = "What does the splat expression `aws_instance.web[*].id` give?"
+options = [
+  "A list of the ids of all the instances",
+  "The id of the first instance",
+  "A map of ids",
+  "An error",
+]
+correct = [0]
+explanation = "`[*]` takes the attribute from every element of a list, often used with `count`."
+
+[[question]]
+id = "b3-4e-2"
+objective = "4e"
+text = "What does `for_each` accept?"
+options = [
+  "A map or a set of strings",
+  "Only a number",
+  "Only a list of numbers",
+  "Any string",
+]
+correct = [0]
+explanation = "Use `toset(list)` to turn a list of strings into a set. `each.key` and `each.value` give the current element."
+
+[[question]]
+id = "b3-4e-3"
+objective = "4e"
+text = "Which function reads the contents of a file as a string?"
+options = [
+  "file(\"path\")",
+  "read(\"path\")",
+  "include(\"path\")",
+  "fileset(\"path\")",
+]
+correct = [0]
+explanation = "`file()` reads text. `filebase64` encodes it, and `fileset` lists the files that match a pattern."
+
+[[question]]
+id = "b3-3d-1"
+objective = "3d"
+text = "What does `terraform plan -destroy` do?"
+options = [
+  "Shows what a destroy would remove, without destroying",
+  "Destroys after confirmation",
+  "Deletes the plan file",
+  "Removes the state",
+]
+correct = [0]
+explanation = "It is a destroy-mode plan, which you can save and apply, or just read."
+
+[[question]]
+id = "b3-3e-1"
+objective = "3e"
+text = "What does `-target=ADDRESS` do on a plan or apply?"
+options = [
+  "Limits the operation to that resource and what it depends on; meant for exceptions",
+  "Selects the workspace",
+  "Selects the provider",
+  "Makes the plan faster and safe for every day",
+]
+correct = [0]
+explanation = "Terraform warns that targeting can leave the configuration and the state out of step, so use it for recovery, not for routine work."
+
+[[question]]
+id = "b3-5d-1"
+objective = "5d"
+text = "What does `terraform init -upgrade` do?"
+options = [
+  "Installs the newest providers and modules that the version constraints allow",
+  "Upgrades the Terraform binary",
+  "Upgrades the state format and nothing else",
+  "Removes the lock file",
+]
+correct = [0]
+explanation = "Without `-upgrade`, init keeps the versions in the lock file. With it, it picks newer ones within the constraints and rewrites the lock file."
+
