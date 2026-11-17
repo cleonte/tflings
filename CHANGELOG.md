@@ -14,6 +14,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - `SECURITY.md` says that release binaries are unsigned and that the Homebrew cask removes the macOS quarantine flag.
 - 16 new mock exam questions (`questions/batch5.toml`) for the thinnest objectives: 3f (destroy), 3g (formatting), 4a (resource and data blocks) and 4b (references). The bank has 183 questions.
 - Two hands-on exercises for objectives that were quiz only: `workflow7` (`terraform init` and a module it cannot install, plan mode) and `workflow8` (`terraform validate`, fix mode). 97 exercises.
+- `tflings sandbox`: a scratch folder (`<home>/sandbox/src`) with a fake AWS account of its own, for trying Terraform outside the exercises. `tflings sandbox` prints the folder and the sealed environment, `tflings sandbox <terraform arguments>` runs Terraform there (its `.tf` files get the same safety check as an exercise's), `tflings sandbox --reset` starts over in a new account. `aws up` and `watch` do not empty Floci while the sandbox's state has resources. Not yet run against Floci: tested with provider-free configurations only.
 
 ### Changed
 
@@ -21,6 +22,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Two exercises folders on one machine no longer share state. `tflings init` now gives the folder a random salt (in `.tflings.json`), which names its scratch folders under tflings's home and goes into its fake AWS accounts, so a `reset` in one folder cannot delete the other's saved state. Folders made by an older version have no salt and keep working exactly as before.
 - `run` now records a pass in the progress file of the exercises folder it works on, the same file the reset counter lives in, instead of always in the current directory.
 - The safety check that refuses a configuration which could leave the fake AWS now also reads backend configuration files (`*.tfbackend`, `*.hcl`) and refuses `assume_role` written as an argument of the s3 backend. `tflings tf` refuses `-backend-config` values that set credentials, a role or an endpoint other than Floci (or name a file that is not one of the exercise's own), `-var` values that give an endpoint another URL, and a `-var-file` outside the exercise's folder.
+- `tflings aws up` and `watch` now say that they are about to empty Floci before they do it, not after.
 
 ### Fixed
 

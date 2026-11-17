@@ -81,6 +81,7 @@ tflings doctor --prefetch   # downloads the AWS provider (about 250 MB) so exerc
 | `doctor --install-terraform` | Downloads Terraform (the newest 1.12.x by default) into tflings's own folder, checking its checksums and signature. For machines that have none. |
 | `exam` | Mock exam: multiple choice questions, scored per objective, with the exercises to redo (`--objective 4g`, `--practice`, `--review` for the questions you missed, `-n 30`, `--minutes 60`). Works anywhere, needs no Terraform or Docker. |
 | `tf <name> <terraform args>` | Fix exercises: run Terraform in the exercise's sealed environment (`tflings tf drift1 plan`). |
+| `sandbox [terraform args]` | A scratch folder with a fake AWS account of its own, in the same sealed environment: try Terraform freely (`tflings sandbox init`, `tflings sandbox --reset` to start over). |
 | `env <name>` | Print that environment, for a shell of your own. |
 | `update` | Add the exercises your folder does not have yet. |
 | `aws up\|down\|status\|reset` | Manage the local AWS (Floci). |

@@ -153,13 +153,17 @@ func orNone(s string) string {
 // progress: every apply exercise keeps its Terraform state, and while any of
 // those states holds resources, Floci is left alone. (A reset would not corrupt
 // them, since Terraform notices missing resources, but it would silently undo
-// the learner's work.) It says so when it empties Floci.
+// the learner's work.) It says so before it empties Floci.
 func emptyFlociIfIdle(ctx context.Context, mgr *floci.Manager) {
 	env := &exercises.Env{}
 	if env.HasSavedState() || !mgr.Healthy(ctx) {
 		return
 	}
-	if err := mgr.Reset(ctx); err == nil {
-		color.White("Floci was emptied: none of your exercises had anything built.")
+	// Say it first: emptying is not undone.
+	color.White("Emptying Floci: none of your exercises has anything built, so nothing of yours is lost.")
+	if err := mgr.Reset(ctx); err != nil {
+		color.Yellow("Floci could not be emptied: %s", err)
+		return
 	}
+	color.White("Floci is empty.")
 }
