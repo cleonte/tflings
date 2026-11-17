@@ -15,11 +15,20 @@ import (
 	"github.com/cleonte/tflings/internal/runner"
 )
 
+// writtenManifest is the file in a scratch folder that lists what tflings
+// wrote there last time, one slash path per line.
+const writtenManifest = ".tflings-written"
+
 // cleanSource empties the scratch folder of an exercise. With keepState (apply
-// mode) the Terraform state survives, because it has to survive between runs: an apply exercise is
-// worked on in steps, and each save applies on top of what is already there,
-// as real work does. Everything else (the .tf files, a stale lock file) is
-// rewritten by the run.
+// and fix mode) the Terraform state survives, because it has to survive between
+// runs: an apply exercise is worked on in steps, and each save applies on top of
+// what is already there, as real work does.
+//
+// With keepState, once the folder has a manifest of what tflings wrote, only
+// those files go (and Terraform's own .terraform folder and lock file, which
+// init makes again): a saved plan (`plan -out=tfplan`) or a file Terraform
+// generated for the learner is theirs and stays for the next `tflings tf`.
+// A folder without a manifest is emptied except for the state.
 func cleanSource(src string, keepState bool) error {
 	entries, err := os.ReadDir(src)
 	if os.IsNotExist(err) {
@@ -27,6 +36,26 @@ func cleanSource(src string, keepState bool) error {
 	}
 	if err != nil {
 		return err
+	}
+	var written map[string]bool
+	if keepState {
+		if data, err := os.ReadFile(filepath.Join(src, writtenManifest)); err == nil {
+			written = map[string]bool{writtenManifest: true, ".terraform": true, ".terraform.lock.hcl": true}
+			for _, l := range strings.Split(string(data), "\n") {
+				if l = strings.TrimSpace(l); l != "" {
+					written[l] = true
+				}
+			}
+		}
+	}
+	if written != nil {
+		for n := range written {
+			if err := os.RemoveAll(filepath.Join(src, filepath.FromSlash(n))); err != nil {
+				return err
+			}
+		}
+		pruneEmptyDirs(src)
+		return nil
 	}
 	for _, e := range entries {
 		if n := e.Name(); keepState && (n == "terraform.tfstate" || n == "terraform.tfstate.backup" || n == "terraform.tfstate.d") {
@@ -37,6 +66,21 @@ func cleanSource(src string, keepState bool) error {
 		}
 	}
 	return nil
+}
+
+// pruneEmptyDirs removes the folders under src that removing files left empty
+// (a module folder the learner deleted).
+func pruneEmptyDirs(src string) {
+	var dirs []string
+	_ = filepath.WalkDir(src, func(p string, d os.DirEntry, err error) error {
+		if err == nil && d.IsDir() && p != src {
+			dirs = append(dirs, p)
+		}
+		return nil
+	})
+	for i := len(dirs) - 1; i >= 0; i-- {
+		_ = os.Remove(dirs[i]) // fails on a folder that still has files, which is right
+	}
 }
 
 // runApply is apply mode. It plans first and applies only if the plan checks

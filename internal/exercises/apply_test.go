@@ -146,3 +146,42 @@ func TestHasSavedStateCountsSeededFixExercises(t *testing.T) {
 		t.Error("reset forgets it")
 	}
 }
+
+// A saved plan and a file Terraform generated are the learner's: the next
+// `tflings tf` must find them (workflow6 plans with -out, then applies it).
+func TestWriteSourceKeepsWhatTflingsDidNotWrite(t *testing.T) {
+	src := filepath.Join(t.TempDir(), "src")
+	files := map[string][]byte{"main.tf": []byte("a"), "old.tf": []byte("b"), "modules/m/main.tf": []byte("c")}
+	if err := writeSource(src, files, true); err != nil {
+		t.Fatal(err)
+	}
+	for _, f := range []string{"tfplan", "generated.tf", "terraform.tfstate"} {
+		if err := os.WriteFile(filepath.Join(src, f), []byte("x"), 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	// The learner deletes old.tf and the module, and edits main.tf.
+	if err := writeSource(src, map[string][]byte{"main.tf": []byte("a2")}, true); err != nil {
+		t.Fatal(err)
+	}
+	for _, f := range []string{"tfplan", "generated.tf", "terraform.tfstate", "main.tf"} {
+		if _, err := os.Stat(filepath.Join(src, f)); err != nil {
+			t.Errorf("%s should survive: %v", f, err)
+		}
+	}
+	for _, f := range []string{"old.tf", "modules"} {
+		if _, err := os.Stat(filepath.Join(src, f)); err == nil {
+			t.Errorf("%s was deleted by the learner and should be gone", f)
+		}
+	}
+	if data, _ := os.ReadFile(filepath.Join(src, "main.tf")); string(data) != "a2" {
+		t.Errorf("main.tf = %q", data)
+	}
+	// Plan mode keeps nothing.
+	if err := writeSource(src, map[string][]byte{"main.tf": []byte("a")}, false); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := os.Stat(filepath.Join(src, "tfplan")); err == nil {
+		t.Error("plan mode keeps nothing")
+	}
+}
