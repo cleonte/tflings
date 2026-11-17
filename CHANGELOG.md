@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Added
+
+- Badges under the title of the README: CI status, latest release, licence (Apache-2.0) and Terraform 1.12+.
+
 ## [0.9.2] - 2026-11-15
 
 ### Fixed
