@@ -33,7 +33,7 @@ tflings progress                  # exercises done and exam score, per objective
 
 - **Terraform 1.12 or newer** (the exam tests 1.12). tflings uses the one on your `PATH`, or the one in `TFLINGS_TERRAFORM`, or one it downloads for you into its own folder with `tflings doctor --install-terraform`.
 - **Docker** (Docker Desktop, OrbStack, Colima, Lima or Docker Engine) for exercises that use the AWS provider. Quizzes and exercises that need no cloud run without it.
-- Go 1.26 or newer to build it for now.
+- Go 1.26 or newer, only if you build tflings yourself (`go install`); the Homebrew install and the release archives need no Go.
 
 `tflings doctor` checks all of this and says how to fix what is missing.
 
@@ -83,7 +83,7 @@ tflings doctor --prefetch   # downloads the AWS provider (about 250 MB) so exerc
 | `tf <name> <terraform args>` | Fix exercises: run Terraform in the exercise's sealed environment (`tflings tf drift1 plan`). |
 | `sandbox [terraform args]` | A scratch folder with a fake AWS account of its own, in the same sealed environment: try Terraform freely (`tflings sandbox init`, `tflings sandbox --reset` to start over). |
 | `env <name>` | Print that environment, for a shell of your own. |
-| `update` | Add the exercises your folder does not have yet. |
+| `update` | Add the exercises your folder does not have yet, and refresh the `info.toml` entries (objective, hint, link) of the ones you have. READMEs and exercise files you have not changed are replaced by the newer ones; files you have edited are never overwritten (`reset` brings the new one). The old `info.toml` is kept as `info.toml.bak`. |
 | `aws up\|down\|status\|reset` | Manage the local AWS (Floci). |
 | `doctor [--prefetch]` | Check this machine. |
 
