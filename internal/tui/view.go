@@ -12,6 +12,7 @@ import (
 	"github.com/cleonte/tflings/internal/exercises"
 )
 
+// View draws the header, the body and the footer.
 func (m *Model) View() tea.View {
 	view := tea.NewView(m.header() + m.body())
 	view.AltScreen = true

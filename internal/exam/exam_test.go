@@ -62,7 +62,7 @@ func TestShuffleKeepsTheRightAnswers(t *testing.T) {
 		for _, i := range a.Right {
 			got = append(got, a.Shown[i])
 		}
-		if len(got) != 2 || !(contains(got, "x") && contains(got, "z")) {
+		if len(got) != 2 || !contains(got, "x") || !contains(got, "z") {
 			t.Fatalf("seed %d: right options are %v", seed, got)
 		}
 	}

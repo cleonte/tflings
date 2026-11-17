@@ -13,6 +13,7 @@ import (
 	"github.com/cleonte/tflings/internal/exercises"
 )
 
+// ErrExists is returned when a file or folder is already there.
 var ErrExists = errors.New("already exists")
 
 // Init writes the exercises in src to a new folder dest. It refuses to touch

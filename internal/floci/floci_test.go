@@ -52,12 +52,12 @@ func (f *fakeDocker) called(prefix string) bool {
 
 const noSuch = "Error response from daemon: No such object: tflings-floci"
 
-func inspectJSON(running bool, health, image, port string) string {
+func inspectJSON(running bool, health, image string) string {
 	h := ""
 	if health != "" {
 		h = fmt.Sprintf(`,"Health":{"Status":%q}`, health)
 	}
-	return fmt.Sprintf(`[{"State":{"Running":%v%s},"Config":{"Image":%q},"HostConfig":{"PortBindings":{"4566/tcp":[{"HostPort":%q}]}}}]`, running, h, image, port)
+	return fmt.Sprintf(`[{"State":{"Running":%v%s},"Config":{"Image":%q},"HostConfig":{"PortBindings":{"4566/tcp":[{"HostPort":"4577"}]}}}]`, running, h, image)
 }
 
 // healthyServer plays Floci's health endpoint and returns a Manager that talks to it.
@@ -122,7 +122,7 @@ func TestUpCreatesTheContainerWhenMissing(t *testing.T) {
 }
 
 func TestUpReusesARunningContainer(t *testing.T) {
-	d := &fakeDocker{reply: map[string]result{"inspect --type": {out: inspectJSON(true, "healthy", Image, "4577")}}}
+	d := &fakeDocker{reply: map[string]result{"inspect --type": {out: inspectJSON(true, "healthy", Image)}}}
 	m, _ := healthyServer(t, d)
 	if err := m.Up(context.Background()); err != nil {
 		t.Fatal(err)
@@ -133,7 +133,7 @@ func TestUpReusesARunningContainer(t *testing.T) {
 }
 
 func TestUpStartsAStoppedContainer(t *testing.T) {
-	d := &fakeDocker{reply: map[string]result{"inspect --type": {out: inspectJSON(false, "", Image, "4577")}}}
+	d := &fakeDocker{reply: map[string]result{"inspect --type": {out: inspectJSON(false, "", Image)}}}
 	m, _ := healthyServer(t, d)
 	if err := m.Up(context.Background()); err != nil {
 		t.Fatal(err)
@@ -144,7 +144,7 @@ func TestUpStartsAStoppedContainer(t *testing.T) {
 }
 
 func TestUpReplacesAContainerFromAnotherImage(t *testing.T) {
-	d := &fakeDocker{reply: map[string]result{"inspect --type": {out: inspectJSON(true, "healthy", "floci/floci:2.3.0", "4577")}}}
+	d := &fakeDocker{reply: map[string]result{"inspect --type": {out: inspectJSON(true, "healthy", "floci/floci:2.3.0")}}}
 	m, _ := healthyServer(t, d)
 	if err := m.Up(context.Background()); err != nil {
 		t.Fatal(err)
@@ -158,7 +158,7 @@ func TestUpReplacesAContainerFromAnotherImage(t *testing.T) {
 }
 
 func TestUpTimesOutWhenFlociNeverAnswers(t *testing.T) {
-	d := &fakeDocker{reply: map[string]result{"inspect --type": {out: inspectJSON(true, "starting", Image, "4577")}}}
+	d := &fakeDocker{reply: map[string]result{"inspect --type": {out: inspectJSON(true, "starting", Image)}}}
 	cfg := DefaultConfig()
 	cfg.Port = 1 // nothing listens here
 	m := &Manager{Cfg: cfg, Docker: d, WaitHealthy: 300 * time.Millisecond}
@@ -176,7 +176,7 @@ func TestDockerErrorsAreNamed(t *testing.T) {
 	for stderr, want := range cases {
 		d := &fakeDocker{reply: map[string]result{"inspect --type": {err: stderr, fail: errors.New("exit 1")}}}
 		m, _ := healthyServer(t, d)
-		if _, err := m.Current(context.Background()); !errors.Is(err, want) && want != ErrPortInUse {
+		if _, err := m.Current(context.Background()); !errors.Is(err, want) && !errors.Is(want, ErrPortInUse) {
 			t.Errorf("%q: got %v, want %v", stderr, err, want)
 		}
 	}

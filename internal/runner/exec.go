@@ -63,9 +63,9 @@ func Run(ctx context.Context, c Call) (Output, error) {
 	if c.Engine == nil {
 		return Output{}, errors.New("no engine")
 	}
-	max := c.MaxOutput
-	if max <= 0 {
-		max = DefaultMaxOutput
+	limit := c.MaxOutput
+	if limit <= 0 {
+		limit = DefaultMaxOutput
 	}
 	timeout := c.Timeout
 	if timeout <= 0 {
@@ -83,8 +83,8 @@ func Run(ctx context.Context, c Call) (Output, error) {
 	setProcessGroup(cmd)
 	cmd.WaitDelay = 3 * time.Second
 
-	stdout := &cappedBuffer{max: max}
-	stderr := &cappedBuffer{max: max}
+	stdout := &cappedBuffer{max: limit}
+	stderr := &cappedBuffer{max: limit}
 	cmd.Stdout, cmd.Stderr = stdout, stderr
 
 	start := time.Now()

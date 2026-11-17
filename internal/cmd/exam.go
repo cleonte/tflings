@@ -13,7 +13,7 @@ import (
 )
 
 // ExamCmd is the mock exam: multiple choice questions from the embedded bank.
-func ExamCmd(infoFile string) *cobra.Command {
+func ExamCmd(_ string) *cobra.Command {
 	var count, minutes int
 	var objective string
 	var practice, weak, review bool
@@ -32,7 +32,7 @@ ours, and the score is only a guide.`,
 		Args:          cobra.NoArgs,
 		SilenceUsage:  true,
 		SilenceErrors: true,
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			all, err := exam.Load(tflings.Questions, "questions")
 			if err != nil {
 				return err

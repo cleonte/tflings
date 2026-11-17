@@ -105,6 +105,7 @@ type SkippedError struct{ Reason string }
 
 func (e *SkippedError) Error() string { return e.Reason }
 
+// IsSkipped says whether err is a SkippedError.
 func IsSkipped(err error) bool {
 	var s *SkippedError
 	return errors.As(err, &s)
@@ -223,9 +224,7 @@ func (e Exercise) runQuiz(c *check.Compiled, src []byte) (Result, error) {
 	var given []string
 	switch a := q.Answer.(type) {
 	case string:
-		for _, p := range strings.FieldsFunc(a, func(r rune) bool { return r == ',' || r == ' ' }) {
-			given = append(given, p)
-		}
+		given = append(given, strings.FieldsFunc(a, func(r rune) bool { return r == ',' || r == ' ' })...)
 	case []any:
 		for _, v := range a {
 			if s, ok := v.(string); ok {

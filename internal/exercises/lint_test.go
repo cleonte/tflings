@@ -53,7 +53,6 @@ func TestExerciseLint(t *testing.T) {
 
 	names := map[string]bool{}
 	for _, ex := range all {
-		ex := ex
 		t.Run(ex.Name, func(t *testing.T) {
 			if names[ex.Name] {
 				t.Error("duplicate name")

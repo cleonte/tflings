@@ -106,8 +106,13 @@ func TestClientIgnoresTheLearnersAWSEnvironment(t *testing.T) {
 func TestTypedCallsAgainstFloci(t *testing.T) {
 	const endpoint = "http://127.0.0.1:4577"
 	hc := &http.Client{Timeout: time.Second}
-	if resp, err := hc.Get(endpoint + "/_floci/health"); err != nil || resp.StatusCode != 200 {
+	resp, err := hc.Get(endpoint + "/_floci/health")
+	if err != nil {
 		t.Skip("Floci is not running on " + endpoint)
+	}
+	_ = resp.Body.Close()
+	if resp.StatusCode != 200 {
+		t.Skip("Floci is not healthy on " + endpoint)
 	}
 	account := "9" + strconv.FormatInt(time.Now().UnixNano()%100000000000, 10)
 	for len(account) < 12 {
@@ -123,7 +128,7 @@ func TestTypedCallsAgainstFloci(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	_, err := s3c.CreateBucket(ctx, &s3.CreateBucketInput{Bucket: aws.String("chk")})
+	_, err = s3c.CreateBucket(ctx, &s3.CreateBucketInput{Bucket: aws.String("chk")})
 	must(err)
 	_, err = s3c.PutBucketVersioning(ctx, &s3.PutBucketVersioningInput{Bucket: aws.String("chk"),
 		VersioningConfiguration: &s3types.VersioningConfiguration{Status: s3types.BucketVersioningStatusEnabled}})

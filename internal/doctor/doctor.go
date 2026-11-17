@@ -22,6 +22,7 @@ import (
 // Level is how bad a finding is.
 type Level int
 
+// The levels of a finding, from fine to blocking.
 const (
 	OK Level = iota
 	Warn

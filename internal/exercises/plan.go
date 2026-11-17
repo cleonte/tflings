@@ -262,10 +262,10 @@ func stripInitPreamble(text string) string {
 	return text
 }
 
-func lines(s string, max int) []string {
+func lines(s string, limit int) []string {
 	ls := strings.Split(strings.TrimRight(s, "\n"), "\n")
-	if len(ls) > max {
-		ls = append(ls[:max], fmt.Sprintf("... (%d more lines)", len(ls)-max))
+	if len(ls) > limit {
+		ls = append(ls[:limit], fmt.Sprintf("... (%d more lines)", len(ls)-limit))
 	}
 	return ls
 }

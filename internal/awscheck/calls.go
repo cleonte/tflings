@@ -54,7 +54,7 @@ func (c *Client) s3Object(ctx context.Context, a Args) (map[string]any, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer out.Body.Close()
+	defer func() { _ = out.Body.Close() }()
 	body, err := io.ReadAll(io.LimitReader(out.Body, maxBody))
 	if err != nil {
 		return nil, err

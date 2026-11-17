@@ -33,7 +33,7 @@ It is used before any terraform on your PATH.`,
 		Args:          cobra.NoArgs,
 		SilenceUsage:  true,
 		SilenceErrors: true,
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			env := newEnv()
 			if installTF {
 				color.White("Downloading Terraform from releases.hashicorp.com…")

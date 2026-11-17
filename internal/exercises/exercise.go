@@ -73,6 +73,7 @@ type Exercise struct {
 	Timeout string
 }
 
+// Errors that commands turn into messages for the learner.
 var (
 	ErrExerciseNotFound = errors.New("exercise not found")
 	ErrNotMarked        = errors.New("the exercise has no 'I AM NOT DONE' marker")
@@ -234,8 +235,11 @@ func EmbeddedOnly(name string) bool {
 	return len(parts) > 3 && parts[3] == SetupDir
 }
 
-// Embedded names inside the embedded exercise tree (always forward slashes).
+// CheckPath is the check.yaml of the exercise, inside the embedded exercise tree
+// (always forward slashes).
 func (e Exercise) CheckPath() string { return path.Join(e.Path, CheckFile) }
+
+// SetupPath is the setup folder of a fix exercise, inside the embedded tree.
 func (e Exercise) SetupPath() string { return path.Join(e.Path, SetupDir) }
 
 // Source is the file the learner edits, inside the embedded tree.
@@ -263,8 +267,10 @@ func (e Exercise) SolutionPath() string {
 	return path.Join(dir, ExerciseFile)
 }
 
+// State says whether an exercise is done.
 type State int
 
+// The states of an exercise.
 const (
 	Pending State = iota + 1
 	Done

@@ -49,7 +49,9 @@ const seededInFloci = "floci"
 // seedStateFile keeps the state right after seeding, for `seed` in check.yaml.
 const seedStateFile = "seed-state.json"
 
-type setupSteps struct {
+// SetupSteps is the setup/steps.yaml of a fix exercise: the steps that build the
+// situation the learner has to repair.
+type SetupSteps struct {
 	Steps []setupStep `json:"steps"`
 }
 
@@ -68,8 +70,8 @@ type setupMutation struct {
 }
 
 // LoadSteps reads and validates the setup of a fix exercise from the embedded tree.
-func (e Exercise) LoadSteps(fsys fs.FS) (setupSteps, error) {
-	var s setupSteps
+func (e Exercise) LoadSteps(fsys fs.FS) (SetupSteps, error) {
+	var s SetupSteps
 	raw, err := fs.ReadFile(fsys, path.Join(e.SetupPath(), StepsFile))
 	if err != nil {
 		return s, fmt.Errorf("%s has no %s: %w", e.Name, path.Join(SetupDir, StepsFile), err)
@@ -185,7 +187,7 @@ func (e Exercise) prepareFix(ctx context.Context, env *Env, files map[string][]b
 		cancel()
 		return nil, ctx, nil, err
 	}
-	if out.ExitCode != 0 && !(init == initTolerant && backendProblem(out)) {
+	if out.ExitCode != 0 && (init != initTolerant || !backendProblem(out)) {
 		cancel()
 		return nil, ctx, nil, terraformFailed("terraform init could not finish:", out)
 	}
@@ -194,12 +196,12 @@ func (e Exercise) prepareFix(ctx context.Context, env *Env, files map[string][]b
 
 // seed builds the situation. Failing here is tflings's problem, not the
 // learner's, and the message says so.
-func (r *run) seed(ctx context.Context, steps setupSteps, learnerFiles map[string][]byte) error {
+func (r *run) seed(ctx context.Context, steps SetupSteps, learnerFiles map[string][]byte) error {
 	report(ctx, "building the exercise")
 	fail := func(what string, err error) error {
 		_ = os.RemoveAll(r.src)
 		_ = os.Remove(filepath.Join(r.dir, seededMarker))
-		return fmt.Errorf("could not build %s (%s): %w\n\nIf it keeps failing, run `tflings reset %s`: it builds the exercise again in a fresh account.", r.ex.Name, what, err, r.ex.Name)
+		return fmt.Errorf("could not build %s (%s): %w\n\nIf it keeps failing, run `tflings reset %s`: it builds the exercise again in a fresh account", r.ex.Name, what, err, r.ex.Name)
 	}
 	for i, st := range steps.Steps {
 		switch {
