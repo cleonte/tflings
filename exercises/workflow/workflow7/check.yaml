@@ -1,0 +1,16 @@
+config:
+  - expr: config.root_module.module_calls.greeting.source == "./modules/greeting"
+    message: "The greeting module lives in ./modules/greeting."
+plan:
+  - expr: plan.planned_values.outputs.greeting.value == "Hello, tflings"
+    message: "The output greeting should be \"Hello, tflings\"."
+variants:
+  - vars: { name: "payments" }
+    plan:
+      - expr: plan.planned_values.outputs.greeting.value == "Hello, payments"
+        message: "The module should still get its name from the variable."
+explanation: >-
+  `terraform init` installs the modules a configuration calls (and downloads its
+  providers) and prepares the backend. It is the first command in a new working
+  directory, and it has to be run again after the source or version of a module,
+  a provider or the backend changes.
