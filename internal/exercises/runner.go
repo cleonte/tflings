@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/cleonte/tflings/internal/check"
 	"github.com/cleonte/tflings/internal/engine"
@@ -249,9 +250,21 @@ func (e *Env) HomeDir() string { return e.home() }
 // scratch folder, with the Terraform state. A reset calls it, because the
 // exercise then gets a fresh AWS account and the old state would describe
 // resources that are not there.
+//
+// It waits for the run folder's lock, so it never deletes the folder under a
+// command that is using it; if that command takes too long it says so and
+// deletes nothing.
 func (e *Env) ForgetRun(name string) error {
+	unlock, err := lockFile(context.Background(), filepath.Join(e.home(), "runs"), name, forgetWait)
+	if err != nil {
+		return fmt.Errorf("cannot forget the saved state of %s now: %w", name, err)
+	}
+	defer unlock()
 	return os.RemoveAll(filepath.Join(e.home(), "runs", name))
 }
+
+// forgetWait is how long ForgetRun waits for a running command to finish.
+var forgetWait = 10 * time.Second
 
 // HasSavedState reports whether any exercise has something built that tflings
 // remembers: a Terraform state with at least one resource in its scratch

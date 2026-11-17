@@ -199,8 +199,17 @@ func (e Exercise) prepareFix(ctx context.Context, env *Env, files map[string][]b
 // learner's, and the message says so.
 func (r *run) seed(ctx context.Context, steps SetupSteps, learnerFiles map[string][]byte) error {
 	report(ctx, "building the exercise")
+	// The situation is built in a folder of its own and moved into place when
+	// it is whole, so that a crash or a failure never leaves a half-built src
+	// that looks like the real one.
+	final := r.src
+	building := final + ".seeding"
+	r.src = building
+	defer func() { r.src = final }()
+	_ = os.RemoveAll(building)
 	fail := func(what string, err error) error {
-		_ = os.RemoveAll(r.src)
+		_ = os.RemoveAll(building)
+		_ = os.RemoveAll(final)
 		_ = os.Remove(filepath.Join(r.dir, seededMarker))
 		return fmt.Errorf("could not build %s (%s): %w\n\nIf it keeps failing, run `tflings reset %s`: it builds the exercise again in a fresh account", r.ex.Name, what, err, r.ex.Name)
 	}
@@ -241,6 +250,12 @@ func (r *run) seed(ctx context.Context, steps SetupSteps, learnerFiles map[strin
 	if err := writeSource(r.src, learnerFiles, true); err != nil {
 		return fail("writing your files", err)
 	}
+	if err := os.RemoveAll(final); err != nil {
+		return fail("replacing the old folder", err)
+	}
+	if err := os.Rename(building, final); err != nil {
+		return fail("moving the built exercise into place", err)
+	}
 	// The marker also says whether the situation lives in Floci, so that
 	// HasSavedState knows that emptying Floci would destroy it.
 	marker := "ok\n"
@@ -264,6 +279,11 @@ func (r *run) seedState() map[string]any {
 // repairing is the learner's job. It reads the state, the real thing in Floci,
 // and wants a plan with nothing left to do.
 func (e Exercise) runFix(ctx context.Context, env *Env, c *check.Compiled, files map[string][]byte) (Result, error) {
+	unlock, err := env.lockRun(ctx, e.Name)
+	if err != nil {
+		return Result{}, err
+	}
+	defer unlock()
 	r, ctx, cancel, err := e.prepareFix(ctx, env, files, initStrict)
 	if err != nil {
 		return Result{}, err
@@ -329,6 +349,13 @@ func (e Exercise) Terraform(ctx context.Context, env *Env, args []string, stdin 
 // terraformWith is Terraform with the learner's files given: the one path every
 // command takes, `tflings tf` and the proof of a solution alike.
 func (e Exercise) terraformWith(ctx context.Context, env *Env, files map[string][]byte, args []string, stdin io.Reader, stdout, stderr io.Writer) (int, error) {
+	// Held for the whole command: another tflings (a `watch`) must not rewrite or
+	// delete the folder while Terraform works in it.
+	unlock, err := env.lockRun(ctx, e.Name)
+	if err != nil {
+		return -1, err
+	}
+	defer unlock()
 	r, _, cancel, err := e.prepareFix(ctx, env, files, initTolerant)
 	if err != nil {
 		return -1, err

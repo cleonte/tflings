@@ -14,6 +14,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - `workflow6` could not be done as its README says: every `tflings tf` call cleared the exercise's scratch folder, so the saved plan of `tflings tf workflow6 plan -out=tfplan` was gone before `show` and `apply tfplan`. tflings now removes only the files it wrote itself; a saved plan or a file Terraform generated stays. The proof of a fix exercise's solution now runs each command the way `tflings tf` does, so a mistake like this is caught.
 
+- Two tflings processes (a `watch` in one terminal, `tflings tf` or `run` in another) could use the same exercise's scratch folder at once, and one could delete the folder under the other (the likely cause of a "chdir .../runs/.../src" error). The folder now has a lock that is held for the whole command, `reset` waits for it (or says it could not and changes nothing), and a fix exercise is built in a side folder and moved into place when it is whole.
+
 ## [0.9.2] - 2026-11-15
 
 ### Fixed

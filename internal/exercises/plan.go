@@ -68,6 +68,11 @@ func (e Exercise) ProofFiles(env *Env) (map[string][]byte, error) {
 // assertions of check.yaml look at the plan and at the configuration inside it.
 // Nothing is created anywhere.
 func (e Exercise) runPlan(ctx context.Context, env *Env, c *check.Compiled, files map[string][]byte) (Result, error) {
+	unlock, err := env.lockRun(ctx, e.Name)
+	if err != nil {
+		return Result{}, err
+	}
+	defer unlock()
 	run, ctx, cancel, err := e.prepare(ctx, env, c, files)
 	if err != nil {
 		return Result{}, err
