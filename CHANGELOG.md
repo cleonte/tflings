@@ -10,6 +10,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - Badges under the title of the README: CI status, latest release, licence (Apache-2.0) and Terraform 1.12+.
 
+### Fixed
+
+- `workflow6` could not be done as its README says: every `tflings tf` call cleared the exercise's scratch folder, so the saved plan of `tflings tf workflow6 plan -out=tfplan` was gone before `show` and `apply tfplan`. tflings now removes only the files it wrote itself; a saved plan or a file Terraform generated stays. The proof of a fix exercise's solution now runs each command the way `tflings tf` does, so a mistake like this is caught.
+
 ## [0.9.2] - 2026-11-15
 
 ### Fixed

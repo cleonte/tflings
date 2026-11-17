@@ -1,6 +1,7 @@
 package exercises
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -322,6 +323,12 @@ func (e Exercise) Terraform(ctx context.Context, env *Env, args []string, stdin 
 	if err != nil {
 		return -1, fmt.Errorf("cannot read %s: %w", e.Path, err)
 	}
+	return e.terraformWith(ctx, env, files, args, stdin, stdout, stderr)
+}
+
+// terraformWith is Terraform with the learner's files given: the one path every
+// command takes, `tflings tf` and the proof of a solution alike.
+func (e Exercise) terraformWith(ctx context.Context, env *Env, files map[string][]byte, args []string, stdin io.Reader, stdout, stderr io.Writer) (int, error) {
 	r, _, cancel, err := e.prepareFix(ctx, env, files, initTolerant)
 	if err != nil {
 		return -1, err
@@ -362,10 +369,6 @@ func (e Exercise) RunSolution(ctx context.Context, env *Env) (Result, error) {
 	if err != nil {
 		return Result{}, err
 	}
-	r, ctx2, cancel, err := e.prepareFix(ctx, env, files, initTolerant)
-	if err != nil {
-		return Result{}, err
-	}
 	for _, line := range strings.Split(string(script), "\n") {
 		line = strings.TrimSpace(line)
 		if line == "" || strings.HasPrefix(line, "#") {
@@ -373,20 +376,22 @@ func (e Exercise) RunSolution(ctx context.Context, env *Env) (Result, error) {
 		}
 		args, err := splitCommand(line)
 		if err != nil || len(args) < 2 || args[0] != "terraform" {
-			cancel()
 			return Result{}, fmt.Errorf("%s: %q is not a `terraform ...` command", e.SolutionPath(), line)
 		}
-		out, err := runner.Run(ctx2, runner.Call{Engine: env.Engine, Dir: r.src, Env: runner.Env(r.cfg), Args: args[1:], Timeout: e.RunTimeout()})
+		// The same path as `tflings tf`: the files are written and init is run
+		// before every command, so a file one command leaves for the next
+		// (a saved plan) has to survive that.
+		var buf bytes.Buffer
+		ctx2, cancel := context.WithTimeout(ctx, e.RunTimeout())
+		code, err := e.terraformWith(ctx2, env, files, args[1:], strings.NewReader(""), &buf, &buf)
+		cancel()
 		if err != nil {
-			cancel()
 			return Result{}, err
 		}
-		if out.ExitCode != 0 {
-			cancel()
-			return Result{}, terraformFailed(fmt.Sprintf("solution command failed: %s", line), out)
+		if code != 0 {
+			return Result{}, terraformFailed(fmt.Sprintf("solution command failed: %s", line), runner.Output{ExitCode: code, Stdout: buf.Bytes()})
 		}
 	}
-	cancel()
 	return e.runFix(ctx, env, c, files)
 }
 

@@ -347,6 +347,12 @@ func writeSource(src string, files map[string][]byte, keepState bool) error {
 			return err
 		}
 	}
+	if keepState {
+		if err := os.MkdirAll(src, 0o755); err != nil {
+			return err
+		}
+		return os.WriteFile(filepath.Join(src, writtenManifest), []byte(strings.Join(names, "\n")+"\n"), 0o644)
+	}
 	return nil
 }
 
