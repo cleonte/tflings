@@ -1,12 +1,16 @@
 package exercises
 
 import (
+	"crypto/rand"
+	"encoding/hex"
 	"encoding/json"
 	"os"
 	"path/filepath"
 	"slices"
 	"sync"
 	"time"
+
+	"github.com/cleonte/tflings/internal/runner"
 )
 
 // ProgressFile is where progress is kept that cannot live in an exercise file.
@@ -27,6 +31,12 @@ type progressData struct {
 	// (init, update). It is how `update` tells a file the learner has not touched
 	// (safe to replace with a newer version) from one with their work in it.
 	Originals map[string]string `json:"originals,omitempty"`
+	// Salt is a random string given to the exercises folder by `init`. It names
+	// the folder's run folders and goes into its fake AWS accounts, so two
+	// exercises folders on one machine (which share <home> and Floci) never share
+	// state, and a reset in one does not touch the other. A folder made before
+	// this existed has none, and keeps the names it always had.
+	Salt string `json:"salt,omitempty"`
 	// New lists the exercises that `update` added, so that `list` can mark them.
 	New []string `json:"new,omitempty"`
 }
@@ -48,8 +58,6 @@ func readProgressIn(dir string) progressData {
 	return p
 }
 
-func writeProgress(p progressData) error { return writeProgressIn(".", p) }
-
 func writeProgressIn(dir string, p progressData) error {
 	data, err := json.MarshalIndent(p, "", "  ")
 	if err != nil {
@@ -70,14 +78,6 @@ func writeProgressIn(dir string, p progressData) error {
 	return os.Rename(tmp.Name(), filepath.Join(dir, ProgressFile))
 }
 
-func updateProgress(f func(*progressData)) error {
-	progressMu.Lock()
-	defer progressMu.Unlock()
-	p := readProgress()
-	f(&p)
-	return writeProgress(p)
-}
-
 func passed(name string) bool {
 	progressMu.Lock()
 	defer progressMu.Unlock()
@@ -85,16 +85,25 @@ func passed(name string) bool {
 	return ok
 }
 
-// markPassed records that the check of an exercise passed.
-func markPassed(name string) error {
-	return updateProgress(func(p *progressData) {
+// markPassed records that the check of an exercise passed, in the progress
+// file of the current folder.
+func markPassed(name string) error { return markPassedIn(".", name) }
+
+// markPassedIn records the pass in the workspace in dir: the same file that
+// ResetCount and RecordReset use.
+func markPassedIn(dir, name string) error {
+	progressMu.Lock()
+	defer progressMu.Unlock()
+	p := readProgressIn(dir)
+	func(p *progressData) {
 		if p.Done == nil {
 			p.Done = map[string]time.Time{}
 		}
 		if _, already := p.Done[name]; !already {
 			p.Done[name] = time.Now().UTC().Truncate(time.Second)
 		}
-	})
+	}(&p)
+	return writeProgressIn(dir, p)
 }
 
 // RecordPass records that the check of the exercise passed, as running it does.
@@ -170,4 +179,49 @@ func ForgetPassed(dir, name string) error {
 	}
 	delete(p.Done, name)
 	return writeProgressIn(dir, p)
+}
+
+// EnsureSalt gives the workspace in dir a random salt if it has none (see
+// progressData.Salt). `init` calls it; nothing else does, so a folder made by an
+// older tflings keeps the run folders and accounts it already has.
+func EnsureSalt(dir string) error {
+	progressMu.Lock()
+	defer progressMu.Unlock()
+	p := readProgressIn(dir)
+	if p.Salt != "" {
+		return nil
+	}
+	b := make([]byte, 4)
+	if _, err := rand.Read(b); err != nil {
+		return err
+	}
+	p.Salt = hex.EncodeToString(b)
+	return writeProgressIn(dir, p)
+}
+
+// Salt is the salt of the workspace in dir, empty for a folder without one.
+func Salt(dir string) string {
+	progressMu.Lock()
+	defer progressMu.Unlock()
+	return readProgressIn(dir).Salt
+}
+
+// runKey is the name of an exercise's run folder (and lock) under <home>/runs:
+// the exercise name, with the folder's salt in front when it has one.
+func runKey(dir, name string) string {
+	if s := Salt(dir); s != "" {
+		return s + "-" + name
+	}
+	return name
+}
+
+// AccountFor is the fake AWS account of an exercise in the workspace in dir, as
+// it is right now: it depends on the exercise name, the folder's salt and the
+// exercise's reset counter. extra is mixed in by tests.
+func AccountFor(dir, name, extra string) string {
+	key := name + extra
+	if s := Salt(dir); s != "" {
+		key += "@" + s
+	}
+	return runner.Account(key, ResetCount(dir, name))
 }

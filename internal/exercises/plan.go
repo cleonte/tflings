@@ -303,14 +303,14 @@ func (e *Env) newRun(ex Exercise, files map[string][]byte) (*run, error) {
 // folder: where it is and the environment Terraform sees there.
 func (e *Env) runFor(ex Exercise) (*run, error) {
 	home := e.home()
-	dir := filepath.Join(home, "runs", ex.Name)
+	dir := filepath.Join(home, "runs", runKey(e.workspace(), ex.Name))
 	src := filepath.Join(dir, "src")
 	cfg := runner.Config{Home: filepath.Join(home, "home"), DataDir: filepath.Join(dir, "data")}
 	if err := os.MkdirAll(cfg.Home, 0o755); err != nil {
 		return nil, err
 	}
 	if ex.NeedsFloci() {
-		cfg.Account = runner.Account(ex.Name+e.AccountSalt, ResetCount(e.workspace(), ex.Name))
+		cfg.Account = AccountFor(e.workspace(), ex.Name, e.AccountSalt)
 		// The AWS provider is installed from the prefetched cache by a filesystem
 		// mirror. The mirror folder must not also be TF_PLUGIN_CACHE_DIR: Terraform
 		// refuses to install a provider "to itself". The cache is the exercise's

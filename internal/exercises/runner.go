@@ -141,7 +141,7 @@ func (e Exercise) Run(ctx context.Context, env *Env) (Result, error) {
 		res, err = e.RunSource(ctx, env, src)
 	}
 	if err == nil {
-		if err := markPassed(e.Name); err != nil {
+		if err := markPassedIn(env.workspace(), e.Name); err != nil {
 			return Result{}, fmt.Errorf("it passes, but cannot save your progress in %s: %w", ProgressFile, err)
 		}
 	}
@@ -255,12 +255,13 @@ func (e *Env) HomeDir() string { return e.home() }
 // command that is using it; if that command takes too long it says so and
 // deletes nothing.
 func (e *Env) ForgetRun(name string) error {
-	unlock, err := lockFile(context.Background(), filepath.Join(e.home(), "runs"), name, forgetWait)
+	key := runKey(e.workspace(), name)
+	unlock, err := lockFile(context.Background(), filepath.Join(e.home(), "runs"), key, forgetWait)
 	if err != nil {
 		return fmt.Errorf("cannot forget the saved state of %s now: %w", name, err)
 	}
 	defer unlock()
-	return os.RemoveAll(filepath.Join(e.home(), "runs", name))
+	return os.RemoveAll(filepath.Join(e.home(), "runs", key))
 }
 
 // forgetWait is how long ForgetRun waits for a running command to finish.

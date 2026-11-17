@@ -103,6 +103,7 @@ AWS_ENDPOINT_URL_S3_CONTROL=http://localhost:4577
 
 - One account per exercise: a 12-digit access key ID is the account ID, resources are invisible across accounts, and the same names are allowed in two accounts.
 - The account ID is deterministic from the exercise name plus a **reset counter kept in the progress file**. `reset` bumps the counter and gets a fresh empty account. There is no single-account reset API: the scripted per-account wipe (8.8 s) is a fallback only, and the global `POST /_floci/state/reset` runs only on `tflings aws up` or when `watch` starts with no active exercise, after a warning.
+- Each exercises folder made by `tflings init` has a random `salt` in `.tflings.json`. The run folder is `<home>/runs/<salt>-<name>` and the account is derived from `name@salt` plus the reset counter, so two folders on one machine never share state and a reset in one leaves the other alone. A folder without a salt (made before this) keeps `<home>/runs/<name>` and the old account. (Not yet run against Floci with two folders: the logic is unit tested only.)
 - Every account starts with a default VPC; the check DSL gets a `non_default` helper.
 
 ## Terraform, providers, cache

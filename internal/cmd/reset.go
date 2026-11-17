@@ -31,7 +31,7 @@ AWS account.`,
 			if err != nil {
 				return err
 			}
-			if err := (&exercises.Env{}).ForgetRun(args[0]); err != nil {
+			if err := (&exercises.Env{Workspace: root}).ForgetRun(args[0]); err != nil {
 				// The state stays, so the account must not change either: the
 				// reset is not recorded, and running reset again finishes it.
 				color.Yellow("Restored %s, but could not delete its saved state: %s", p, err)
