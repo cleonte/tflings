@@ -363,7 +363,11 @@ func (m *Model) reset() tea.Cmd {
 		return nil
 	}
 	if m.cfg.Env != nil {
-		_ = m.cfg.Env.ForgetRun(m.exercise.Name)
+		if err := m.cfg.Env.ForgetRun(m.exercise.Name); err != nil {
+			// The saved state stays, so the account must not change either.
+			m.notice = "Restored " + path + ", but the saved state was not reset: " + err.Error()
+			return nil
+		}
 	}
 	if err := exercises.RecordReset(root, m.exercise.Name); err != nil {
 		m.notice = "Restored " + path + ", but could not save the reset: " + err.Error()

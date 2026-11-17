@@ -87,6 +87,11 @@ func pruneEmptyDirs(src string) {
 // pass, so a mistake Terraform or the checks can see does not build anything.
 // Then it checks the state, and finally that a second plan has nothing to do.
 func (e Exercise) runApply(ctx context.Context, env *Env, c *check.Compiled, files map[string][]byte) (Result, error) {
+	unlock, err := env.lockRun(ctx, e.Name)
+	if err != nil {
+		return Result{}, err
+	}
+	defer unlock()
 	run, ctx, cancel, err := e.prepare(ctx, env, c, files)
 	if err != nil {
 		return Result{}, err
