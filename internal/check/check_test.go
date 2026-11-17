@@ -127,7 +127,7 @@ empty_plan_after: true
 
 type fakeAWS struct{ calls int }
 
-func (f *fakeAWS) Call(_ context.Context, name string, args map[string]any) (map[string]any, error) {
+func (f *fakeAWS) Call(_ context.Context, _ string, _ map[string]any) (map[string]any, error) {
 	f.calls++
 	return map[string]any{"status": "Enabled", "exists": true}, nil
 }

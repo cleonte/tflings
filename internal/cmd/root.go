@@ -37,6 +37,7 @@ func newEnv() *exercises.Env {
 	return env
 }
 
+// NewRootCmd builds the tflings command with all its subcommands.
 func NewRootCmd(version string) *cobra.Command {
 	rootCmd := &cobra.Command{
 		Use:           "tflings",
@@ -94,11 +95,13 @@ func printError(w io.Writer, err error) {
 	}
 }
 
+// Execute runs the command line and exits with status 1 on an error.
 func Execute(version string) {
 	// Ctrl-C stops a run that is still waiting for Terraform or Floci.
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
-	defer stop()
-	if err := NewRootCmd(version).ExecuteContext(ctx); err != nil {
+	err := NewRootCmd(version).ExecuteContext(ctx)
+	stop()
+	if err != nil {
 		printError(os.Stderr, err)
 		os.Exit(1)
 	}

@@ -9,6 +9,7 @@ agree on the shape.
 ```bash
 make build        # bin/tflings
 make test         # unit tests
+golangci-lint run ./...   # lint (golangci-lint v2, config in .golangci.yml; CI runs the same)
 make ci           # vet, then every exercise proven on each Terraform in TF_BINS
 ```
 

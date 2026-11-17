@@ -141,15 +141,15 @@ func Shuffle(q Question, r *rand.Rand) Asked {
 	return a
 }
 
-// ParseAnswer reads "b" or "a,c" or "a c" or "ac" into sorted indexes below max.
-func ParseAnswer(s string, max int) ([]int, error) {
+// ParseAnswer reads "b" or "a,c" or "a c" or "ac" into sorted indexes below limit.
+func ParseAnswer(s string, limit int) ([]int, error) {
 	var got []int
 	for _, r := range strings.ToLower(s) {
 		if r == ',' || r == ' ' {
 			continue
 		}
 		i := int(r - 'a')
-		if r < 'a' || i >= max {
+		if r < 'a' || i >= limit {
 			return nil, fmt.Errorf("%q is not one of the options", string(r))
 		}
 		if !slices.Contains(got, i) {

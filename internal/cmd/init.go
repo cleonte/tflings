@@ -12,6 +12,7 @@ import (
 
 const defaultWorkspace = "tflings-exercises"
 
+// InitCmd writes the exercises into a new folder.
 func InitCmd(src fs.FS) *cobra.Command {
 	return &cobra.Command{
 		Use:   "init [folder]",
@@ -21,7 +22,7 @@ the info.toml that tflings needs. Use it after installing tflings.`,
 		Args:          cobra.MaximumNArgs(1),
 		SilenceUsage:  true,
 		SilenceErrors: true,
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(_ *cobra.Command, args []string) error {
 			dest := defaultWorkspace
 			if len(args) == 1 {
 				dest = args[0]

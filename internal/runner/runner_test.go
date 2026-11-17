@@ -2,6 +2,7 @@ package runner
 
 import (
 	"context"
+	"errors"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -205,7 +206,8 @@ func TestRunTimeoutKillsTheWholeGroup(t *testing.T) {
 	script := "(sleep 2; touch " + marker + ") & sleep 30"
 	start := time.Now()
 	_, err := Run(context.Background(), Call{Engine: e, Args: []string{"-c", script}, Env: []string{"PATH=/usr/bin:/bin"}, Timeout: 300 * time.Millisecond})
-	if _, ok := err.(*TimeoutError); !ok {
+	var timeout *TimeoutError
+	if !errors.As(err, &timeout) {
 		t.Fatalf("expected a TimeoutError, got %v", err)
 	}
 	if time.Since(start) > 5*time.Second {

@@ -63,7 +63,7 @@ func TestTerraformRefusesABinaryThatDoesNotRun(t *testing.T) {
 func TestTerraformMovesAndChecksTheBinary(t *testing.T) {
 	home := t.TempDir()
 	script := "#!/bin/sh\necho 'Terraform v1.12.9'\n"
-	path, ver, err := Terraform(context.Background(), home, "", func(_ context.Context, dir, c string) (string, error) {
+	path, ver, err := Terraform(context.Background(), home, "", func(_ context.Context, dir, _ string) (string, error) {
 		p := filepath.Join(dir, "downloaded")
 		return p, os.WriteFile(p, []byte(script), 0o755)
 	})

@@ -3,6 +3,7 @@ package runner
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"os"
 	"path/filepath"
 	"strings"
@@ -128,7 +129,8 @@ resource "terraform_data" "slow" {
 		Engine: e, Dir: dir, Env: env, Timeout: 3_000_000_000,
 		Args: append([]string{"apply", "-auto-approve"}, e.Flags("apply")...),
 	})
-	if _, ok := err.(*TimeoutError); !ok {
+	var timeout *TimeoutError
+	if !errors.As(err, &timeout) {
 		t.Fatalf("expected a TimeoutError, got %v", err)
 	}
 }

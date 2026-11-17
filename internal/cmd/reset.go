@@ -10,6 +10,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// ResetCmd restores an exercise to its original state.
 func ResetCmd(src fs.FS, root string) *cobra.Command {
 	return &cobra.Command{
 		Use:   "reset <exercise name>",
@@ -21,7 +22,7 @@ AWS account.`,
 		Args:          cobra.ExactArgs(1),
 		SilenceUsage:  true,
 		SilenceErrors: true,
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(_ *cobra.Command, args []string) error {
 			p, err := workspace.Reset(src, root, args[0])
 			if errors.Is(err, exercises.ErrExerciseNotFound) {
 				color.White("No exercise found for '%s'", args[0])

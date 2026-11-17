@@ -10,6 +10,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// RunCmd checks one exercise, or the next one that is not done.
 func RunCmd(infoFile string) *cobra.Command {
 	return &cobra.Command{
 		Use:   "run next | <exercise name>",

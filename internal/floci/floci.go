@@ -45,6 +45,7 @@ type Docker interface {
 // CLI is the real docker command line.
 type CLI struct{ Binary string }
 
+// Run runs the docker CLI with args and returns its stdout and stderr.
 func (c CLI) Run(ctx context.Context, args ...string) (string, string, error) {
 	bin := c.Binary
 	if bin == "" {
@@ -102,7 +103,7 @@ func (m *Manager) Healthy(ctx context.Context) bool {
 	if err != nil {
 		return false
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 	_, _ = io.Copy(io.Discard, resp.Body)
 	return resp.StatusCode == http.StatusOK
 }
@@ -144,8 +145,11 @@ func (m *Manager) Current(ctx context.Context) (State, error) {
 			PortBindings map[string][]struct{ HostPort string }
 		}
 	}
-	if err := json.Unmarshal([]byte(out), &infos); err != nil || len(infos) != 1 {
-		return State{}, fmt.Errorf("cannot read `docker inspect` output: %v", err)
+	if err := json.Unmarshal([]byte(out), &infos); err != nil {
+		return State{}, fmt.Errorf("cannot read `docker inspect` output: %w", err)
+	}
+	if len(infos) != 1 {
+		return State{}, fmt.Errorf("cannot read `docker inspect` output: expected one container, got %d", len(infos))
 	}
 	i := infos[0]
 	s := State{Exists: true, Running: i.State.Running, Image: i.Config.Image}
@@ -318,7 +322,7 @@ func (m *Manager) Reset(ctx context.Context) error {
 	if err != nil {
 		return fmt.Errorf("floci is not answering: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 	if resp.StatusCode != http.StatusOK {
 		return fmt.Errorf("floci refused the reset: HTTP %d", resp.StatusCode)
 	}

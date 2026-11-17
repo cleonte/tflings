@@ -1,3 +1,5 @@
+// Command tflings is rustlings for Terraform: it teaches the Terraform Associate
+// syllabus through small broken exercises. The commands live in internal/cmd.
 package main
 
 import (

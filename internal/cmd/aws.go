@@ -1,3 +1,4 @@
+// Package cmd holds the commands of the tflings CLI.
 package cmd
 
 import (
@@ -51,7 +52,7 @@ a Floci or LocalStack you run yourself. Nothing here talks to a real AWS.`,
 		Args:          cobra.NoArgs,
 		SilenceUsage:  true,
 		SilenceErrors: true,
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			if err := mgr.Up(cmd.Context()); err != nil {
 				return flociError(err)
 			}
@@ -68,7 +69,7 @@ a Floci or LocalStack you run yourself. Nothing here talks to a real AWS.`,
 		Args:          cobra.NoArgs,
 		SilenceUsage:  true,
 		SilenceErrors: true,
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			if err := mgr.Down(cmd.Context(), wipe); err != nil {
 				return flociError(err)
 			}
@@ -89,7 +90,7 @@ a Floci or LocalStack you run yourself. Nothing here talks to a real AWS.`,
 		Args:          cobra.NoArgs,
 		SilenceUsage:  true,
 		SilenceErrors: true,
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			if mgr.Healthy(cmd.Context()) {
 				color.Green("Floci is running on %s", mgr.URL())
 				return nil
@@ -120,7 +121,7 @@ tflings reset <exercise>, which gives it a fresh account.)`,
 		Args:          cobra.NoArgs,
 		SilenceUsage:  true,
 		SilenceErrors: true,
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			if !yes {
 				fmt.Print("This deletes everything in every exercise's fake AWS account. Continue? [y/N] ")
 				line, _ := bufio.NewReader(cmd.InOrStdin()).ReadString('\n')

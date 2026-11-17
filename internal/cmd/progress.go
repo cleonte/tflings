@@ -22,7 +22,7 @@ no exercise done yet, or under 70% on the questions you have been asked.`,
 		Args:          cobra.NoArgs,
 		SilenceUsage:  true,
 		SilenceErrors: true,
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(_ *cobra.Command, _ []string) error {
 			total, done := map[string]int{}, map[string]int{}
 			all, err := exercises.List(infoFile)
 			local := err == nil
