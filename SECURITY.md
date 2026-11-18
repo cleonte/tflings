@@ -19,6 +19,17 @@ exercise or configuration that shows it. This is a project run in spare time, so
 there is no guaranteed response time, but a boundary escape is the first thing
 that gets fixed.
 
+## Release binaries are not signed
+
+The archives on the GitHub releases page are built by GoReleaser in GitHub
+Actions and come with a `checksums.txt`, but neither the binaries nor the
+checksums are signed or notarized. The checksums only tell you that the download
+is intact, not who built it. On macOS the Homebrew cask (`brew install
+cleonte/tap/tflings`) removes the quarantine flag from the binary after
+installing it, which is what stops Gatekeeper from refusing an unsigned binary;
+if that matters to you, build from source (`go install
+github.com/cleonte/tflings/cmd/tflings@<tag>`) instead.
+
 ## Supported versions
 
 tflings is pre-release. Only the latest commit of `main` is supported.

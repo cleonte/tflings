@@ -9,6 +9,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### Added
 
 - Badges under the title of the README: CI status, latest release, licence (Apache-2.0) and Terraform 1.12+.
+- A weekly `versions` workflow (and `scripts/check-versions.sh`) that reports when a newer Floci, AWS provider or Terraform exists than the pinned ones. It only reports.
+- `SECURITY.md` says that release binaries are unsigned and that the Homebrew cask removes the macOS quarantine flag.
+
+### Changed
+
+- The release workflow runs `go test ./...` (on Terraform 1.12, without Docker) before GoReleaser publishes, and the `aws` CI job runs its tests with `-timeout 60m`.
 
 ### Fixed
 

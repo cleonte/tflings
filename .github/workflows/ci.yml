@@ -100,7 +100,9 @@ jobs:
       - name: doctor
         run: ./tflings doctor
       - name: Tests (exercises that use the AWS provider included)
-        run: go test ./...
+        # Each AWS exercise takes 36 to 90 s on a slow runner: Go's default 10
+        # minute test timeout is too short.
+        run: go test -timeout 60m ./...
       - if: failure()
         run: docker logs tflings-floci | tail -50
 
