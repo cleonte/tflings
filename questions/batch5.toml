@@ -1,0 +1,216 @@
+# Mock exam questions, batch 5: more for thin objectives (3f, 3g, 4a, 4b).
+# correct = 0-based indexes into options.
+
+[[question]]
+id = "b5-4a-1"
+objective = "4a"
+text = "A data block's arguments are all known while Terraform plans. When does Terraform read the data source?"
+options = [
+  "During the plan, so its values can be used in the plan",
+  "Only during apply, never during plan",
+  "Only when you run `terraform refresh`",
+  "Only when another resource uses it with `depends_on`",
+]
+correct = [0]
+explanation = "A data source whose arguments are known is read while planning. Only a data source that depends on a value that is not known yet (an attribute of a resource that does not exist yet) has to wait until apply."
+
+[[question]]
+id = "b5-4a-2"
+objective = "4a"
+text = "A data block reads an existing VPC. What does `terraform destroy` do to that VPC?"
+code = "data \"aws_vpc\" \"default\" {\n  default = true\n}"
+options = [
+  "Nothing: Terraform only reads a data source, it never creates, changes or destroys the object",
+  "It destroys the VPC",
+  "It destroys the VPC only if `force_destroy = true` is set",
+  "It fails because data sources cannot be in the configuration during destroy",
+]
+correct = [0]
+explanation = "A `data` block is read-only. Terraform does not manage the object it reads, so it is not in the plan as something to create or destroy."
+
+[[question]]
+id = "b5-4a-3"
+objective = "4a"
+text = "Can these two blocks be in the same module?"
+code = "resource \"aws_s3_bucket\" \"logs\" {\n  bucket = \"example-logs\"\n}\n\ndata \"aws_s3_bucket\" \"logs\" {\n  bucket = \"other-logs\"\n}"
+options = [
+  "Yes: the addresses are different, `aws_s3_bucket.logs` and `data.aws_s3_bucket.logs`",
+  "No: a type and a name can be used only once in a module",
+  "Yes, but only with `depends_on` between them",
+  "No: a data block must have a different type from every resource",
+]
+correct = [0]
+explanation = "A data source's address starts with `data.`, so it does not clash with a managed resource of the same type and name. Two resources, or two data sources, with the same type and name would be an error."
+
+[[question]]
+id = "b5-4a-4"
+objective = "4a"
+text = "What is the address of this data source, as it is written in an expression?"
+code = "data \"aws_caller_identity\" \"me\" {}"
+options = [
+  "data.aws_caller_identity.me",
+  "aws_caller_identity.me",
+  "data.me.aws_caller_identity",
+  "var.aws_caller_identity.me",
+]
+correct = [0]
+explanation = "A data source is referenced as `data.<type>.<name>`, then the attribute, for example `data.aws_caller_identity.me.account_id`."
+
+[[question]]
+id = "b5-4b-1"
+objective = "4b"
+text = "Which expression is the `id` of the first instance of this resource?"
+code = "resource \"aws_instance\" \"web\" {\n  count = 2\n  # ...\n}"
+options = [
+  "aws_instance.web[0].id",
+  "aws_instance.web.id",
+  "aws_instance[0].web.id",
+  "aws_instance.web(0).id",
+]
+correct = [0]
+explanation = "With `count`, the resource is a list of instances, so you pick one with an index: `aws_instance.web[0].id`. Without the index the expression is the whole list and has no `id`."
+
+[[question]]
+id = "b5-4b-2"
+objective = "4b"
+text = "A resource has `for_each` set. What does the expression `aws_s3_bucket.b` (with no key) evaluate to?"
+code = "resource \"aws_s3_bucket\" \"b\" {\n  for_each = toset([\"logs\", \"data\"])\n  bucket   = \"example-${each.key}\"\n}"
+options = [
+  "A map of the instances, with the keys of the `for_each` as its keys",
+  "The first instance only",
+  "A list of the instances in the order they were created",
+  "A set of the bucket names",
+]
+correct = [0]
+explanation = "A resource with `for_each` is a map from each key to its instance, so `aws_s3_bucket.b[\"logs\"].arn` is one bucket and `values(aws_s3_bucket.b)[*].arn` are all of them."
+
+[[question]]
+id = "b5-4b-3"
+objective = "4b"
+text = "A plan shows `id = (known after apply)` for a new resource. What does that mean?"
+options = [
+  "The provider assigns the value when the resource is created, and other resources can still refer to it",
+  "The argument is missing and apply will fail",
+  "The value is secret and is hidden from the plan",
+  "Terraform will ask you for the value during apply",
+]
+correct = [0]
+explanation = "Some attributes only exist once the real object does. Terraform keeps the reference in the graph, builds the resource first, then fills in the value for the things that use it."
+
+[[question]]
+id = "b5-4b-4"
+objective = "4b"
+text = "Resource A uses an attribute of resource B, and resource B uses an attribute of resource A. What happens on `terraform plan`?"
+options = [
+  "It fails with an error about a dependency cycle",
+  "Terraform creates both at the same time",
+  "Terraform creates them in file order",
+  "Terraform plans A and ignores the reference in B",
+]
+correct = [0]
+explanation = "References are edges of a graph that must be built in order. Two resources that each wait for the other form a cycle, and Terraform reports the error instead of guessing."
+
+[[question]]
+id = "b5-3f-1"
+objective = "3f"
+text = "Which command does the same as `terraform destroy`?"
+options = [
+  "terraform apply -destroy",
+  "terraform plan -destroy",
+  "terraform state rm -all",
+  "terraform apply -refresh-only",
+]
+correct = [0]
+explanation = "`terraform destroy` is a shortcut for an apply in destroy mode, `terraform apply -destroy`. It also shows a plan and asks for confirmation. `plan -destroy` only shows what would be destroyed."
+
+[[question]]
+id = "b5-3f-2"
+objective = "3f"
+text = "You want to see what `terraform destroy` would remove without removing anything. What do you run?"
+options = [
+  "terraform plan -destroy",
+  "terraform destroy -dry-run",
+  "terraform validate -destroy",
+  "terraform state list",
+]
+correct = [0]
+explanation = "`terraform plan -destroy` makes a plan in destroy mode and stops there. There is no `-dry-run` flag."
+
+[[question]]
+id = "b5-3f-3"
+objective = "3f"
+text = "What does this command destroy?"
+code = "terraform destroy -target=aws_s3_bucket.logs"
+options = [
+  "That bucket and the resources that depend on it, and Terraform warns that targeting is for exceptions",
+  "Only that bucket, never anything that depends on it",
+  "Everything except that bucket",
+  "Nothing: `-target` is only accepted by `plan`",
+]
+correct = [0]
+explanation = "`-target` limits the operation to the address and what it needs. For a destroy that includes the resources that depend on the target. Terraform warns because a targeted run can leave the state and the configuration out of step."
+
+[[question]]
+id = "b5-3f-4"
+objective = "3f"
+text = "A resource has `lifecycle { prevent_destroy = true }`. What happens when a plan would destroy it?"
+options = [
+  "Terraform fails with an error and changes nothing",
+  "Terraform skips that resource and destroys the others",
+  "Terraform asks for a second confirmation",
+  "Terraform destroys it and prints a warning",
+]
+correct = [0]
+explanation = "A plan that includes the destruction of a resource with `prevent_destroy` is an error, whether it comes from `terraform destroy` or from a change that needs a replacement. Remove the setting (or the resource from the configuration with it) when you really mean to destroy it."
+
+[[question]]
+id = "b5-3g-1"
+objective = "3g"
+text = "Which of these does `terraform fmt` change?"
+options = [
+  "Indentation and the alignment of equals signs",
+  "The names of resources, to snake_case",
+  "The order of the blocks in a file",
+  "Variables that are never used, which it removes",
+]
+correct = [0]
+explanation = "`terraform fmt` only rewrites layout to the canonical style: spacing, indentation, alignment. It does not rename, reorder or remove anything."
+
+[[question]]
+id = "b5-3g-2"
+objective = "3g"
+text = "How do you make `terraform fmt` also format the files in subdirectories, such as local modules?"
+options = [
+  "terraform fmt -recursive",
+  "terraform fmt -all",
+  "terraform fmt -modules",
+  "It does that by default",
+]
+correct = [0]
+explanation = "By default `terraform fmt` works on the files of the current directory only. `-recursive` also processes the subdirectories."
+
+[[question]]
+id = "b5-3g-3"
+objective = "3g"
+text = "A CI job should fail when a file is not formatted, and must not rewrite any file. Which command fits?"
+options = [
+  "terraform fmt -check",
+  "terraform fmt -recursive",
+  "terraform validate",
+  "terraform fmt -diff",
+]
+correct = [0]
+explanation = "With `-check`, `terraform fmt` lists the files that need formatting and exits with a non-zero status, and does not overwrite them. `validate` checks the configuration, not its layout."
+
+[[question]]
+id = "b5-3g-4"
+objective = "3g"
+text = "What indentation does the Terraform style convention use for each level of nesting?"
+options = [
+  "Two spaces",
+  "Four spaces",
+  "One tab",
+  "Eight spaces",
+]
+correct = [0]
+explanation = "Terraform's style convention is two spaces per nesting level, with the equals signs of consecutive single-line arguments aligned. `terraform fmt` applies it."

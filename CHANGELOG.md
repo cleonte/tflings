@@ -12,22 +12,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - README badge for the Go version (read from `go.mod`), and the Go and Terraform logos on their badges.
 - A weekly `versions` workflow (and `scripts/check-versions.sh`) that reports when a newer Floci, AWS provider or Terraform exists than the pinned ones. It only reports.
 - `SECURITY.md` says that release binaries are unsigned and that the Homebrew cask removes the macOS quarantine flag.
+- 16 new mock exam questions (`questions/batch5.toml`) for the thinnest objectives: 3f (destroy), 3g (formatting), 4a (resource and data blocks) and 4b (references). The bank has 183 questions.
+- Two hands-on exercises for objectives that were quiz only: `workflow7` (`terraform init` and a module it cannot install, plan mode) and `workflow8` (`terraform validate`, fix mode). 97 exercises.
 
 ### Changed
 
 - The release workflow runs `go test ./...` (on Terraform 1.12, without Docker) before GoReleaser publishes, and the `aws` CI job runs its tests with `-timeout 60m`.
+- Two exercises folders on one machine no longer share state. `tflings init` now gives the folder a random salt (in `.tflings.json`), which names its scratch folders under tflings's home and goes into its fake AWS accounts, so a `reset` in one folder cannot delete the other's saved state. Folders made by an older version have no salt and keep working exactly as before.
+- `run` now records a pass in the progress file of the exercises folder it works on, the same file the reset counter lives in, instead of always in the current directory.
+- The safety check that refuses a configuration which could leave the fake AWS now also reads backend configuration files (`*.tfbackend`, `*.hcl`) and refuses `assume_role` written as an argument of the s3 backend. `tflings tf` refuses `-backend-config` values that set credentials, a role or an endpoint other than Floci (or name a file that is not one of the exercise's own), `-var` values that give an endpoint another URL, and a `-var-file` outside the exercise's folder.
 
 ### Fixed
 
 - `workflow6` could not be done as its README says: every `tflings tf` call cleared the exercise's scratch folder, so the saved plan of `tflings tf workflow6 plan -out=tfplan` was gone before `show` and `apply tfplan`. tflings now removes only the files it wrote itself; a saved plan or a file Terraform generated stays. The proof of a fix exercise's solution now runs each command the way `tflings tf` does, so a mistake like this is caught.
 
 - Two tflings processes (a `watch` in one terminal, `tflings tf` or `run` in another) could use the same exercise's scratch folder at once, and one could delete the folder under the other (the likely cause of a "chdir .../runs/.../src" error). The folder now has a lock that is held for the whole command, `reset` waits for it (or says it could not and changes nothing), and a fix exercise is built in a side folder and moved into place when it is whole.
-
-### Changed
-
-- Two exercises folders on one machine no longer share state. `tflings init` now gives the folder a random salt (in `.tflings.json`), which names its scratch folders under tflings's home and goes into its fake AWS accounts, so a `reset` in one folder cannot delete the other's saved state. Folders made by an older version have no salt and keep working exactly as before.
-- `run` now records a pass in the progress file of the exercises folder it works on, the same file the reset counter lives in, instead of always in the current directory.
-- The safety check that refuses a configuration which could leave the fake AWS now also reads backend configuration files (`*.tfbackend`, `*.hcl`) and refuses `assume_role` written as an argument of the s3 backend. `tflings tf` refuses `-backend-config` values that set credentials, a role or an endpoint other than Floci (or name a file that is not one of the exercise's own), `-var` values that give an endpoint another URL, and a `-var-file` outside the exercise's folder.
 
 ## [0.9.2] - 2026-11-15
 

@@ -755,6 +755,24 @@ hint      = "terraform plan -out=FILE, then terraform apply FILE."
 docs      = "https://developer.hashicorp.com/terraform/cli/commands/plan#out-filename"
 
 [[exercises]]
+name      = "workflow7"
+path      = "exercises/workflow/workflow7"
+topic     = "workflow"
+mode      = "plan"
+objective = "3b"
+hint      = "init installs modules from the source in the module block. Does that folder exist?"
+docs      = "https://developer.hashicorp.com/terraform/cli/commands/init"
+
+[[exercises]]
+name      = "workflow8"
+path      = "exercises/workflow/workflow8"
+topic     = "workflow"
+mode      = "fix"
+objective = "3c"
+hint      = "Run tflings tf workflow8 validate and read every error: one is in the resource, one in the output."
+docs      = "https://developer.hashicorp.com/terraform/cli/commands/validate"
+
+[[exercises]]
 name      = "iteration7"
 path      = "exercises/iteration/iteration7"
 topic     = "iteration"

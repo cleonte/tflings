@@ -1,0 +1,12 @@
+state:
+  - expr: state.values.root_module.resources.exists(r, r.address == "terraform_data.app" && r.values.input == "small")
+    message: "terraform_data.app should still hold the tier, small."
+plan:
+  - expr: plan.configuration.root_module.outputs.app_tier.expression.references.exists(x, x == "terraform_data.app.input" || x == "terraform_data.app")
+    message: "The output app_tier should read terraform_data.app."
+empty_plan_after: true
+explanation: >-
+  `terraform validate` checks a configuration on its own: syntax, argument names,
+  types and references to variables and resources. It lists every error it finds.
+  It does not look at the state or at the real infrastructure, so run it first,
+  then `plan`.
