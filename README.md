@@ -1,6 +1,6 @@
 # tflings
 
-[![CI](https://github.com/cleonte/tflings/actions/workflows/ci.yml/badge.svg)](https://github.com/cleonte/tflings/actions/workflows/ci.yml) [![Release](https://img.shields.io/github/v/release/cleonte/tflings)](https://github.com/cleonte/tflings/releases/latest) [![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE) [![Terraform 1.12+](https://img.shields.io/badge/Terraform-1.12%2B-844FBA.svg)](https://developer.hashicorp.com/terraform/tutorials/certification-004/associate-review-004)
+[![CI](https://github.com/cleonte/tflings/actions/workflows/ci.yml/badge.svg)](https://github.com/cleonte/tflings/actions/workflows/ci.yml) [![Release](https://img.shields.io/github/v/release/cleonte/tflings)](https://github.com/cleonte/tflings/releases/latest) [![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE) [![Go](https://img.shields.io/github/go-mod/go-version/cleonte/tflings?logo=go&logoColor=white)](go.mod) [![Terraform 1.12+](https://img.shields.io/badge/Terraform-1.12%2B-844FBA.svg?logo=terraform&logoColor=white)](https://developer.hashicorp.com/terraform/tutorials/certification-004/associate-review-004)
 
 Learn Terraform by fixing small broken exercises, like [Rustlings](https://github.com/rust-lang/rustlings), for the **HashiCorp Terraform Associate (004)** exam. It is a sibling of [k8slings](https://github.com/cleonte/k8slings) and [golings](https://github.com/cleonte/golings).
 
