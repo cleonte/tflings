@@ -30,6 +30,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - Two tflings processes (a `watch` in one terminal, `tflings tf` or `run` in another) could use the same exercise's scratch folder at once, and one could delete the folder under the other (the likely cause of a "chdir .../runs/.../src" error). The folder now has a lock that is held for the whole command, `reset` waits for it (or says it could not and changes nothing), and a fix exercise is built in a side folder and moved into place when it is whole.
 
+### Changed
+
+- Documentation brought up to date: `ROADMAP.md` (phases that are done, the modes that need Terraform and Docker, the per-exercise plugin cache), `CLAUDE.md` (status, architecture, the automatic Floci reset exists) and the README (Go is needed only to build from source; `update` also refreshes `info.toml` entries).
+
 ## [0.9.2] - 2026-11-15
 
 ### Fixed
