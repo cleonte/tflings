@@ -343,6 +343,13 @@ func (e Exercise) Terraform(ctx context.Context, env *Env, args []string, stdin 
 	if err != nil {
 		return -1, fmt.Errorf("cannot read %s: %w", e.Path, err)
 	}
+	if problems := runner.CheckTerraformArgs(args, files); len(problems) > 0 {
+		var ls []string
+		for _, p := range problems {
+			ls = append(ls, p.Message)
+		}
+		return -1, &FailedError{Lines: append([]string{"tflings will not run this command:"}, ls...)}
+	}
 	return e.terraformWith(ctx, env, files, args, stdin, stdout, stderr)
 }
 
