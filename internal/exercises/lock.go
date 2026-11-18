@@ -23,7 +23,7 @@ const lockPoll = 50 * time.Millisecond
 // it, so one tflings cannot delete the folder under another. The lock file sits
 // next to the folder, not in it, so that deleting the folder leaves it alone.
 func (e *Env) lockRun(ctx context.Context, name string) (unlock func(), err error) {
-	return lockFile(ctx, filepath.Join(e.home(), "runs"), name, lockWait)
+	return lockFile(ctx, filepath.Join(e.home(), "runs"), runKey(e.workspace(), name), lockWait)
 }
 
 func lockFile(ctx context.Context, runsDir, name string, wait time.Duration) (func(), error) {

@@ -197,7 +197,7 @@ func FlociAccounts(o Options) []string {
 	var out []string
 	for _, e := range all {
 		if e.NeedsFloci() {
-			out = append(out, runner.Account(e.Name, exercises.ResetCount(o.Workspace, e.Name)))
+			out = append(out, exercises.AccountFor(o.Workspace, e.Name, ""))
 		}
 	}
 	return out

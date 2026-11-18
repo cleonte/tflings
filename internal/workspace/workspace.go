@@ -34,6 +34,12 @@ func Init(src fs.FS, dest string) error {
 		_ = os.RemoveAll(dest)
 		return err
 	}
+	// A salt of its own, so this folder's run folders and fake accounts are not
+	// those of another exercises folder on the same machine.
+	if err := exercises.EnsureSalt(dest); err != nil {
+		_ = os.RemoveAll(dest)
+		return err
+	}
 	return nil
 }
 

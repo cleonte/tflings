@@ -16,6 +16,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - Two tflings processes (a `watch` in one terminal, `tflings tf` or `run` in another) could use the same exercise's scratch folder at once, and one could delete the folder under the other (the likely cause of a "chdir .../runs/.../src" error). The folder now has a lock that is held for the whole command, `reset` waits for it (or says it could not and changes nothing), and a fix exercise is built in a side folder and moved into place when it is whole.
 
+### Changed
+
+- Two exercises folders on one machine no longer share state. `tflings init` now gives the folder a random salt (in `.tflings.json`), which names its scratch folders under tflings's home and goes into its fake AWS accounts, so a `reset` in one folder cannot delete the other's saved state. Folders made by an older version have no salt and keep working exactly as before.
+- `run` now records a pass in the progress file of the exercises folder it works on, the same file the reset counter lives in, instead of always in the current directory.
+
 ## [0.9.2] - 2026-11-15
 
 ### Fixed
