@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Added
+
+- The Go gopher and the Terraform mark at the top of the README (`misc/gopher.svg`, `misc/terraform.svg`), with credits in the README and `NOTICE`.
+
 ## [0.10.0] - 2026-11-18
 
 ### Added
