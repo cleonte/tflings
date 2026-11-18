@@ -280,6 +280,8 @@ func (e *Env) HasSavedState() bool {
 		}
 	}
 	matches, _ := filepath.Glob(filepath.Join(e.home(), "runs", "*", "src", "terraform.tfstate"))
+	// The sandbox's state counts too: it is work in progress in Floci.
+	matches = append(matches, filepath.Join(e.home(), sandboxDir, "src", "terraform.tfstate"))
 	for _, m := range matches {
 		data, err := os.ReadFile(m)
 		if err != nil {
