@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.10.0] - 2026-11-18
+
 ### Added
 
 - Badges under the title of the README: CI status, latest release, licence (Apache-2.0) and Terraform 1.12+.
@@ -133,7 +135,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - First tagged version: the CLI (`init`, `list`, `run`, `hint`, `reset`, `solution`, `update`, `verify`, `watch`, `doctor`, `aws up|down|status|reset`, `tf`, `env`), plan, apply, fix and quiz exercises (54), proven on Terraform 1.12 and the latest, against the Floci AWS emulator.
 
-[Unreleased]: https://github.com/cleonte/tflings/compare/v0.9.2...HEAD
+[Unreleased]: https://github.com/cleonte/tflings/compare/v0.10.0...HEAD
+[0.10.0]: https://github.com/cleonte/tflings/compare/v0.9.2...v0.10.0
 [0.9.2]: https://github.com/cleonte/tflings/compare/v0.9.1...v0.9.2
 [0.9.1]: https://github.com/cleonte/tflings/compare/v0.9.0...v0.9.1
 [0.9.0]: https://github.com/cleonte/tflings/compare/v0.8.0...v0.9.0
