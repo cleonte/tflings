@@ -3,7 +3,7 @@
 # Needs vhs (https://github.com/charmbracelet/vhs) and a tflings on the PATH, then:
 #   vhs demo-exam.tape
 # --seed 5 asks the same three questions every time, as long as the question bank
-# is the one of v0.9.0; the answers typed below match them. If the bank changes,
+# is the one of v0.10.0 (183 questions); the answers typed below match them. If the bank changes,
 # look at the questions again and adjust the answers.
 
 Output misc/demo-exam.gif
@@ -28,18 +28,18 @@ Sleep 500ms
 Enter
 Sleep 3s
 
-# A question with two answers.
-Type "c,d"
+# A single answer, explained right away.
+Type "d"
 Sleep 600ms
 Enter
 Sleep 3s
 
-Type "c"
+# A question with a code snippet and two answers.
+Type "a,c"
 Sleep 600ms
 Enter
-Sleep 3s
+Sleep 4s
 
-# A question with a code snippet.
 Type "b"
 Sleep 600ms
 Enter
