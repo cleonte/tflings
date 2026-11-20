@@ -763,6 +763,15 @@ hint      = "A local path has to start with ./ or ../, or Terraform reads it as 
 docs      = "https://developer.hashicorp.com/terraform/language/modules/sources#local-paths"
 
 [[exercises]]
+name      = "modules6"
+path      = "exercises/modules/modules6"
+topic     = "modules"
+mode      = "plan"
+objective = "5a"
+hint      = "From modules/app, the folder modules/db is ../db."
+docs      = "https://developer.hashicorp.com/terraform/language/modules/sources#local-paths"
+
+[[exercises]]
 name      = "providers3"
 path      = "exercises/providers/providers3"
 topic     = "providers"

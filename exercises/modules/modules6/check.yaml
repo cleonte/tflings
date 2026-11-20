@@ -1,0 +1,9 @@
+plan:
+  - expr: plan.resource_changes.exists(r, r.address == "module.app.module.db.terraform_data.this")
+    message: "module.app.module.db.terraform_data.this should be planned."
+  - expr: plan.resource_changes.exists(r, r.address == "module.app.terraform_data.this")
+    message: "module.app.terraform_data.this should be planned."
+explanation: >-
+  A local `source` path starts at the folder of the configuration file that
+  contains the `module` block. Calling a sibling folder from inside a module
+  therefore starts with `../`.
