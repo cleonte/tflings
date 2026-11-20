@@ -529,6 +529,15 @@ hint      = "-migrate-state copies the state to the new place; -reconfigure star
 docs      = "https://developer.hashicorp.com/terraform/cli/commands/init#backend-initialization"
 
 [[exercises]]
+name      = "backends3"
+path      = "exercises/backends/backends3"
+topic     = "backends"
+mode      = "fix"
+objective = "6a"
+hint      = "init has a flag that copies the existing state to the new backend settings."
+docs      = "https://developer.hashicorp.com/terraform/language/backend/local"
+
+[[exercises]]
 name      = "modules1"
 path      = "exercises/modules/modules1"
 topic     = "modules"
