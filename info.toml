@@ -906,3 +906,13 @@ mode      = "cli"
 objective = "3g"
 hint      = "Two flags of fmt: one to check, one for sub-folders."
 docs      = "https://developer.hashicorp.com/terraform/cli/commands/fmt"
+
+[[exercises]]
+name      = "cli11"
+path      = "exercises/cli/cli11"
+topic     = "cli"
+mode      = "cli"
+objective = "3a"
+hint      = "The command that comes before plan and apply in a new directory."
+docs      = "https://developer.hashicorp.com/terraform/cli/commands/init"
+

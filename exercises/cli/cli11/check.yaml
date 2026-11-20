@@ -1,0 +1,12 @@
+cli:
+  subcommand: [init]
+  hints:
+    plan: "`plan` needs the providers and modules that `init` installs, so it comes after. What prepares the directory?"
+    apply: "`apply` needs the providers and modules that `init` installs, so it comes after. What prepares the directory?"
+    validate: "`validate` also needs `init` first when the configuration uses providers or modules."
+    get: "`terraform get` only downloads modules. The first step also installs providers and sets up the backend."
+explanation: >-
+  `terraform init` installs the providers and modules, sets up the backend and
+  writes the dependency lock file. It is the first command in a new or cloned
+  working directory, and the one to run again after changing providers, modules
+  or the backend.
