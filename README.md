@@ -1,5 +1,7 @@
 # tflings
 
+<p align="center"><img src="misc/gopher.svg" alt="The Go gopher" height="110"> &nbsp;&nbsp; <img src="misc/terraform.svg" alt="Terraform" height="110"></p>
+
 [![CI](https://github.com/cleonte/tflings/actions/workflows/ci.yml/badge.svg)](https://github.com/cleonte/tflings/actions/workflows/ci.yml) [![Release](https://img.shields.io/github/v/release/cleonte/tflings)](https://github.com/cleonte/tflings/releases/latest) [![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE) [![Go](https://img.shields.io/github/go-mod/go-version/cleonte/tflings?logo=go&logoColor=white)](go.mod) [![Terraform 1.12+](https://img.shields.io/badge/Terraform-1.12%2B-844FBA.svg?logo=terraform&logoColor=white)](https://developer.hashicorp.com/terraform/tutorials/certification-004/associate-review-004)
 
 Learn Terraform by fixing small broken exercises, like [Rustlings](https://github.com/rust-lang/rustlings), for the **HashiCorp Terraform Associate (004)** exam. It is a sibling of [k8slings](https://github.com/cleonte/k8slings) and [golings](https://github.com/cleonte/golings).
@@ -108,3 +110,5 @@ Issues and pull requests are welcome: see [CONTRIBUTING.md](CONTRIBUTING.md). To
 ## License
 
 Apache-2.0, see [LICENSE](LICENSE) and [NOTICE](NOTICE). Floci is MIT licensed and is downloaded, not included.
+
+The Go gopher was designed by [Renee French](http://reneefrench.blogspot.com/); the vector in `misc/gopher.svg` is by Takuya Ueda, [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/). The Terraform mark in `misc/terraform.svg` is from [Simple Icons](https://simpleicons.org/) (CC0). Go is a trademark of Google LLC and Terraform is a trademark of HashiCorp, Inc.

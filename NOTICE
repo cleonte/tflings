@@ -8,3 +8,10 @@ tflings downloads and runs Floci (https://github.com/floci-io/floci, MIT
 license) as a local AWS emulator. Floci is not part of this repository.
 
 Exercises are adapted from the author's own study notes (learn/tf-associate).
+
+misc/gopher.svg: the Go gopher was designed by Renee French; this vector was
+created by Takuya Ueda (https://github.com/golang-samples/gopher-vector) and is
+licensed under Creative Commons Attribution 3.0. misc/terraform.svg is from
+Simple Icons (CC0). The Go name and logo are trademarks of Google LLC;
+Terraform and its logo are trademarks of HashiCorp, Inc. tflings is not
+affiliated with either.
