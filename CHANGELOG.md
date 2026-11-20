@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.11.0] - 2026-11-20
+
 ### Changed
 
 - The message that says another tflings is using an exercise names the exercise (`locking1`), not the internal name of its folder.
