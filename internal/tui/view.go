@@ -211,9 +211,9 @@ func (m *Model) footer() string {
 	case m.hasExercise():
 		// "f full" is only offered when there is something it would show. Nothing
 		// is shortened in a tflings failure today, so the key stays hidden.
-		keys := []string{"h hint", "s solution", "r reset", "n next", "l list", "c check all", "q quit"}
+		keys := []string{"h hint", "s solution", "g again", "r reset", "n next", "l list", "c check all", "q quit"}
 		if m.cfg.Editor != "" {
-			keys = slices.Insert(keys, 3, "e edit")
+			keys = slices.Insert(keys, 4, "e edit")
 		}
 		withScroll := slices.Insert(slices.Clone(keys), len(keys)-1, "↑↓ scroll")
 		line := strings.Join(withScroll, "   ")

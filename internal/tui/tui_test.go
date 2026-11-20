@@ -36,6 +36,7 @@ func newSession(t *testing.T) *session {
 		Solutions: tflings.Solutions,
 		Root:      ".",
 		Editor:    "",
+		NoPoll:    true,
 	})
 	s := &session{t: t, m: m}
 	s.send(startMsg{})
@@ -274,5 +275,42 @@ func TestLongLinesAreWrappedNotCut(t *testing.T) {
 	}
 	if one := (&Model{}).wrap("no width known", 0); len(one) != 1 || one[0] != "no width known" {
 		t.Errorf("without a width the text is left alone: %q", one)
+	}
+}
+
+func TestGChecksTheExerciseAgain(t *testing.T) {
+	s := newSession(t)
+	s.expect("iac1")
+	before := s.m.runID
+	s.key("g")
+	if s.m.runID == before {
+		t.Error("g should start a new run")
+	}
+	s.expect("iac1")
+}
+
+func TestAFixExerciseIsCheckedAgainWhenTfRan(t *testing.T) {
+	s := newSession(t)
+	s.m.exercise = exercises.Exercise{Name: "backends3", Mode: exercises.ModeFix}
+	s.m.status, s.m.mode = statusFinished, modeResult
+	env := &exercises.Env{Home: t.TempDir(), Embedded: tflings.FS, Solutions: tflings.Solutions}
+	s.m.cfg.Env = env
+	s.m.cfg.NoPoll = false
+
+	// Nothing ran: the tick only asks again.
+	if _, cmd := s.m.Update(tickMsg{}); cmd == nil {
+		t.Error("the tick should be scheduled again")
+	}
+	if s.m.status != statusFinished {
+		t.Errorf("no tf ran, so no new run: status %v", s.m.status)
+	}
+
+	// `tflings tf` ended a command.
+	if err := env.MarkTfRan("backends3"); err != nil {
+		t.Fatal(err)
+	}
+	s.m.Update(tickMsg{})
+	if s.m.status != statusRunning {
+		t.Errorf("tf ran, so the exercise should be checked again: status %v", s.m.status)
 	}
 }
