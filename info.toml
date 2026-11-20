@@ -574,6 +574,15 @@ hint      = "Where do modules get installed, and which command does it?"
 docs      = "https://developer.hashicorp.com/terraform/cli/commands/init"
 
 [[exercises]]
+name      = "module-versions3"
+path      = "exercises/module-versions/module-versions3"
+topic     = "module-versions"
+mode      = "plan"
+objective = "5d"
+hint      = ">= 1.12 sets a minimum with no upper limit; the constraint to change is inside the module, not in main.tf."
+docs      = "https://developer.hashicorp.com/terraform/language/expressions/version-constraints"
+
+[[exercises]]
 name      = "iac2"
 path      = "exercises/iac/iac2"
 topic     = "iac"
