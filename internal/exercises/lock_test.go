@@ -13,15 +13,15 @@ import (
 
 func TestLockExcludesGoroutines(t *testing.T) {
 	dir := t.TempDir()
-	unlock, err := lockFile(context.Background(), dir, "x", time.Second)
+	unlock, err := lockFile(context.Background(), dir, "x", "ex-x", time.Second)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if _, err := lockFile(context.Background(), dir, "x", 200*time.Millisecond); err == nil || !strings.Contains(err.Error(), "another tflings") {
+	if _, err := lockFile(context.Background(), dir, "x", "ex-x", 200*time.Millisecond); err == nil || !strings.Contains(err.Error(), "another tflings") {
 		t.Fatalf("a second lock should be refused with a clear message, got %v", err)
 	}
 	// Another exercise's lock is independent.
-	other, err := lockFile(context.Background(), dir, "y", time.Second)
+	other, err := lockFile(context.Background(), dir, "y", "ex-y", time.Second)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -33,7 +33,7 @@ func TestLockExcludesGoroutines(t *testing.T) {
 	got := make(chan error, 1)
 	go func() {
 		defer wg.Done()
-		u, err := lockFile(context.Background(), dir, "x", 5*time.Second)
+		u, err := lockFile(context.Background(), dir, "x", "ex-x", 5*time.Second)
 		if err == nil {
 			u()
 		}
@@ -51,7 +51,7 @@ func TestLockExcludesGoroutines(t *testing.T) {
 // takes the lock and sleeps.
 func TestLockExcludesProcesses(t *testing.T) {
 	if dir := os.Getenv("TFLINGS_LOCK_HELPER"); dir != "" {
-		u, err := lockFile(context.Background(), dir, "x", time.Second)
+		u, err := lockFile(context.Background(), dir, "x", "ex-x", time.Second)
 		if err != nil {
 			os.Exit(3)
 		}
@@ -76,10 +76,10 @@ func TestLockExcludesProcesses(t *testing.T) {
 		}
 		time.Sleep(50 * time.Millisecond)
 	}
-	if _, err := lockFile(context.Background(), dir, "x", 100*time.Millisecond); err == nil {
+	if _, err := lockFile(context.Background(), dir, "x", "ex-x", 100*time.Millisecond); err == nil {
 		t.Fatal("the lock held by another process should be refused")
 	}
-	u, err := lockFile(context.Background(), dir, "x", 5*time.Second)
+	u, err := lockFile(context.Background(), dir, "x", "ex-x", 5*time.Second)
 	if err != nil {
 		t.Fatalf("after the child exits the lock should be free: %v", err)
 	}
@@ -111,5 +111,23 @@ func TestForgetRunRespectsTheLock(t *testing.T) {
 	}
 	if _, err := os.Stat(run); err == nil {
 		t.Error("the folder should be gone")
+	}
+}
+
+// A learner reads the exercise's name in the message, not the internal key of
+// its folder (which carries the folder's salt).
+func TestLockMessageNamesTheExercise(t *testing.T) {
+	dir := t.TempDir()
+	unlock, err := lockFile(context.Background(), dir, "e702b45f-locking1", "locking1", time.Second)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer unlock()
+	_, err = lockFile(context.Background(), dir, "e702b45f-locking1", "locking1", 100*time.Millisecond)
+	if err == nil {
+		t.Fatal("the second lock should be refused")
+	}
+	if strings.Contains(err.Error(), "e702b45f") || !strings.Contains(err.Error(), "using locking1 ") {
+		t.Errorf("the message should name the exercise only, got %q", err)
 	}
 }

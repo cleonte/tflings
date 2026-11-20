@@ -97,6 +97,13 @@ func (e *Env) Sandbox(ctx context.Context, args []string, stdin io.Reader, stdou
 		}
 		return -1, &FailedError{Lines: append([]string{"tflings will not run this configuration:"}, ls...)}
 	}
+	if problems := runner.CheckTerraformArgs(args, files); len(problems) > 0 {
+		var ls []string
+		for _, p := range problems {
+			ls = append(ls, p.Message)
+		}
+		return -1, &FailedError{Lines: append([]string{"tflings will not run this command:"}, ls...)}
+	}
 	return runner.Attach(ctx, runner.Call{Engine: e.Engine, Dir: s.src, Env: runner.Env(s.cfg), Args: args}, stdin, stdout, stderr)
 }
 

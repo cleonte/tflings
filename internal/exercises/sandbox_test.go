@@ -79,6 +79,22 @@ func TestSandboxRefusesAnUnsafeConfiguration(t *testing.T) {
 	}
 }
 
+func TestSandboxRefusesAnUnsafeArgument(t *testing.T) {
+	env := &Env{Home: t.TempDir(), Engine: testEngine(t)}
+	if _, _, err := env.SandboxEnv(); err != nil {
+		t.Fatal(err)
+	}
+	var out bytes.Buffer
+	_, err := env.Sandbox(context.Background(), []string{"init", "-backend-config=endpoint=https://s3.amazonaws.com"}, strings.NewReader(""), &out, &out)
+	var failed *FailedError
+	if !errors.As(err, &failed) {
+		t.Fatalf("a backend endpoint outside Floci should be refused, got %v (output %q)", err, out.String())
+	}
+	if out.Len() != 0 {
+		t.Errorf("Terraform must not have run, it printed %q", out.String())
+	}
+}
+
 func TestSandboxRunsTerraformAndKeepsItsState(t *testing.T) {
 	env := &Env{Home: t.TempDir(), Engine: testEngine(t)}
 	folder, _, err := env.SandboxEnv()

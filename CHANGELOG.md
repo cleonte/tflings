@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Changed
+
+- The message that says another tflings is using an exercise names the exercise (`locking1`), not the internal name of its folder.
+- `tflings sandbox` refuses the same Terraform arguments as `tflings tf` (a `-backend-config` with credentials or an endpoint other than Floci, a `-var-file` outside the folder).
+
 ### Added
 
 - The Go gopher and the Terraform mark at the top of the README (`misc/gopher.svg`, `misc/terraform.svg`), with credits in the README and `NOTICE`.
