@@ -182,7 +182,7 @@ Easier with Floci than with a custom provider: Floci already tests OpenTofu in i
 ### Phase 3 — State and fix mode
 - [x] Fix mode: seeding (`apply` steps and allowlisted Floci `mutate` steps), `tflings tf` and `tflings env`, `run` checks the end state, `reset` re-seeds. Built on 2026-11-14 with `refactoring1`, `drift1`, `drift2`. A stuck lock is seeded (`locking1`, with `s3.put_object`); a tfstate written by hand is not.
 - [x] Topics: `state-basics`, `backends`, `locking`, `drift` (refresh, refresh-only), `refactoring` (moved, state mv), `import` (`import1`) all exist; `debugging` is a single quiz question (objective 7c is quiz only).
-- [x] cli mode (`cli1`..`cli10`) and the `inspect` topic (`inspect1-2`).
+- [x] cli mode (`cli1`..`cli11`) and the `inspect` topic (`inspect1-2`).
 
 ### Phase 4 — Modules
 - [x] Local modules, scope, outputs between modules (`modules1-5`, plan mode). Module versions and registry specifics are quiz (`module-versions1-2`); the local git repo for sources was not built.

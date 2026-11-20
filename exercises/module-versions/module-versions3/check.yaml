@@ -1,0 +1,12 @@
+plan:
+  - expr: plan.resource_changes.exists(r, r.address == "module.app.terraform_data.this" && "create" in r.change.actions)
+    message: "module.app.terraform_data.this should be planned."
+files:
+  - expr: files["modules/app/main.tf"].matches("required_version\\s*=\\s*\"(>=|~>)")
+    message: "Keep a required_version in the module, with a minimum (>= or ~>)."
+explanation: >-
+  A `version` argument in a `module` block picks the version of a registry module.
+  A module of any kind can also say which Terraform versions may use it with
+  `required_version` in its own `terraform` block; init stops when the running
+  Terraform does not fit. `>=` sets a minimum, `~>` allows only the last number
+  to rise.

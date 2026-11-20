@@ -14,6 +14,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### Added
 
 - The Go gopher and the Terraform mark at the top of the README (`misc/gopher.svg`, `misc/terraform.svg`), with credits in the README and `NOTICE`.
+- Six hands-on exercises, all provider-free, for objectives that had no or one: `state4` (2d, fix: read the state with `state list` and `state show`, then bring `main.tf` up to date without applying), `cli11` (3a, cli: `terraform init`), `module-versions3` (5d, plan: a module that pins `required_version`; the `version` argument of a `module` block works only for registry modules, so it cannot be exercised offline), `types2` (4d, plan: `object` against `map(string)`), `modules6` (5a, plan: a nested module's local `source`) and `backends3` (6a, fix: `init -migrate-state` to a new `path` of the local backend). 103 exercises.
 
 ## [0.10.0] - 2026-11-18
 

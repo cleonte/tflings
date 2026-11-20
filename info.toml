@@ -73,6 +73,15 @@ hint      = "A list is written with square brackets, with its elements separated
 docs      = "https://developer.hashicorp.com/terraform/language/expressions/type-constraints"
 
 [[exercises]]
+name      = "types2"
+path      = "exercises/types/types2"
+topic     = "types"
+mode      = "plan"
+objective = "4d"
+hint      = "object({ name = string, ports = list(number) }) gives each attribute its own type."
+docs      = "https://developer.hashicorp.com/terraform/language/expressions/type-constraints"
+
+[[exercises]]
 name      = "expressions1"
 path      = "exercises/expressions/expressions1"
 topic     = "expressions"
@@ -520,6 +529,15 @@ hint      = "-migrate-state copies the state to the new place; -reconfigure star
 docs      = "https://developer.hashicorp.com/terraform/cli/commands/init#backend-initialization"
 
 [[exercises]]
+name      = "backends3"
+path      = "exercises/backends/backends3"
+topic     = "backends"
+mode      = "fix"
+objective = "6a"
+hint      = "init has a flag that copies the existing state to the new backend settings."
+docs      = "https://developer.hashicorp.com/terraform/language/backend/local"
+
+[[exercises]]
 name      = "modules1"
 path      = "exercises/modules/modules1"
 topic     = "modules"
@@ -572,6 +590,15 @@ mode      = "quiz"
 objective = "5d"
 hint      = "Where do modules get installed, and which command does it?"
 docs      = "https://developer.hashicorp.com/terraform/cli/commands/init"
+
+[[exercises]]
+name      = "module-versions3"
+path      = "exercises/module-versions/module-versions3"
+topic     = "module-versions"
+mode      = "plan"
+objective = "5d"
+hint      = ">= 1.12 sets a minimum with no upper limit; the constraint to change is inside the module, not in main.tf."
+docs      = "https://developer.hashicorp.com/terraform/language/expressions/version-constraints"
 
 [[exercises]]
 name      = "iac2"
@@ -635,6 +662,15 @@ mode      = "quiz"
 objective = "2d"
 hint      = "How does Terraform know that aws_s3_bucket.logs is that bucket and not another?"
 docs      = "https://developer.hashicorp.com/terraform/language/state/purpose"
+
+[[exercises]]
+name      = "state4"
+path      = "exercises/state-basics/state4"
+topic     = "state-basics"
+mode      = "fix"
+objective = "2d"
+hint      = "state show terraform_data.api prints what Terraform holds for it. Make main.tf say the same."
+docs      = "https://developer.hashicorp.com/terraform/cli/commands/state/show"
 
 [[exercises]]
 name      = "debugging1"
@@ -733,6 +769,15 @@ topic     = "modules"
 mode      = "plan"
 objective = "5a"
 hint      = "A local path has to start with ./ or ../, or Terraform reads it as a registry address."
+docs      = "https://developer.hashicorp.com/terraform/language/modules/sources#local-paths"
+
+[[exercises]]
+name      = "modules6"
+path      = "exercises/modules/modules6"
+topic     = "modules"
+mode      = "plan"
+objective = "5a"
+hint      = "From modules/app, the folder modules/db is ../db."
 docs      = "https://developer.hashicorp.com/terraform/language/modules/sources#local-paths"
 
 [[exercises]]
@@ -888,3 +933,13 @@ mode      = "cli"
 objective = "3g"
 hint      = "Two flags of fmt: one to check, one for sub-folders."
 docs      = "https://developer.hashicorp.com/terraform/cli/commands/fmt"
+
+[[exercises]]
+name      = "cli11"
+path      = "exercises/cli/cli11"
+topic     = "cli"
+mode      = "cli"
+objective = "3a"
+hint      = "The command that comes before plan and apply in a new directory."
+docs      = "https://developer.hashicorp.com/terraform/cli/commands/init"
+
