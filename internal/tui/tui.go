@@ -11,6 +11,7 @@ import (
 	"path/filepath"
 	"slices"
 	"sync/atomic"
+	"time"
 
 	"charm.land/bubbles/v2/list"
 	tea "charm.land/bubbletea/v2"
@@ -46,6 +47,9 @@ type Config struct {
 	// NewExercises is how many exercises this version has that the folder does
 	// not: the header says so, and that `tflings update` adds them.
 	NewExercises int
+	// NoPoll turns off the check for `tflings tf` having run (tests drive the
+	// model with messages and cannot wait on a timer).
+	NoPoll bool
 }
 
 type editDoneMsg struct{ err error }
@@ -115,9 +119,18 @@ type Model struct {
 	setup  atomic.Pointer[string]
 	result exercises.Result
 	runErr error
+	// tfStamp is the TfStamp of the current exercise when its last run began.
+	// When the stamp moves, `tflings tf` ran a command and the exercise is
+	// checked again, since no saved file says so.
+	tfStamp time.Time
 }
 
 type startMsg struct{}
+
+// tickMsg asks whether `tflings tf` ran since the last check.
+type tickMsg struct{}
+
+const tfPoll = time.Second
 
 type changesMsg struct{ files []string }
 
@@ -159,6 +172,13 @@ func (m *Model) Init() tea.Cmd {
 	return func() tea.Msg { return startMsg{} }
 }
 
+func (m *Model) tick() tea.Cmd {
+	if m.cfg.NoPoll {
+		return nil
+	}
+	return tea.Tick(tfPoll, func(time.Time) tea.Msg { return tickMsg{} })
+}
+
 // Update handles a key, a saved file or the result of a run.
 func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
@@ -172,7 +192,16 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m.handleKey(msg)
 
 	case startMsg:
-		return m, tea.Batch(m.startRun(), m.waitForChanges())
+		return m, tea.Batch(m.startRun(), m.waitForChanges(), m.tick())
+
+	case tickMsg:
+		// Only a fix exercise is repaired with `tflings tf`, and a check or the
+		// screens that are not the result are left alone until they end.
+		if m.status == statusFinished && m.mode == modeResult && m.exercise.Mode == exercises.ModeFix && m.cfg.Env != nil &&
+			m.cfg.Env.TfStamp(m.exercise.Name).After(m.tfStamp) {
+			return m, tea.Batch(m.startRun(), m.tick())
+		}
+		return m, m.tick()
 
 	case changesMsg:
 		if m.checking() {
@@ -260,6 +289,10 @@ func (m *Model) handleKey(msg tea.KeyPressMsg) (tea.Model, tea.Cmd) {
 		return m, m.next()
 	case "c":
 		return m, m.startCheck()
+	case "g":
+		if m.hasExercise() {
+			return m, m.startRun()
+		}
 	case "l":
 		m.openList()
 	case "f":
@@ -450,6 +483,9 @@ func (m *Model) startRun() tea.Cmd {
 	}
 	m.exercise = exercise
 	m.topic = m.topicLine(exercise)
+	if m.cfg.Env != nil {
+		m.tfStamp = m.cfg.Env.TfStamp(exercise.Name)
+	}
 
 	ctx, cancel := context.WithCancel(context.Background())
 	m.cancel = cancel

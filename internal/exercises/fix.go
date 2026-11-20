@@ -12,6 +12,7 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+	"time"
 
 	"github.com/cleonte/tflings/internal/awscheck"
 	"github.com/cleonte/tflings/internal/check"
@@ -43,6 +44,11 @@ const StepsFile = "steps.yaml"
 
 // seededMarker is the file in a run folder that says the situation was built.
 const seededMarker = "seeded"
+
+// tfRanMarker is the file in a run folder that `tflings tf` touches when a
+// command ends. It changes nothing in the learner's folder, so a running
+// `watch` would not know that the state moved; its modification time tells it.
+const tfRanMarker = "tf-ran"
 
 // seededInFloci is what the marker holds when the situation was built in Floci.
 const seededInFloci = "floci"
@@ -368,7 +374,33 @@ func (e Exercise) terraformWith(ctx context.Context, env *Env, files map[string]
 		return -1, err
 	}
 	cancel() // the run's timeout is for the checks; a learner may take their time
-	return runner.Attach(ctx, runner.Call{Engine: env.Engine, Dir: r.src, Env: runner.Env(r.cfg), Args: args}, stdin, stdout, stderr)
+	code, err := runner.Attach(ctx, runner.Call{Engine: env.Engine, Dir: r.src, Env: runner.Env(r.cfg), Args: args}, stdin, stdout, stderr)
+	// Still under the lock. Best effort: a missing marker only means a watch has
+	// to be told with the g key.
+	_ = env.MarkTfRan(e.Name)
+	return code, err
+}
+
+// MarkTfRan records that a `tflings tf` command just ended in the exercise's
+// run folder (see tfRanMarker).
+func (e *Env) MarkTfRan(name string) error {
+	dir := filepath.Join(e.home(), "runs", runKey(e.workspace(), name))
+	if err := os.MkdirAll(dir, 0o755); err != nil {
+		return err
+	}
+	return os.WriteFile(filepath.Join(dir, tfRanMarker), []byte(time.Now().UTC().Format(time.RFC3339Nano)+"\n"), 0o644)
+}
+
+// TfStamp is when `tflings tf` last ended a command in the exercise's run
+// folder, or the zero time if it never did (or the folder was reset). A `watch`
+// compares it with the value it saw to re-check an exercise that is repaired
+// with Terraform commands, where no file in the exercises folder is saved.
+func (e *Env) TfStamp(name string) time.Time {
+	st, err := os.Stat(filepath.Join(e.home(), "runs", runKey(e.workspace(), name), tfRanMarker))
+	if err != nil {
+		return time.Time{}
+	}
+	return st.ModTime()
 }
 
 // SealedEnv is the environment Terraform sees in this exercise, as sorted
