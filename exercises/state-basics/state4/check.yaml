@@ -1,0 +1,14 @@
+state:
+  - expr: state.values.root_module.resources.filter(r, r.address == "terraform_data.api").all(r, r.values.input == seed.values.root_module.resources.filter(s, s.address == "terraform_data.api")[0].values.input)
+    message: "The state of terraform_data.api changed. Do not apply: only edit main.tf so that it says what the state already holds."
+  - expr: state.values.root_module.resources.exists(r, r.address == "terraform_data.web") && state.values.root_module.resources.exists(r, r.address == "terraform_data.db")
+    message: "web and db must stay in the state."
+config:
+  - expr: config.root_module.resources.filter(r, r.address == "terraform_data.api").all(r, r.expressions.input.constant_value == "api-v2")
+    message: "main.tf should say api-v2, the version the state holds."
+empty_plan_after: true
+explanation: >-
+  A plan shows what would change to make the real world match the
+  configuration, using the state as the record of what Terraform manages and last
+  saw. `terraform state list` and `terraform state show` read that record. When
+  the state is the truth, change the configuration, not the state.

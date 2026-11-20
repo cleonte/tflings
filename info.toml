@@ -646,6 +646,15 @@ hint      = "How does Terraform know that aws_s3_bucket.logs is that bucket and 
 docs      = "https://developer.hashicorp.com/terraform/language/state/purpose"
 
 [[exercises]]
+name      = "state4"
+path      = "exercises/state-basics/state4"
+topic     = "state-basics"
+mode      = "fix"
+objective = "2d"
+hint      = "state show terraform_data.api prints what Terraform holds for it. Make main.tf say the same."
+docs      = "https://developer.hashicorp.com/terraform/cli/commands/state/show"
+
+[[exercises]]
 name      = "debugging1"
 path      = "exercises/debugging/debugging1"
 topic     = "debugging"
