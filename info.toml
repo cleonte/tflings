@@ -73,6 +73,15 @@ hint      = "A list is written with square brackets, with its elements separated
 docs      = "https://developer.hashicorp.com/terraform/language/expressions/type-constraints"
 
 [[exercises]]
+name      = "types2"
+path      = "exercises/types/types2"
+topic     = "types"
+mode      = "plan"
+objective = "4d"
+hint      = "object({ name = string, ports = list(number) }) gives each attribute its own type."
+docs      = "https://developer.hashicorp.com/terraform/language/expressions/type-constraints"
+
+[[exercises]]
 name      = "expressions1"
 path      = "exercises/expressions/expressions1"
 topic     = "expressions"
