@@ -256,7 +256,7 @@ func (e *Env) HomeDir() string { return e.home() }
 // deletes nothing.
 func (e *Env) ForgetRun(name string) error {
 	key := runKey(e.workspace(), name)
-	unlock, err := lockFile(context.Background(), filepath.Join(e.home(), "runs"), key, forgetWait)
+	unlock, err := lockFile(context.Background(), filepath.Join(e.home(), "runs"), key, name, forgetWait)
 	if err != nil {
 		return fmt.Errorf("cannot forget the saved state of %s now: %w", name, err)
 	}

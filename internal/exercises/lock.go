@@ -23,10 +23,13 @@ const lockPoll = 50 * time.Millisecond
 // it, so one tflings cannot delete the folder under another. The lock file sits
 // next to the folder, not in it, so that deleting the folder leaves it alone.
 func (e *Env) lockRun(ctx context.Context, name string) (unlock func(), err error) {
-	return lockFile(ctx, filepath.Join(e.home(), "runs"), runKey(e.workspace(), name), lockWait)
+	return lockFile(ctx, filepath.Join(e.home(), "runs"), runKey(e.workspace(), name), name, lockWait)
 }
 
-func lockFile(ctx context.Context, runsDir, name string, wait time.Duration) (func(), error) {
+// lockFile takes the lock file <runsDir>/<name>.lock. label is what a learner
+// reads in the message when it has to wait (the exercise's name, not the
+// internal key of its folder).
+func lockFile(ctx context.Context, runsDir, name, label string, wait time.Duration) (func(), error) {
 	if err := os.MkdirAll(runsDir, 0o755); err != nil {
 		return nil, err
 	}
@@ -49,12 +52,12 @@ func lockFile(ctx context.Context, runsDir, name string, wait time.Duration) (fu
 			}, nil
 		}
 		if !announced {
-			report(ctx, "waiting for another tflings to finish with "+name)
+			report(ctx, "waiting for another tflings to finish with "+label)
 			announced = true
 		}
 		if time.Now().After(deadline) || ctx.Err() != nil {
 			_ = f.Close()
-			return nil, fmt.Errorf("another tflings is using %s (a `tflings tf`, `watch` or `run` in another terminal). Let it finish, then try again", name)
+			return nil, fmt.Errorf("another tflings is using %s (a `tflings tf`, `watch` or `run` in another terminal). Let it finish, then try again", label)
 		}
 		time.Sleep(lockPoll)
 	}
