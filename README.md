@@ -10,7 +10,7 @@ You get a folder of Terraform files with a `# I AM NOT DONE` line and a `# TODO:
 
 ![tflings watch](misc/demo-tui.gif)
 
-> **Status: early releases, expect rough edges.** 97 exercises in five modes (quiz, plan, apply, fix, and `cli`, where you write one command), every objective of the Terraform Associate 004 content list covered, a mock exam with 183 questions, and `tflings progress`. Tested on macOS and Linux; Windows with Docker is untested. See [ROADMAP.md](ROADMAP.md) and the [changelog](CHANGELOG.md).
+> **Status: early releases, expect rough edges.** 103 exercises in five modes (quiz, plan, apply, fix, and `cli`, where you write one command), every objective of the Terraform Associate 004 content list covered, a mock exam with 183 questions, and `tflings progress`. Tested on macOS and Linux; Windows with Docker is untested. See [ROADMAP.md](ROADMAP.md) and the [changelog](CHANGELOG.md).
 
 ## The first five minutes
 
