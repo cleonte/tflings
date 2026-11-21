@@ -8,7 +8,7 @@ require (
 	charm.land/bubbletea/v2 v2.1.1
 	charm.land/lipgloss/v2 v2.1.0
 	github.com/aws/aws-sdk-go-v2 v1.48.0
-	github.com/aws/aws-sdk-go-v2/credentials v1.21.0
+	github.com/aws/aws-sdk-go-v2/credentials v1.21.1
 	github.com/aws/aws-sdk-go-v2/service/dynamodb v1.74.0
 	github.com/aws/aws-sdk-go-v2/service/ec2 v1.347.0
 	github.com/aws/aws-sdk-go-v2/service/iam v1.66.0
