@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.11.1] - 2026-11-21
+
 ### Fixed
 
 - `tflings watch` did not notice a repair made with `tflings tf` (the state moves, no file in the exercises folder is saved), so it kept showing the old error after `tflings run` said ok. `tflings tf` now leaves a marker in the exercise's run folder and `watch` checks a fix exercise again when it changes.
