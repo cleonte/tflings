@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Added
+
+- A CodeQL workflow (`.github/workflows/codeql.yml`) that scans the Go code and the workflow files on every pull request, every push to main and weekly.
+
 ## [0.11.1] - 2026-11-21
 
 ### Fixed
