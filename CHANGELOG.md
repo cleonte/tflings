@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Changed
+
+- Floci is pinned to 2.5.0 (was 2.4.0). Every exercise was proven on it with Terraform 1.12.2 and 1.17.2. `tflings aws up` replaces a container made from the old image; the data volume is kept.
+
 ### Added
 
 - A CodeQL workflow (`.github/workflows/codeql.yml`) that scans the Go code and the workflow files on every pull request, every push to main and weekly.

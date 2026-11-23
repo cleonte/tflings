@@ -94,7 +94,7 @@ AWS_ENDPOINT_URL_S3_CONTROL=http://localhost:4577
 
 ## Floci
 
-- Run in **Docker only** (Floci 2.4.0 published no native binary), image **pinned by digest** `floci/floci@sha256:5ee85db604c4aa74ac76e07ea5cc83086f37bb472bf3dbb97e34019e48efae9c`, container `tflings-floci`, published on `127.0.0.1:4577` (not 4566, which the user may use), data in the named volume `tflings-floci-data`. A bind mount does not work under Lima (`$HOME` is read-only to containers).
+- Run in **Docker only** (Floci 2.4.0 published no native binary), image **pinned by digest** (release **2.5.0**, whole suite proven on it 2026-11-23 with `make ci` on Terraform 1.12.2 and 1.17.2) `floci/floci@sha256:a0fbf944d7f338cc0856f1ef83831ea749ff2be71956eb7a7fce08fc21458e19`, container `tflings-floci`, published on `127.0.0.1:4577` (not 4566, which the user may use), data in the named volume `tflings-floci-data`. A bind mount does not work under Lima (`$HOME` is read-only to containers).
 - Recipe (spike 05; the hardened flags are verified, not yet in `spikes/floci.sh`):
   ```
   docker run -d --name tflings-floci -p 127.0.0.1:4577:4566 \
@@ -102,7 +102,7 @@ AWS_ENDPOINT_URL_S3_CONTROL=http://localhost:4577
     -v tflings-floci-data:/app/data \
     --cap-drop ALL --cap-add SYS_CHROOT --cap-add SETUID --cap-add SETGID \
     --security-opt no-new-privileges --read-only --tmpfs /tmp \
-    floci/floci@sha256:5ee85db6...   # full digest above
+    floci/floci@sha256:a0fbf944...   # full digest above
   ```
   The volume must be at `/app/data`: the image declares a volume there and any other mount leaks an anonymous volume per run. Never mount the Docker socket. Wait with the container's health status or `/_floci/health` (0.07 s to healthy, 29 MiB idle). `tflings aws up` inspects the existing container first (reuse / start / recreate on a different digest); do not rely on Docker's error text for port or name conflicts.
 - Only use services proven by our own CI or in Floci's Terraform compatibility suite: S3, VPC/subnet/security group, IAM, SSM, Secrets Manager, DynamoDB, Route 53, KMS. Container-backed services (Lambda, ECS, EC2 instances) are out of scope.
