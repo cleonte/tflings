@@ -18,10 +18,10 @@ import (
 
 // Image is the Floci image, pinned by digest (spike 05). Bumping it is a
 // deliberate change: run the whole exercise suite first.
-const Image = "floci/floci@sha256:5ee85db604c4aa74ac76e07ea5cc83086f37bb472bf3dbb97e34019e48efae9c"
+const Image = "floci/floci@sha256:a0fbf944d7f338cc0856f1ef83831ea749ff2be71956eb7a7fce08fc21458e19"
 
 // Version is the Floci release the digest above is.
-const Version = "2.4.0"
+const Version = "2.5.0"
 
 // Config says which container to manage. The defaults are what tflings uses;
 // tests use another name, port and volume so they never touch the real one.
