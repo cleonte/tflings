@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.11.2] - 2026-11-25
+
 ### Changed
 
 - Floci is pinned to 2.5.0 (was 2.4.0). Every exercise was proven on it with Terraform 1.12.2 and 1.17.2. `tflings aws up` replaces a container made from the old image; the data volume is kept.
