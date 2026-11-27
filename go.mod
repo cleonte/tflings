@@ -16,7 +16,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/secretsmanager v1.51.0
 	github.com/aws/aws-sdk-go-v2/service/ssm v1.83.0
 	github.com/aws/smithy-go v1.28.9
-	github.com/cleonte/lingscore v0.3.0
+	github.com/cleonte/lingscore v0.4.1
 	github.com/fatih/color v1.19.0
 	github.com/hashicorp/go-version v1.9.0
 	github.com/hashicorp/hc-install v0.10.0
