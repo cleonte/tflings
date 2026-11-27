@@ -3,13 +3,8 @@ package exercises
 import (
 	"crypto/rand"
 	"encoding/hex"
-	"encoding/json"
-	"os"
-	"path/filepath"
-	"slices"
-	"sync"
-	"time"
 
+	"github.com/cleonte/lingscore/progress"
 	"github.com/cleonte/tflings/internal/runner"
 )
 
@@ -21,69 +16,27 @@ import (
 // AWS account the exercise runs in (a reset gets a fresh, empty account).
 const ProgressFile = ".tflings.json"
 
-type progressData struct {
-	// Done maps the name of an exercise to the time its check passed. Once done,
-	// an exercise stays done, even if the learner breaks it again later.
-	Done map[string]time.Time `json:"done,omitempty"`
-	// Resets maps the name of an exercise to how many times it was reset.
-	Resets map[string]int `json:"resets,omitempty"`
-	// Originals maps an exercise to the SHA-256 of its file as tflings wrote it
-	// (init, update). It is how `update` tells a file the learner has not touched
-	// (safe to replace with a newer version) from one with their work in it.
-	Originals map[string]string `json:"originals,omitempty"`
-	// Salt is a random string given to the exercises folder by `init`. It names
-	// the folder's run folders and goes into its fake AWS accounts, so two
-	// exercises folders on one machine (which share <home> and Floci) never share
-	// state, and a reset in one does not touch the other. A folder made before
-	// this existed has none, and keeps the names it always had.
-	Salt string `json:"salt,omitempty"`
-	// New lists the exercises that `update` added, so that `list` can mark them.
-	New []string `json:"new,omitempty"`
-}
+// The file is kept by lingscore's progress package: the done passes, the hashes
+// of the exercise files and the exercises `update` added are its own keys. What
+// is tflings' own lives under two more keys, which the package keeps through
+// every write:
+//
+//   - "resets" maps the name of an exercise to how many times it was reset.
+//   - "salt" is a random string given to the exercises folder by `init`. It
+//     names the folder's run folders and goes into its fake AWS accounts, so two
+//     exercises folders on one machine (which share <home> and Floci) never share
+//     state, and a reset in one does not touch the other. A folder made before
+//     this existed has none, and keeps the names it always had.
+const (
+	keyResets = "resets"
+	keySalt   = "salt"
+)
 
-// The file is read and written by several commands and by the full-screen view,
-// so access in one process is serialised, and a write replaces the file whole.
-var progressMu sync.Mutex
+func store(dir string) progress.Store { return progress.Store{Dir: dir, File: ProgressFile} }
 
-func readProgress() progressData { return readProgressIn(".") }
+func readProgressIn(dir string) progress.Data { return store(dir).Read() }
 
-func readProgressIn(dir string) progressData {
-	var p progressData
-	data, err := os.ReadFile(filepath.Join(dir, ProgressFile))
-	if err != nil {
-		return p
-	}
-	// A damaged file means no progress, not a crash: the exercises can be redone.
-	_ = json.Unmarshal(data, &p)
-	return p
-}
-
-func writeProgressIn(dir string, p progressData) error {
-	data, err := json.MarshalIndent(p, "", "  ")
-	if err != nil {
-		return err
-	}
-	tmp, err := os.CreateTemp(dir, ".tflings-*.tmp")
-	if err != nil {
-		return err
-	}
-	defer func() { _ = os.Remove(tmp.Name()) }()
-	if _, err := tmp.Write(append(data, '\n')); err != nil {
-		_ = tmp.Close()
-		return err
-	}
-	if err := tmp.Close(); err != nil {
-		return err
-	}
-	return os.Rename(tmp.Name(), filepath.Join(dir, ProgressFile))
-}
-
-func passed(name string) bool {
-	progressMu.Lock()
-	defer progressMu.Unlock()
-	_, ok := readProgress().Done[name]
-	return ok
-}
+func passed(name string) bool { return store(".").Passed(name) }
 
 // markPassed records that the check of an exercise passed, in the progress
 // file of the current folder.
@@ -91,119 +44,75 @@ func markPassed(name string) error { return markPassedIn(".", name) }
 
 // markPassedIn records the pass in the workspace in dir: the same file that
 // ResetCount and RecordReset use.
-func markPassedIn(dir, name string) error {
-	progressMu.Lock()
-	defer progressMu.Unlock()
-	p := readProgressIn(dir)
-	func(p *progressData) {
-		if p.Done == nil {
-			p.Done = map[string]time.Time{}
-		}
-		if _, already := p.Done[name]; !already {
-			p.Done[name] = time.Now().UTC().Truncate(time.Second)
-		}
-	}(&p)
-	return writeProgressIn(dir, p)
-}
+func markPassedIn(dir, name string) error { return store(dir).RecordPass(name) }
 
 // RecordPass records that the check of the exercise passed, as running it does.
 func RecordPass(name string) error { return markPassed(name) }
 
 // ResetCount is how many times the exercise in the workspace in dir was reset.
 func ResetCount(dir, name string) int {
-	progressMu.Lock()
-	defer progressMu.Unlock()
-	return readProgressIn(dir).Resets[name]
+	var resets map[string]int
+	readProgressIn(dir).Get(keyResets, &resets)
+	return resets[name]
 }
 
 // RecordReset counts a reset of the exercise in the workspace in dir and
 // forgets that it was done: it has to pass again, in a fresh account.
 func RecordReset(dir, name string) error {
-	progressMu.Lock()
-	defer progressMu.Unlock()
-	p := readProgressIn(dir)
-	if p.Resets == nil {
-		p.Resets = map[string]int{}
-	}
-	p.Resets[name]++
-	delete(p.Done, name)
-	return writeProgressIn(dir, p)
+	return store(dir).Update(func(d *progress.Data) {
+		var resets map[string]int
+		d.Get(keyResets, &resets)
+		if resets == nil {
+			resets = map[string]int{}
+		}
+		resets[name]++
+		_ = d.Set(keyResets, resets)
+		delete(d.Done, name)
+	})
 }
 
 // Originals returns the recorded hashes of the exercise files written into the
 // workspace in dir.
-func Originals(dir string) map[string]string {
-	progressMu.Lock()
-	defer progressMu.Unlock()
-	return readProgressIn(dir).Originals
-}
+func Originals(dir string) map[string]string { return store(dir).Originals() }
 
 // RecordOriginals remembers the hashes of exercise files that tflings has just
 // written into the workspace in dir, and which exercises `update` has just added.
 func RecordOriginals(dir string, hashes map[string]string, added []string) error {
-	progressMu.Lock()
-	defer progressMu.Unlock()
-	p := readProgressIn(dir)
-	if p.Originals == nil {
-		p.Originals = map[string]string{}
-	}
-	for name, h := range hashes {
-		p.Originals[name] = h
-	}
-	for _, name := range added {
-		if !slices.Contains(p.New, name) {
-			p.New = append(p.New, name)
-		}
-	}
-	return writeProgressIn(dir, p)
+	return store(dir).RecordOriginals(hashes, added)
 }
 
 // IsNew reports whether `update` added the exercise to this workspace.
 func IsNew(name string) bool { return IsNewIn(".", name) }
 
 // IsNewIn is IsNew for the workspace in dir.
-func IsNewIn(dir, name string) bool {
-	progressMu.Lock()
-	defer progressMu.Unlock()
-	return slices.Contains(readProgressIn(dir).New, name)
-}
+func IsNewIn(dir, name string) bool { return store(dir).IsNew(name) }
 
 // ForgetPassed drops the recorded pass of an exercise in the workspace in dir
 // (its file was reset, so it has to pass again).
-func ForgetPassed(dir, name string) error {
-	progressMu.Lock()
-	defer progressMu.Unlock()
-	p := readProgressIn(dir)
-	if _, ok := p.Done[name]; !ok {
-		return nil
-	}
-	delete(p.Done, name)
-	return writeProgressIn(dir, p)
-}
+func ForgetPassed(dir, name string) error { return store(dir).ForgetPass(name) }
 
-// EnsureSalt gives the workspace in dir a random salt if it has none (see
-// progressData.Salt). `init` calls it; nothing else does, so a folder made by an
+// EnsureSalt gives the workspace in dir a random salt if it has none (see the
+// "salt" key above). `init` calls it; nothing else does, so a folder made by an
 // older tflings keeps the run folders and accounts it already has.
 func EnsureSalt(dir string) error {
-	progressMu.Lock()
-	defer progressMu.Unlock()
-	p := readProgressIn(dir)
-	if p.Salt != "" {
-		return nil
-	}
-	b := make([]byte, 4)
-	if _, err := rand.Read(b); err != nil {
-		return err
-	}
-	p.Salt = hex.EncodeToString(b)
-	return writeProgressIn(dir, p)
+	return store(dir).Update(func(d *progress.Data) {
+		var salt string
+		if d.Get(keySalt, &salt) && salt != "" {
+			return
+		}
+		b := make([]byte, 4)
+		if _, err := rand.Read(b); err != nil {
+			return
+		}
+		_ = d.Set(keySalt, hex.EncodeToString(b))
+	})
 }
 
 // Salt is the salt of the workspace in dir, empty for a folder without one.
 func Salt(dir string) string {
-	progressMu.Lock()
-	defer progressMu.Unlock()
-	return readProgressIn(dir).Salt
+	var salt string
+	readProgressIn(dir).Get(keySalt, &salt)
+	return salt
 }
 
 // runKey is the name of an exercise's run folder (and lock) under <home>/runs:
