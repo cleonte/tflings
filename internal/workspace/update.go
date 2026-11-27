@@ -1,18 +1,12 @@
 package workspace
 
 import (
-	"crypto/sha256"
-	"encoding/hex"
-	"errors"
-	"fmt"
 	"io/fs"
 	"os"
 	"path"
 	"path/filepath"
-	"regexp"
-	"slices"
-	"strings"
 
+	lw "github.com/cleonte/lingscore/workspace"
 	"github.com/cleonte/tflings/internal/exercises"
 )
 
@@ -33,40 +27,6 @@ type UpdateResult struct {
 	// (objective, hint, link, requirements) was replaced by the binary's. The
 	// file holds no learner state: progress is in .tflings.json.
 	Info []string
-}
-
-var (
-	infoBlock = regexp.MustCompile(`(?m)^\[\[exercises\]\]`)
-	infoName  = regexp.MustCompile(`(?m)^name\s*=\s*"([^"]+)"`)
-)
-
-func hashOf(data []byte) string {
-	sum := sha256.Sum256(data)
-	return hex.EncodeToString(sum[:])
-}
-
-// splitInfo cuts the text of an info.toml into what comes before the first
-// exercise and the text of each exercise, in order. It works on the text, not on
-// the parsed manifest, so that nothing else in the file is rewritten.
-func splitInfo(text string) (header string, names []string, blocks map[string]string) {
-	blocks = map[string]string{}
-	locs := infoBlock.FindAllStringIndex(text, -1)
-	if len(locs) == 0 {
-		return text, nil, blocks
-	}
-	header = text[:locs[0][0]]
-	for i, loc := range locs {
-		end := len(text)
-		if i+1 < len(locs) {
-			end = locs[i+1][0]
-		}
-		block := text[loc[0]:end]
-		if m := infoName.FindStringSubmatch(block); m != nil {
-			names = append(names, m[1])
-			blocks[m[1]] = block
-		}
-	}
-	return header, names, blocks
 }
 
 func readInfo(src fs.FS, root string) (embedded []exercises.Exercise, embeddedText string, workspace []exercises.Exercise, workspaceText string, err error) {
@@ -139,7 +99,7 @@ func Update(src fs.FS, root string, dryRun bool) (UpdateResult, error) {
 			if old, err := os.ReadFile(target); err != nil || string(old) != string(data) {
 				res.Readmes++
 				if !dryRun {
-					if err := writeNew(target, data, true); err != nil {
+					if err := lw.WriteFile(target, data, true); err != nil {
 						return res, err
 					}
 				}
@@ -157,33 +117,26 @@ func Update(src fs.FS, root string, dryRun bool) (UpdateResult, error) {
 		if err != nil {
 			continue
 		}
-		switch recorded, known := originals[e.Name]; {
-		case string(current) == string(original):
-			if !known {
-				record[e.Name] = hashOf(original) // untouched and current: a later release can refresh it
-			}
-		case known && hashOf(current) == recorded:
+		recorded, known := originals[e.Name]
+		switch lw.Decide(current, original, recorded, known) {
+		case lw.Record:
+			record[e.Name] = lw.Hash(original) // untouched and current: a later release can refresh it
+		case lw.Refresh:
 			res.Refreshed = append(res.Refreshed, e.Name) // untouched, and the binary has a newer one
 			if !dryRun {
-				if err := writeNew(target, original, true); err != nil {
+				if err := lw.WriteFile(target, original, true); err != nil {
 					return res, err
 				}
-				record[e.Name] = hashOf(original)
+				record[e.Name] = lw.Hash(original)
 			}
-		case known && recorded != hashOf(original):
+		case lw.Newer:
 			res.Newer = append(res.Newer, e.Name) // the learner has edited it
 		}
 	}
 
 	// Entries that are already there but say something older than the binary:
 	// a corrected objective, a better hint.
-	_, mineNames, mineBlocks := splitInfo(mineText)
-	_, _, embeddedBlocks := splitInfo(embeddedText)
-	for _, n := range mineNames {
-		if eb, ok := embeddedBlocks[n]; ok && strings.TrimSpace(eb) != strings.TrimSpace(mineBlocks[n]) {
-			res.Info = append(res.Info, n)
-		}
-	}
+	res.Info = lw.ChangedEntries(embeddedText, mineText)
 
 	// Exercises that are not there yet.
 	for _, e := range embedded {
@@ -203,7 +156,7 @@ func Update(src fs.FS, root string, dryRun bool) (UpdateResult, error) {
 	}
 
 	if (len(res.Added) > 0 || len(res.Info) > 0) && !dryRun {
-		merged := mergeInfo(embeddedText, mineText, embedded, res.Added, res.Info)
+		merged := lw.MergeInfo(embeddedText, mineText, exerciseNames(embedded), exerciseNames(res.Added), res.Info)
 		if err := os.WriteFile(filepath.Join(root, "info.toml.bak"), []byte(mineText), 0o644); err != nil {
 			return res, err
 		}
@@ -219,49 +172,6 @@ func Update(src fs.FS, root string, dryRun bool) (UpdateResult, error) {
 	return res, nil
 }
 
-// mergeInfo puts the entries of the added exercises into the info.toml of the
-// workspace, each after the exercise that comes before it in the binary's order.
-// Entries of the workspace that the binary does not know are left where they are.
-func mergeInfo(embeddedText, workspaceText string, embedded, added []exercises.Exercise, changed []string) string {
-	header, names, blocks := splitInfo(workspaceText)
-	_, _, embeddedBlocks := splitInfo(embeddedText)
-	for _, n := range changed {
-		blocks[n] = embeddedBlocks[n]
-	}
-	isAdded := map[string]bool{}
-	for _, e := range added {
-		isAdded[e.Name] = true
-	}
-	prev := ""
-	for _, e := range embedded {
-		if !isAdded[e.Name] {
-			prev = e.Name
-			continue
-		}
-		at := 0
-		if i := slices.Index(names, prev); prev != "" && i >= 0 {
-			at = i + 1
-		}
-		block := embeddedBlocks[e.Name]
-		if !strings.HasSuffix(block, "\n\n") {
-			block = strings.TrimRight(block, "\n") + "\n\n"
-		}
-		blocks[e.Name] = block
-		names = slices.Insert(names, at, e.Name)
-		prev = e.Name
-	}
-	var b strings.Builder
-	b.WriteString(header)
-	for i, n := range names {
-		block := blocks[n]
-		if i < len(names)-1 && !strings.HasSuffix(block, "\n\n") {
-			block = strings.TrimRight(block, "\n") + "\n\n"
-		}
-		b.WriteString(block)
-	}
-	return b.String()
-}
-
 // copyExercise writes the files of one exercise into the workspace, except the
 // ones that stay in the binary, and never over a file that is already there.
 func copyExercise(src fs.FS, root string, e exercises.Exercise, record map[string]string) error {
@@ -273,38 +183,24 @@ func copyExercise(src fs.FS, root string, e exercises.Exercise, record map[strin
 		if err != nil {
 			return err
 		}
-		if err := writeNew(filepath.Join(root, filepath.FromSlash(name)), data, false); err != nil {
+		if err := lw.WriteFile(filepath.Join(root, filepath.FromSlash(name)), data, false); err != nil {
 			return err
 		}
 		if e.Mode != exercises.ModeFix && name == e.Source() {
-			record[e.Name] = hashOf(data)
+			record[e.Name] = lw.Hash(data)
 		}
 		return nil
 	})
 }
 
-// writeNew writes a file, creating its folder. Without overwrite it leaves an
-// existing file alone.
-func writeNew(target string, data []byte, overwrite bool) error {
-	if !overwrite {
-		if _, err := os.Stat(target); err == nil {
-			return nil
-		} else if !errors.Is(err, fs.ErrNotExist) {
-			return err
-		}
+// exerciseNames are the names of the exercises, in order.
+func exerciseNames(list []exercises.Exercise) []string {
+	out := make([]string, len(list))
+	for i, e := range list {
+		out[i] = e.Name
 	}
-	if err := os.MkdirAll(filepath.Dir(target), 0o755); err != nil {
-		return err
-	}
-	return os.WriteFile(target, data, 0o644)
+	return out
 }
 
 // Describe is a short phrase for a list of exercises: "config5, config6 and 24 more".
-func Describe(names []string) string {
-	switch {
-	case len(names) <= 3:
-		return strings.Join(names, ", ")
-	default:
-		return fmt.Sprintf("%s and %d more", strings.Join(names[:3], ", "), len(names)-3)
-	}
-}
+func Describe(names []string) string { return lw.Describe(names) }

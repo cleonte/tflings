@@ -10,6 +10,7 @@ import (
 	"path"
 	"path/filepath"
 
+	lw "github.com/cleonte/lingscore/workspace"
 	"github.com/cleonte/tflings/internal/exercises"
 )
 
@@ -58,7 +59,7 @@ func recordOriginals(src fs.FS, dest string) error {
 			continue
 		}
 		if data, err := fs.ReadFile(src, e.Source()); err == nil {
-			hashes[e.Name] = hashOf(data)
+			hashes[e.Name] = lw.Hash(data)
 		}
 	}
 	return exercises.RecordOriginals(dest, hashes, nil)
@@ -122,7 +123,7 @@ func Reset(src fs.FS, root, name string) (string, error) {
 			return "", err
 		}
 		// The file is the original again: a later update may replace it safely.
-		_ = exercises.RecordOriginals(root, map[string]string{ex.Name: hashOf(original)}, nil)
+		_ = exercises.RecordOriginals(root, map[string]string{ex.Name: lw.Hash(original)}, nil)
 		_ = exercises.ForgetPassed(root, ex.Name) // it has to pass again
 		return path.Clean(ex.Source()), nil
 	}
