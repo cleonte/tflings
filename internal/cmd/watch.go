@@ -9,13 +9,20 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cleonte/lingscore/watcher"
 	"github.com/cleonte/tflings/internal/exercises"
 	"github.com/cleonte/tflings/internal/floci"
-	"github.com/cleonte/tflings/internal/watcher"
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 	"golang.org/x/term"
 )
+
+// isExerciseFile is true for the files a learner edits, leaving out editor
+// backups and temporary files.
+func isExerciseFile(name string) bool {
+	base := filepath.Base(name)
+	return watcher.SkipEditorFiles(name) && (strings.HasSuffix(base, ".tf") || strings.HasSuffix(base, ".tfvars") || strings.HasSuffix(base, ".sh") || strings.HasSuffix(base, ".toml"))
+}
 
 // debounce is how long the watcher waits for a burst of file events to settle.
 const debounce = 150 * time.Millisecond
@@ -43,7 +50,7 @@ again) or q (quit).`,
 			defer cancel()
 
 			root := filepath.Join(filepath.Dir(infoFile), "exercises")
-			changes, err := watcher.Watch(ctx, root, debounce)
+			changes, err := watcher.Watch(ctx, root, debounce, isExerciseFile)
 			if err != nil {
 				color.Red("Can't watch %s: %s", root, err)
 				color.Yellow("Run tflings from the folder that holds the exercises, or create one with `tflings init`.")
