@@ -4,7 +4,6 @@ go 1.26.7
 
 require (
 	cel.dev/cel-go v0.33.2
-	charm.land/bubbles/v2 v2.2.1
 	charm.land/bubbletea/v2 v2.1.1
 	charm.land/lipgloss/v2 v2.1.0
 	github.com/aws/aws-sdk-go-v2 v1.48.0
@@ -16,7 +15,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/secretsmanager v1.51.0
 	github.com/aws/aws-sdk-go-v2/service/ssm v1.83.0
 	github.com/aws/smithy-go v1.28.9
-	github.com/cleonte/lingscore v0.4.1
+	github.com/cleonte/lingscore v0.5.0
 	github.com/fatih/color v1.19.0
 	github.com/hashicorp/go-version v1.9.0
 	github.com/hashicorp/hc-install v0.10.0
@@ -31,6 +30,7 @@ require (
 
 require (
 	cel.dev/expr v0.25.1 // indirect
+	charm.land/bubbles/v2 v2.2.1 // indirect
 	github.com/ProtonMail/go-crypto v1.5.2 // indirect
 	github.com/agext/levenshtein v1.2.1 // indirect
 	github.com/antlr4-go/antlr/v4 v4.13.1 // indirect
