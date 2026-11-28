@@ -3,7 +3,7 @@ module github.com/cleonte/tflings
 go 1.26.7
 
 require (
-	cel.dev/cel-go v0.33.2
+	cel.dev/cel-go v0.33.4
 	charm.land/bubbletea/v2 v2.2.0
 	charm.land/lipgloss/v2 v2.1.0
 	github.com/aws/aws-sdk-go-v2 v1.48.0
