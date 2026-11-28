@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/cleonte/lingscore/style"
+	"github.com/cleonte/lingscore/tui/checkall"
 	"github.com/cleonte/lingscore/tui/jumplist"
 
 	tea "charm.land/bubbletea/v2"
@@ -104,12 +105,7 @@ type Model struct {
 
 	// Checking every exercise (the c key). Like runs, the results of a check
 	// that was cancelled carry an older id and are ignored.
-	checkID     int
-	checkCtx    context.Context
-	checkCancel context.CancelFunc
-	checkItems  []checkItem
-	checkNext   int // index of the next exercise to start
-	checkActive int // how many are running now
+	check checkall.Check[exercises.Exercise]
 
 	// The run in progress. Results of earlier runs carry an older id and are
 	// ignored: a save during a run starts a new one.
@@ -141,12 +137,6 @@ type runDoneMsg struct {
 	id     int
 	result exercises.Result
 	err    error
-}
-
-type checkDoneMsg struct {
-	id    int
-	index int
-	err   error
 }
 
 // New builds the model of the view.
@@ -205,7 +195,7 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, m.tick()
 
 	case changesMsg:
-		if m.checking() {
+		if m.check.Active() {
 			// A save should not throw away a check that is half way; leaving the
 			// check with esc runs the exercise again.
 			return m, m.waitForChanges()
@@ -215,8 +205,8 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case changesClosedMsg:
 		// The watcher stopped; whatever is on screen stays, and q still works.
 
-	case checkDoneMsg:
-		return m, m.finishCheck(msg)
+	case checkall.DoneMsg:
+		return m, m.check.Finish(msg)
 
 	case runDoneMsg:
 		if msg.id == m.runID {
@@ -247,7 +237,7 @@ func (m *Model) handleKey(msg tea.KeyPressMsg) (tea.Model, tea.Cmd) {
 	key := msg.String()
 	if key == "q" || key == "ctrl+c" {
 		m.stopRun()
-		m.stopCheck()
+		m.check.Stop()
 		return m, tea.Quit
 	}
 	m.notice = ""
@@ -455,7 +445,7 @@ func (m *Model) stopRun() {
 // starts checking it.
 func (m *Model) startRun() tea.Cmd {
 	m.stopRun()
-	m.stopCheck()
+	m.check.Stop()
 	m.mode, m.scroll = modeResult, 0
 
 	done, total, err := exercises.Progress(m.cfg.InfoFile)
