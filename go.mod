@@ -4,7 +4,7 @@ go 1.26.7
 
 require (
 	cel.dev/cel-go v0.33.2
-	charm.land/bubbletea/v2 v2.1.2
+	charm.land/bubbletea/v2 v2.2.0
 	charm.land/lipgloss/v2 v2.1.0
 	github.com/aws/aws-sdk-go-v2 v1.48.0
 	github.com/aws/aws-sdk-go-v2/credentials v1.21.1
@@ -15,7 +15,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/secretsmanager v1.51.0
 	github.com/aws/aws-sdk-go-v2/service/ssm v1.83.0
 	github.com/aws/smithy-go v1.28.9
-	github.com/cleonte/lingscore v0.5.0
+	github.com/cleonte/lingscore v0.6.0
 	github.com/fatih/color v1.19.0
 	github.com/hashicorp/go-version v1.9.0
 	github.com/hashicorp/hc-install v0.10.0
@@ -48,7 +48,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/internal/s3shared v1.20.12 // indirect
 	github.com/charmbracelet/colorprofile v0.4.3 // indirect
 	github.com/charmbracelet/ultraviolet v0.0.0-20261008173134-6b8d4baf91b4 // indirect
-	github.com/charmbracelet/x/ansi v0.11.9 // indirect
+	github.com/charmbracelet/x/ansi v0.12.0 // indirect
 	github.com/charmbracelet/x/term v0.2.2 // indirect
 	github.com/charmbracelet/x/termios v0.1.1 // indirect
 	github.com/charmbracelet/x/windows v0.2.2 // indirect

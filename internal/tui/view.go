@@ -9,6 +9,7 @@ import (
 
 	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
+	"github.com/cleonte/lingscore/tui/resume"
 	"github.com/cleonte/tflings/internal/exercises"
 )
 
@@ -16,6 +17,7 @@ import (
 func (m *Model) View() tea.View {
 	view := tea.NewView(m.header() + m.body())
 	view.AltScreen = true
+	resume.Set(&view)
 	view.WindowTitle = "tflings"
 	return view
 }
