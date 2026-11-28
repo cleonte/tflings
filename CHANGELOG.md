@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.11.3] - 2026-11-28
+
+### Changed
+
+- The watcher, the exercise marker, the progress file, the `update` helpers and the list of exercises in the full-screen view now come from the shared [lingscore](https://github.com/cleonte/lingscore) module, which golings and k8slings use too, so the three look and behave the same. No change for learners: `.tflings.json` keeps its format.
+- Dependencies: bubbletea 2.1.2, the AWS SDK (credentials, dynamodb, ec2, s3) and `actions/setup-go` 7.1.0.
+
 ## [0.11.2] - 2026-11-25
 
 ### Changed
