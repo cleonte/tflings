@@ -13,7 +13,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/iam v1.66.0
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.115.0
 	github.com/aws/aws-sdk-go-v2/service/secretsmanager v1.51.0
-	github.com/aws/aws-sdk-go-v2/service/ssm v1.83.0
+	github.com/aws/aws-sdk-go-v2/service/ssm v1.84.0
 	github.com/aws/smithy-go v1.28.9
 	github.com/cleonte/lingscore v0.7.0
 	github.com/fatih/color v1.19.0
